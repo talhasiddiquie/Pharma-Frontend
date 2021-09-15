@@ -1,0 +1,60 @@
+body{
+  margin: 0;
+  padding: 0;
+}
+.loginLogo{
+    width: 160px;
+    margin: 20px;
+    position: absolute;
+}
+
+.MuiAppBar-colorPrimary{
+  /* background: #2b90d9 !important; */
+}
+
+
+.sidebar-content .MuiListItemIcon-root {
+  min-width: 10px !important;
+  margin-right: 10px;
+}
+.sidebar-content .MuiListItemText-root .MuiTypography-body1{
+  font-size: 16px !important;
+}
+.MuiCardContent-root:last-child {
+  padding: 0px !important;
+}
+.MuiDrawer-paper{
+  position: fixed !important
+}
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 11px #717171; 
+  border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  /* background: #a6d1f1; */
+  background: #616161;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  /* background: #a6d1f1; */
+  background: #616161;
+}
+@media only screen and (max-width: 600px) {
+  .loginLogo {
+    margin: 20px auto;
+    width: 100px;
+    left: 0;
+    right: 0;
+    top: 0;
+  }
+}

@@ -1,0 +1,29 @@
+
+.eventDialogContent{
+    width: 100% !important;
+    padding: 10px 0px 0px !important;
+}
+
+.eventDialogContent>*{
+    display: block !important;
+    margin: 20px auto !important;
+
+} 
+.eventsContainer .MuiDrawer-paper{
+    background-color: #f7f7f7 !important; 
+   
+    position:initial !important
+}
+section header{
+    padding: 0px !important;
+}
+.eventsContainer .MuiList-root {
+    width: 100%;
+}
+.eventsContainer .MuiListItemIcon-root {
+    display: flex;
+    justify-content: flex-end;
+}
+.MuiBreadcrumbs-root{
+    margin-bottom: 20px !important;
+}

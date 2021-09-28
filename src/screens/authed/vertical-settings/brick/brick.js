@@ -1,377 +1,597 @@
-import React, { useState, useEffect } from 'react'
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import { makeStyles } from '@material-ui/core/styles';
-import { useHistory } from 'react-router-dom'
-import Breadcrumbs from '@material-ui/core/Breadcrumbs';
-import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import FormGridTabs from '../../../components/Tabs/Form-Grid-Tabs'
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import AddIcon from '@material-ui/icons/Add'
-import EditIcon from '@material-ui/icons/Edit';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import GridTable from '../../../components/GridTable/grid-table';
-import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl'
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormLabel from '@material-ui/core/FormLabel';
-import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../../../../config/Store/Actions/brick.action';
-import { useAlert } from "react-alert";
-import * as BricksActions from '../../../../config/Store/Actions/brick.action';
-import * as TerritoryActions from '../../../../config/Store/Actions/territory.action';
-import * as RegionActions from '../../../../config/Store/Actions/region.action';
-import * as ZoneActions from '../../../../config/Store/Actions/zone.action';
+import React, { useState, useEffect } from "react";
+import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+import Link from "@material-ui/core/Link";
+import Typography from "@material-ui/core/Typography";
+import { useHistory } from "react-router-dom";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import axios from "axios";
+import { Button, TextField } from "@material-ui/core";
+import Modal from "@material-ui/core/Modal";
+import Backdrop from "@material-ui/core/Backdrop";
+import Fade from "@material-ui/core/Fade";
+import Select from "@material-ui/core/Select";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { confirmAlert } from "react-confirm-alert"; // Import
+import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+import { useSnackbar } from "notistack";
+import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles({
-    root: {
+const useStyles = makeStyles((theme) => ({
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: "2px solid white",
+    borderRadius: "4px",
+    boxShadow: theme.shadows[5],
+    padding: "20px",
+    width: "25%",
+    height: "50%",
+    [theme.breakpoints.down("sm")]: {
+      width: "70%",
+      height: "55%",
     },
-});
+  },
+}));
 
-function Brick(props) {
-    const classes = useStyles();
-    const history = useHistory();
-    const alert = useAlert();
-    const [brickType, setBrickType] = useState('')
-    const dispatch = useDispatch();
-    const [name, setName] = useState('')
-    const [abbreviation, setAbbreviation] = useState('');
-    const [regionId, setRegionId] = useState('');
-    const [zone, setZones] = useState([]);
-    const [zoneId, setZoneId] = useState('');
-    const [territory, setTerritory] = useState([]);
-    const [territoryId, setTerritoryId] = useState('');
-    const [objectId, setObjectId] = useState('');
-    const [selectedData, setSelectedData] = useState(false)
-    const [isEditingSelectedData, setIsEditingSelectedData] = useState(false)
-    const [addForm, setAddForm] = useState(false);
-    const [tab, setTab] = useState(0);
-    const user = useSelector((state) => state.user.user);
-    const allRegions = useSelector((state) => state.region.allRegions);
-    const allZones = useSelector((state) => state.zone.allZones);
-    const allTerritories = useSelector((state) => state.territory.allTerritorys);
-    const allBricks = useSelector((state) => state.bricks.allBricks);
+const Brick = () => {
+  const classes = useStyles();
+  const history = useHistory();
+  const [emp, setEmp] = useState([]);
+  const [load, setLoad] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [objectId, setObjectId] = useState("");
+  const [name, setName] = useState("");
+  const [abbreviation, setAbbreviation] = useState("");
+  const [brickType, setBrickType] = useState("");
+  const [territoryId, setTerritoryId] = useState("");
+  const [Id, setId] = useState("");
+  const [dropDownTerritory, setDropDownTerritory] = useState([]);
+  const { enqueueSnackbar } = useSnackbar();
 
-    useEffect(() => {
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
-        if (!allRegions) {
-            dispatch(RegionActions.get_regions())
-        }
-        if (!allZones) {
-            dispatch(ZoneActions.get_zones())
-        }
-        else {
-            setZones(allZones)
-        }
-        if (!allTerritories) {
-            dispatch(TerritoryActions.get_territorys())
-        }
-        else {
-            setTerritory(allTerritories)
-        }
-        if (!allBricks) {
-            dispatch(BricksActions.get_Bricks())
-        }
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-    }, [allRegions, allZones, allTerritories, allBricks])
+  const handleEditOpen = (id) => {
+    setEditModal(true);
+  };
 
-    const onChangeRegion = (value) => {
-        const arr = [];
-        setRegionId(value)
-        for (var i = 0; i < allZones.length; i++) {
-            if (allZones[i].regionId === value) {
-                arr.push(allZones[i])
-            }
-        }
-        setZones(arr)
-    }
+  const handleEditClose = () => {
+    setEditModal(false);
+  };
 
-    const onChangeZone = (value) => {
-        const arr = [];
-        setZoneId(value)
-        for (var i = 0; i < allTerritories.length; i++) {
-            if (allTerritories[i].zoneId === value) {
-                arr.push(allTerritories[i])
-            }
-        }
-        setTerritory(arr)
-    }
-
-    const addBrick = () => {
-        setName('')
-        setAbbreviation('')
-        setRegionId('')
-        setZoneId('')
-        setZones([])
-        setObjectId('')
-        setTerritoryId('')
-        setTerritory([])
-        setBrickType('')
-        setTab(0)
-        setSelectedData(false)
-        setIsEditingSelectedData(false)
-        setAddForm(false)
+  const addBrick = () => {
+    const form = {
+      objectId,
+      name,
+      abbreviation,
+      brickType,
+      territoryId,
     };
+    axios
+      .post(`${process.env.REACT_APP_URL}/bricks/postBrick`, form)
+      .then((res) => {
+        console.log(res.data);
+        enqueueSnackbar("City Add Successfully", { variant: "success" });
+        setOpen(false);
+        fetchBrick();
+      })
+      .catch(function (error) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
+      });
+    setAbbreviation("");
+    setName("");
+    setObjectId("");
+    setTerritoryId("");
+  };
 
-    const editData = () => {
-        setIsEditingSelectedData(false)
-        setSelectedData(false)
-        setAddForm(true)
-    }
+  const editProvince = async (id) => {
+    const form = { id };
+    let response = await axios.post(
+      `${process.env.REACT_APP_URL}/bricks/getBrick`,
+      form
+    );
+    console.log(response.data);
+    setId(response.data._id);
+    setName(response.data.name);
+    setObjectId(response.data.objectId);
+    setAbbreviation(response.data.abbreviation);
+    setBrickType(response.data.brickType);
+    setTerritoryId(response.data.territoryId._id);
+    setEditModal(true);
+  };
 
-    function handleRowClick(data) {
-        setTab(1)
-        setSelectedData(true)
-        setName(data.name)
-        setAbbreviation(data.abbreviation)
-        setRegionId(data.regionId)
-        setZoneId(data.zoneId)
-        setTerritoryId(data.territoryId)
-        setBrickType(data.brickType)
-        setObjectId(data._id)
-        setIsEditingSelectedData(true)
-        setAddForm(true)
-        onChangeRegion(data.regionId)
-        onChangeZone(data.zoneId)
-    }
+  const editFormProvince = async (id) => {
+    const form = {
+      id,
+      objectId,
+      name,
+      abbreviation,
+      brickType,
+      territoryId,
+    };
+    await axios
+      .post(`${process.env.REACT_APP_URL}/bricks/updateBrick`, form)
+      .then((res) => {
+        console.log(res.data);
+        setEditModal(false);
+        enqueueSnackbar("City Edit Successfully", { variant: "success" });
+        fetchBrick();
+      })
+      .catch(function (error) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
+      });
+    setAbbreviation("");
+    setName("");
+    setObjectId("");
+    setTerritoryId("");
+  };
 
-    function handleSave() {
+  const deleteProvince = (id) => {
+    const form = { id };
+    confirmAlert({
+      title: "Confirm to Delete",
+      message: "Are you sure to do this.",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            axios
+              .post(`${process.env.REACT_APP_URL}/bricks/deleteBrick`, form)
+              .then((res) => {
+                console.log(res.data);
+                fetchBrick();
+              })
+              .catch(function (error) {
+                console.log(error.response);
+              });
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
 
-        if (objectId !== "") {
-            const body = {
-                name,
-                abbreviation,
-                regionId,
-                zoneId,
-                brickType,
-                territoryId,
-                updatedBy: user._id,
-                objectId
-            }
-            dispatch(Actions.update_brick(body))
-            alert.success("Brick Updated!");
-            addBrick()
+  //Get Region
 
-        }
-        else {
-            if (
-                name !== "" &&
-                regionId !== "" &&
-                territoryId !== "" &&
-                zoneId !== "" &&
-                brickType !== ""
-            ) {
-                let obj = {
-                    name,
-                    abbreviation,
-                    regionId,
-                    territoryId,
-                    zoneId,
-                    brickType,
-                    createdBy: user._id
-                }
-                dispatch(Actions.add_brick(obj))
-                alert.success("Brick Added!");
-                addBrick()
-            }
-            else {
-                alert.error("All fields are required!");
-            }
-        }
+  const fetchBrick = async () => {
+    await axios
+      .get(`${process.env.REACT_APP_URL}/bricks/getBricks`)
+      .then((response) => {
+        const allfetchBrick = response.data;
+        setEmp(allfetchBrick);
+        setLoad(false);
+      })
+      .catch((error) => console.log(`Error: ${error}`));
+  };
 
-    }
+  useEffect(() => {
+    fetchBrick();
+  }, [load]);
 
-    const deleteBrick = () => {
-        let body = {
-            objectId
-        }
-        dispatch(BricksActions.delete_brick(body))
-        addBrick()
-    }
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/territory/getTerritories`)
+      .then((res) => {
+        setDropDownTerritory(res.data);
+        console.log(res.data);
+      });
+  }, []);
 
-    return (
-        <>
-            <Breadcrumbs aria-label="breadcrumb">
-                <Link color="inherit" href="javascript:void(0)" onClick={() => { history.push('/dashboard') }}>
-                    Home
-             </Link>
-                <Typography color="textPrimary">Vertical-Settings</Typography>
-                <Typography color="textPrimary">Brick</Typography>
-            </Breadcrumbs>
-            <Card className={classes.root}>
-                <CardContent>
-                    <FormGridTabs
-                        tab={tab}
-                        afterRowClick={() => { setTab(0) }}
-                        form={
+  return (
+    <div>
+      <Breadcrumbs aria-label="breadcrumb">
+        <Link
+          color="inherit"
+          href="javascript:void(0)"
+          onClick={() => {
+            history.push("/dashboard");
+          }}
+        >
+          Home
+        </Link>
+        <Typography color="textPrimary">Vertical-Settings</Typography>
+        <Typography color="textPrimary">City</Typography>
+      </Breadcrumbs>
+      <div>
+        <TableContainer
+          style={{
+            borderRadius: "4px",
+            width: "100%",
+            overflow: "auto",
+            minWidth: "450px",
+          }}
+          component={Paper}
+        >
+          <Table>
+            <TableHead style={{ background: "#00AEEF" }}>
+              <TableRow>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Object ID
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Name
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Abbreviation
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Brick Type
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Territory ID
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Territory Name
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Zone ID
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Zone Name
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Region ID
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Region Name
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Province ID
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Province Name
+                </TableCell>
+                <TableCell
+                  style={{
+                    fontWeight: "600",
+                    width: "15%",
+                    textAlign: "center",
+                  }}
+                >
+                  Actions
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%" }}
+                  align="right"
+                >
+                  <Button
+                    style={{ width: "150px" }}
+                    variant="outlined"
+                    onClick={handleOpen}
+                  >
+                    Add Brick
+                  </Button>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {emp.map((user, key, index) => {
+                return (
+                  <TableRow key={user.id}>
+                    <TableCell component="th" scope="row">
+                      {user.objectId}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {user.name}
+                    </TableCell>
 
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Brick ID"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        disabled
-                                        fullWidth
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="regionId">Region ID</InputLabel>
-                                        <Select
-                                            labelId="regionId"
-                                            label="Region ID"
-                                            fullWidth
-                                            name='regionId'
-                                            value={regionId}
-                                            disabled={isEditingSelectedData}
+                    <TableCell>{user.abbreviation}</TableCell>
+                    <TableCell>{user.brickType}</TableCell>
+                    <TableCell>{user.territoryId.objectId}</TableCell>
+                    <TableCell>{user.territoryId.name}</TableCell>
+                    <TableCell>{user.territoryId.zoneId.objectId}</TableCell>
+                    <TableCell>{user.territoryId.zoneId.name}</TableCell>
+                    <TableCell>
+                      {user.territoryId.zoneId.regionId.objectId}
+                    </TableCell>
+                    <TableCell>
+                      {user.territoryId.zoneId.regionId.name}
+                    </TableCell>
+                    <TableCell>
+                      {user.territoryId.zoneId.regionId.provinceId.objectId}
+                    </TableCell>
+                    <TableCell>
+                      {user.territoryId.zoneId.regionId.provinceId.name}
+                    </TableCell>
+                    <TableCell>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Button
+                          onClick={() => {
+                            editProvince(user._id);
+                          }}
+                        >
+                          <EditIcon color="primary" />
+                        </Button>
 
-                                            onChange={(e) => { onChangeRegion(e.target.value) }}
-                                        >
-                                            {allRegions && allRegions.map((region) => {
-                                                return (
-                                                    <MenuItem key={region._id} value={region._id}>
-                                                        {region.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="zoneId">Zone ID</InputLabel>
-                                        <Select
-                                            labelId="zoneId"
-                                            label="Zone ID"
-                                            fullWidth
-                                            name='zoneId'
-                                            value={zoneId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { onChangeZone(e.target.value) }}
-                                        >
-                                            {zone && zone.map((zone) => {
-                                                return (
-                                                    <MenuItem key={zone._id} value={zone._id}>
-                                                        {zone.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="territoryId">Territory ID</InputLabel>
-                                        <Select
-                                            labelId="territoryId"
-                                            label="Territory ID"
-                                            fullWidth
-                                            name='territoryId'
-                                            value={territoryId}
-                                            disabled={isEditingSelectedData}
+                        <Button
+                          onClick={() => {
+                            deleteProvince(user._id);
+                          }}
+                        >
+                          <DeleteIcon color="secondary" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
 
-                                            onChange={(e) => {
-                                                setTerritoryId(e.target.value)
-                                            }}
-                                        >
-                                            {territory && territory.map((territory) => {
-                                                return (
-                                                    <MenuItem key={territory._id} value={territory._id}>
-                                                        {territory.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={open}
+          onClose={handleClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={open}>
+            <div className={classes.paper}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">Add Brick</h2>
+                <div style={{ marginTop: "10px", width: "80%" }}>
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Object ID"
+                    variant="outlined"
+                    value={objectId}
+                    onChange={(e) => setObjectId(e.target.value)}
+                  />
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Name"
+                    variant="outlined"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
 
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Brick Name"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        name='name'
-                                        value={name}
-                                        disabled={isEditingSelectedData}
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Abbreviation"
+                    variant="outlined"
+                    value={abbreviation}
+                    onChange={(e) => setAbbreviation(e.target.value)}
+                  />
 
-                                        onChange={(e) => { setName(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Brick Abbreviation"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        name='abbreviation'
-                                        value={abbreviation}
-                                        disabled={isEditingSelectedData}
+                  <FormControl
+                    style={{ width: "100%", marginTop: "10px" }}
+                    variant="outlined"
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Brick Type
+                    </InputLabel>
+                    <Select
+                      native
+                      label="Brick Type"
+                      value={brickType}
+                      onChange={(e) => setBrickType(e.target.value)}
+                    >
+                      <option aria-label="None"> </option>
+                      <option value="Ims Brick">Ims Brick</option>
+                      <option value="Distributor Brick">
+                        Distributor Brick
+                      </option>
+                    </Select>
+                  </FormControl>
 
-                                        onChange={(e) => { setAbbreviation(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl component="fieldset">
-                                        <FormLabel component="legend" style={{ marginBottom: "5px" }}>Brick Type</FormLabel>
-                                        <RadioGroup aria-label="brick-type" name="brickType" value={brickType}
-                                            onChange={(event) => { setBrickType(event.target.value) }}
-                                        >
-                                            <FormControlLabel value="Ims Brick" control={<Radio disabled={isEditingSelectedData} color={'primary'} />} label="IMS Brick" />
-                                            <FormControlLabel value="Distributor Brick" control={<Radio disabled={isEditingSelectedData} color={'primary'} />} label="Distributor Brick" />
-                                        </RadioGroup>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <ButtonGroup variant="contained" color="secondary" size={'large'}>
-                                        {addForm &&
-                                            <Button onClick={addBrick}><AddIcon style={{ marginRight: "2px" }} /> Add</Button>
-                                        }
-                                        {!selectedData &&
-                                            <Button disabled={selectedData} onClick={() => { handleSave() }}><SaveAltIcon style={{ marginRight: "5px" }} /> Save</Button>
-                                        }
-                                        {isEditingSelectedData &&
-                                            <Button onClick={editData}><EditIcon style={{ marginRight: "5px" }} /> Edit</Button>
-                                        }
-                                        {isEditingSelectedData &&
-                                            <Button onClick={deleteBrick}><DeleteOutlineIcon style={{ marginRight: "5px" }} /> Delete</Button>
-                                        }
-                                    </ButtonGroup>
-                                </Grid>
-                            </Grid>
-                        }
-                        grid={
-                            <div>
-                                <GridTable
-                                    onRowClick={(data) => { handleRowClick(data) }}
-                                    headCells={
-                                        [
-                                            { id: 'name', label: 'Name' },
-                                            { id: 'abbreviation', label: 'Abbreviation' },
-                                            { id: 'brickType', label: 'Brick Type' },
-                                        ]
-                                    }
-                                    rows={allBricks} />
-                            </div>
-                        }
-                    />
-                </CardContent>
-            </Card>
-        </>
-    )
-}
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Territory ID
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setTerritoryId(e.target.value)}
+                      native
+                      value={territoryId}
+                      label="Territory ID"
+                    >
+                      <option aria-label="None" />
+                      {dropDownTerritory.map((value, index) => (
+                        <option key={value.id} value={value._id}>
+                          {value.objectId}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
 
-export default Brick
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    marginTop: "15px",
+                  }}
+                >
+                  <Button
+                    style={{ width: "45%" }}
+                    variant="contained"
+                    color="primary"
+                    onClick={addBrick}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={editModal}
+          onClose={handleEditClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={editModal}>
+            <div className={classes.paper}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">Edit City</h2>
+                <div style={{ marginTop: "10px", width: "80%" }}>
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Object ID"
+                    variant="outlined"
+                    value={objectId}
+                    onChange={(e) => setObjectId(e.target.value)}
+                  />
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Name"
+                    variant="outlined"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Abbreviation"
+                    variant="outlined"
+                    value={abbreviation}
+                    onChange={(e) => setAbbreviation(e.target.value)}
+                  />
+
+                  <FormControl
+                    style={{ width: "100%", marginTop: "10px" }}
+                    variant="outlined"
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Brick Type
+                    </InputLabel>
+                    <Select
+                      native
+                      label="Brick Type"
+                      value={brickType}
+                      onChange={(e) => setBrickType(e.target.value)}
+                    >
+                      <option aria-label="None"> </option>
+                      <option value="Ims Brick">Ims Brick</option>
+                      <option value="Distributor Brick">
+                        Distributor Brick
+                      </option>
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Territory ID
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setTerritoryId(e.target.value)}
+                      native
+                      value={territoryId}
+                      label="Territory ID"
+                    >
+                      <option aria-label="None" />
+                      {dropDownTerritory.map((value, index) => (
+                        <option key={value.id} value={value._id}>
+                          {value.objectId}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    marginTop: "15px",
+                  }}
+                >
+                  <Button
+                    style={{ width: "45%" }}
+                    variant="contained"
+                    color="primary"
+                    onClick={() => editFormProvince(Id)}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+    </div>
+  );
+};
+
+export default Brick;

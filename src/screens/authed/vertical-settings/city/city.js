@@ -1,319 +1,613 @@
-import React, { useState, useEffect } from 'react'
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import { makeStyles } from '@material-ui/core/styles';
-import { useHistory } from 'react-router-dom'
-import Breadcrumbs from '@material-ui/core/Breadcrumbs';
-import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import FormGridTabs from '../../../components/Tabs/Form-Grid-Tabs'
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import AddIcon from '@material-ui/icons/Add'
-import EditIcon from '@material-ui/icons/Edit';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import GridTable from '../../../components/GridTable/grid-table';
-import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl'
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import { useDispatch, useSelector } from 'react-redux';
-import { useAlert } from "react-alert";
-import axios from 'axios';
-import * as CityActions from '../../../../config/Store/Actions/city.action';
-import * as RegionActions from '../../../../config/Store/Actions/region.action';
-import * as ProvinceActions from '../../../../config/Store/Actions/provice.action';
-import ApiService from '../../../../config/ApiService';
+import React, { useState, useEffect } from "react";
+import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+import Link from "@material-ui/core/Link";
+import Typography from "@material-ui/core/Typography";
+import { useHistory } from "react-router-dom";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import axios from "axios";
+import { Button, TextField } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
+import Modal from "@material-ui/core/Modal";
+import Backdrop from "@material-ui/core/Backdrop";
+import Fade from "@material-ui/core/Fade";
+import Card from "@material-ui/core/Card";
+import Select from "@material-ui/core/Select";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
+import SuccessIcon from "../../../components/Success&PendingIcon/SuccessIcon";
+import PendingIcon from "../../../components/Success&PendingIcon/PendingIcon";
+import { confirmAlert } from "react-confirm-alert"; // Import
+import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+import { useSnackbar } from "notistack";
+import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles({
-    root: {
+const useStyles = makeStyles((theme) => ({
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: "2px solid white",
+    borderRadius: "4px",
+    boxShadow: theme.shadows[5],
+    padding: "20px",
+    width: "25%",
+    height: "55%",
+    [theme.breakpoints.down("sm")]: {
+      width: "70%",
+      height: "60%",
     },
-});
+  },
+}));
 
-function City() {
-    const classes = useStyles();
-    const history = useHistory();
-    const alert = useAlert();
-    const dispatch = useDispatch();
-    const [name, setName] = useState('')
-    const [abbreviation, setAbbreviation] = useState('');
-    const [regionId, setRegionId] = useState('')
-    const [objectId, setObjectId] = useState('')
-    const [provices, setProvinces] = useState([]);
-    const [provinceId, setProvinceId] = useState('')
-    const [selectedData, setSelectedData] = useState(false)
-    const [isEditingSelectedData, setIsEditingSelectedData] = useState(false)
-    const [addForm, setAddForm] = useState(false);
-    const [tab, setTab] = useState(0);
-    const user = useSelector((state) => state.user.user);
-    const allRegions = useSelector((state) => state.region.allRegions);
-    const allcities = useSelector((state) => state.city.allCities);
-    const allProvinces = useSelector((state) => state.province.allProvinces);
+const City = () => {
+  const classes = useStyles();
+  const history = useHistory();
+  const [emp, setEmp] = useState([]);
+  const [load, setLoad] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [objectId, setObjectId] = useState("");
+  const [name, setName] = useState("");
+  const [identifier, setIdentifier] = useState("");
+  const [abbreviation, setAbbreviation] = useState("");
+  const [regionId, setRegionId] = useState("");
+  const [provinceId, setProvinceId] = useState("");
+  const [Id, setId] = useState("");
+  const [dropdownProvince, setDropDownProvince] = useState([]);
+  const [dropdownRegion, setDropDownRegion] = useState([]);
+  const { enqueueSnackbar } = useSnackbar();
 
-    useEffect(() => {
-        if (!allRegions) {
-            dispatch(RegionActions.get_regions())
-        }
-        if (!allProvinces) {
-            dispatch(ProvinceActions.get_province())
-        }
-        else {
-            setProvinces(allProvinces)
-        }
-        if (!allcities) {
-            dispatch(CityActions.get_cities())
-        }
-    }, [allRegions, allProvinces, allcities])
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-    const onChangeRegion = (value) => {
-        const arrProvices = [];
-        setRegionId(value);
+  const handleEditOpen = (id) => {
+    setEditModal(true);
+  };
 
-        let obj = {
-            objectId: value
-        }
-        axios.post(ApiService.getBaseUrl() + '/regions/getSpecificRegionById', obj)
-            .then((res) => {
-                var data = res.data.content[0];
-                var provinceId = data.provinceId;
-                for (var i = 0; i < provinceId.length; i++) {
-                    for (var j = 0; j < allProvinces.length; j++) {
-                        if (allProvinces[j]._id === provinceId[i]) {
-                            arrProvices.push(allProvinces[j])
-                        }
-                    }
-                }
-                setProvinces(arrProvices)
-            })
-            .catch((error) => {
-                console.log(error, 'error')
-            })
-    }
+  const handleEditClose = () => {
+    setEditModal(false);
+  };
 
-    const addCity = () => {
-        setName('')
-        setAbbreviation('')
-        setRegionId('')
-        setObjectId('')
-        setProvinces([])
-        setProvinceId('')
-        setTab(0)
-        setSelectedData(false)
-        setIsEditingSelectedData(false)
-        setAddForm(false)
+  const addCity = () => {
+    const form = {
+      objectId,
+      name,
+      abbreviation,
+      identifier,
+      regionId,
+      provinceId,
     };
+    axios
+      .post(`${process.env.REACT_APP_URL}/cities/postCity`, form)
+      .then((res) => {
+        console.log(res.data);
+        enqueueSnackbar("City Add Successfully", { variant: "success" });
+        setOpen(false);
+        fetchCity();
+      })
+      .catch(function (error) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
+      });
+    setAbbreviation("");
+    setName("");
+    setObjectId("");
+    setIdentifier("");
+    setRegionId("");
+    setProvinceId("");
+  };
 
-    const editData = () => {
-        setIsEditingSelectedData(false)
-        setSelectedData(false)
-        setAddForm(true)
-    }
+  const editProvince = async (id) => {
+    const form = { id };
+    let response = await axios.post(
+      `${process.env.REACT_APP_URL}/cities/getCity`,
+      form
+    );
+    console.log(response.data);
+    setId(response.data._id);
+    setName(response.data.name);
+    setObjectId(response.data.objectId);
+    setAbbreviation(response.data.abbreviation);
+    setRegionId(response.data.regionId._id);
+    setProvinceId(response.data.provinceId._id);
+    setIdentifier(response.data.identifier);
+    setEditModal(true);
+  };
 
-    function handleRowClick(data) {
-        setTab(1)
-        setSelectedData(true)
-        setName(data.name)
-        setAbbreviation(data.abbreviation)
-        setRegionId(data.regionId)
-        setObjectId(data._id)
-        onChangeRegion(data.regionId)
-        setProvinceId(data.provinceId)
-        setIsEditingSelectedData(true)
-        setAddForm(true)
-    }
+  const editFormProvince = async (id) => {
+    const form = {
+      id,
+      objectId,
+      name,
+      abbreviation,
+      identifier,
+      regionId,
+      provinceId,
+    };
+    await axios
+      .post(`${process.env.REACT_APP_URL}/cities/updateCity`, form)
+      .then((res) => {
+        console.log(res.data);
+        setEditModal(false);
+        enqueueSnackbar("City Edit Successfully", { variant: "success" });
+        fetchCity();
+      })
+      .catch(function (error) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
+      });
+    setAbbreviation("");
+    setName("");
+    setObjectId("");
+    setIdentifier("");
+    setRegionId("");
+    setProvinceId("");
+  };
 
-    function handleSave() {
-        if (objectId !== "") {
-            const body = {
-                name,
-                abbreviation,
-                regionId,
-                provinceId,
-                updatedBy: user._id,
-                objectId
-            }
-            dispatch(CityActions.update_city(body))
-            alert.success("City Updated!");
-            addCity()
-        }
-        else {
-            if (name !== "" && abbreviation !== "" && regionId !== "" && provinceId !== "") {
-                let obj = {
-                    name,
-                    abbreviation,
-                    regionId,
-                    provinceId,
-                    createdBy: user._id
-                }
+  const deleteProvince = (id) => {
+    const form = { id };
+    confirmAlert({
+      title: "Confirm to Delete",
+      message: "Are you sure to do this.",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            axios
+              .post(`${process.env.REACT_APP_URL}/cities/deleteCity`, form)
+              .then((res) => {
+                console.log(res.data);
+                fetchCity();
+              })
+              .catch(function (error) {
+                console.log(error.response);
+              });
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
 
-                dispatch(CityActions.add_city(obj))
-                alert.success("City Added!");
-                addCity()
-            }
-            else {
-                alert.error("All fields are required!");
+  //Get Region
 
-            }
-        }
+  const fetchCity = async () => {
+    await axios
+      .get(`${process.env.REACT_APP_URL}/cities/getCities`)
+      .then((response) => {
+        const allfetchCity = response.data;
+        setEmp(allfetchCity);
+        setLoad(false);
+      })
+      .catch((error) => console.log(`Error: ${error}`));
+  };
 
-    }
+  useEffect(() => {
+    fetchCity();
+  }, [load]);
 
-    const deleteCity = () => {
-        let body = {
-            objectId
-        }
+  useEffect(() => {
+    axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
+      setDropDownRegion(res.data);
+      console.log(res.data);
+    });
+  }, []);
 
-        dispatch(CityActions.delete_city(body))
-        addCity()
-    }
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
+      .then((res) => {
+        setDropDownProvince(res.data.content);
+        console.log(res.data);
+      });
+  }, []);
+  return (
+    <div>
+      <Breadcrumbs aria-label="breadcrumb">
+        <Link
+          color="inherit"
+          href="javascript:void(0)"
+          onClick={() => {
+            history.push("/dashboard");
+          }}
+        >
+          Home
+        </Link>
+        <Typography color="textPrimary">Vertical-Settings</Typography>
+        <Typography color="textPrimary">City</Typography>
+      </Breadcrumbs>
+      <div>
+        <TableContainer
+          style={{
+            borderRadius: "4px",
+            width: "100%",
+            overflow: "auto",
+            minWidth: "450px",
+          }}
+          component={Paper}
+        >
+          <Table>
+            <TableHead style={{ background: "#00AEEF" }}>
+              <TableRow>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Object ID
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Name
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Abbreviation
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Identifier
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Region ID
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Region Name
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Province ID
+                </TableCell>
+                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                  Province Name
+                </TableCell>
 
+                <TableCell
+                  style={{
+                    fontWeight: "600",
+                    width: "15%",
+                    textAlign: "center",
+                  }}
+                >
+                  Actions
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%" }}
+                  align="right"
+                >
+                  <Button
+                    style={{ width: "150px" }}
+                    variant="outlined"
+                    onClick={handleOpen}
+                  >
+                    Add City
+                  </Button>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {emp.map((user, key, index) => {
+                return (
+                  <TableRow key={user.id}>
+                    <TableCell component="th" scope="row">
+                      {user.objectId}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {user.name}
+                    </TableCell>
 
+                    <TableCell>{user.abbreviation}</TableCell>
+                    <TableCell>{user.identifier}</TableCell>
+                    <TableCell>{user.regionId.objectId}</TableCell>
+                    <TableCell>{user.regionId.name}</TableCell>
+                    <TableCell>{user.provinceId.objectId}</TableCell>
+                    <TableCell>{user.provinceId.name}</TableCell>
+                    <TableCell>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Button
+                          onClick={() => {
+                            editProvince(user._id);
+                          }}
+                        >
+                          <EditIcon color="primary" />
+                        </Button>
 
-    return (
-        <>
-            <Breadcrumbs aria-label="breadcrumb">
-                <Link color="inherit" href="javascript:void(0)" onClick={() => { history.push('/dashboard') }}>
-                    Home
-             </Link>
-                <Typography color="textPrimary">Vertical-Settings</Typography>
-                <Typography color="textPrimary">City</Typography>
-            </Breadcrumbs>
-            <Card className={classes.root}>
-                <CardContent>
-                    <FormGridTabs
-                        tab={tab}
-                        afterRowClick={() => { setTab(0) }}
-                        form={
+                        <Button
+                          onClick={() => {
+                            deleteProvince(user._id);
+                          }}
+                        >
+                          <DeleteIcon color="secondary" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
 
-                            <Grid container spacing={3}>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        label="City ID"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        disabled
-                                        fullWidth
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="regionId">Region ID</InputLabel>
-                                        <Select
-                                            labelId="regionId"
-                                            label="Region ID"
-                                            disabled={isEditingSelectedData}
-                                            fullWidth
-                                            name='regionId'
-                                            value={regionId}
-                                            onChange={(e) => {
-                                                onChangeRegion(e.target.value)
-                                            }}
-                                        >
-                                            {allRegions && allRegions.map((region) => {
-                                                return (
-                                                    <MenuItem key={region._id} value={region._id}>
-                                                        {region.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="provinceId">Province ID</InputLabel>
-                                        <Select
-                                            labelId="provinceId"
-                                            label="Province ID"
-                                            fullWidth
-                                            name='provinceId'
-                                            value={provinceId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => {
-                                                setProvinceId(e.target.value)
-                                            }}
-                                        >
-                                            {provices && provices.map((province) => {
-                                                return (
-                                                    <MenuItem key={province._id} value={province._id}>
-                                                        {province.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="City Name"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        name='name'
-                                        disabled={isEditingSelectedData}
-                                        value={name}
-                                        onChange={(e) => { setName(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="City Abbreviation"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        name='abbreviation'
-                                        disabled={isEditingSelectedData}
-                                        value={abbreviation}
-                                        onChange={(e) => { setAbbreviation(e.target.value) }}
-                                    />
-                                </Grid>
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={open}
+          onClose={handleClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={open}>
+            <div className={classes.paper}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">Add City</h2>
+                <div style={{ marginTop: "10px", width: "80%" }}>
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Object ID"
+                    variant="outlined"
+                    value={objectId}
+                    onChange={(e) => setObjectId(e.target.value)}
+                  />
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Name"
+                    variant="outlined"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
 
-                                <Grid item xs={12}>
-                                    <ButtonGroup variant="contained" color="secondary" size={'large'}>
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Abbreviation"
+                    variant="outlined"
+                    value={abbreviation}
+                    onChange={(e) => setAbbreviation(e.target.value)}
+                  />
 
-                                        {addForm &&
-                                            <Button onClick={addCity}><AddIcon style={{ marginRight: "2px" }} /> Add</Button>
-                                        }
-                                        {!selectedData &&
-                                            <Button disabled={selectedData} onClick={() => { handleSave() }}><SaveAltIcon style={{ marginRight: "5px" }} /> Save</Button>
-                                        }
-                                        {isEditingSelectedData &&
-                                            <Button onClick={editData}><EditIcon style={{ marginRight: "5px" }} /> Edit</Button>
-                                        }
-                                        {isEditingSelectedData &&
-                                            <Button onClick={deleteCity}><DeleteOutlineIcon style={{ marginRight: "5px" }} /> Delete</Button>
-                                        }
-                                    </ButtonGroup>
-                                </Grid>
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Identifier"
+                    variant="outlined"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                  />
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Region ID
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setRegionId(e.target.value)}
+                      native
+                      value={regionId}
+                      label="Region ID"
+                    >
+                      <option aria-label="None" />
+                      {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value._id}>
+                          {value.objectId}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
 
-                            </Grid>
-                        }
-                        grid={
-                            <div>
-                                <GridTable
-                                    onRowClick={(data) => { handleRowClick(data) }}
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Province ID
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setProvinceId(e.target.value)}
+                      native
+                      value={provinceId}
+                      label="Province ID"
+                    >
+                      <option aria-label="None" />
+                      {dropdownProvince.map((value, index) => (
+                        <option key={value.id} value={value._id}>
+                          {value.objectId}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
 
-                                    headCells={
-                                        [
-                                            { id: 'name', label: 'Name' },
-                                            { id: 'abbreviation', label: 'Abbreviation' },
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    marginTop: "15px",
+                  }}
+                >
+                  <Button
+                    style={{ width: "45%" }}
+                    variant="contained"
+                    color="primary"
+                    onClick={addCity}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={editModal}
+          onClose={handleEditClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={editModal}>
+            <div className={classes.paper}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">Edit City</h2>
+                <div style={{ marginTop: "10px", width: "80%" }}>
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Object ID"
+                    variant="outlined"
+                    value={objectId}
+                    onChange={(e) => setObjectId(e.target.value)}
+                  />
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Name"
+                    variant="outlined"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
 
-                                        ]
-                                    }
-                                    rows={allcities} />
-                            </div>
-                        }
-                    />
-                </CardContent>
-            </Card>
-        </>
-    )
-}
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Abbreviation"
+                    variant="outlined"
+                    value={abbreviation}
+                    onChange={(e) => setAbbreviation(e.target.value)}
+                  />
 
-export default City
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Identifier"
+                    variant="outlined"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                  />
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Region ID
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setRegionId(e.target.value)}
+                      native
+                      value={regionId}
+                      label="Region ID"
+                    >
+                      <option aria-label="None" />
+                      {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value._id}>
+                          {value.objectId}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Province ID
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setProvinceId(e.target.value)}
+                      native
+                      value={provinceId}
+                      label="Province ID"
+                    >
+                      <option aria-label="None" />
+                      {dropdownProvince.map((value, index) => (
+                        <option key={value.id} value={value._id}>
+                          {value.objectId}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    marginTop: "15px",
+                  }}
+                >
+                  <Button
+                    style={{ width: "45%" }}
+                    variant="contained"
+                    color="primary"
+                    onClick={() => editFormProvince(Id)}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+    </div>
+  );
+};
+
+export default City;

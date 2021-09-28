@@ -42,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
   },
   appBar: {
+    // display:'none',
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -118,11 +119,7 @@ function DrawerAndRoutes() {
     (state) => state.theme.blackAndWhiteTheme
   );
   const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
+    setOpen(!open);
   };
 
   useEffect(() => {
@@ -166,7 +163,7 @@ function DrawerAndRoutes() {
             aria-label="open drawer"
             onClick={handleDrawerOpen}
             edge="start"
-            className={clsx(classes.menuButton, open && classes.hide)}
+            className={clsx(classes.menuButton, open)}
           >
             <MenuIcon />
           </IconButton>
@@ -194,6 +191,7 @@ function DrawerAndRoutes() {
           </div>
         </Toolbar>
       </AppBar>
+
       <Drawer
         className={classes.drawer}
         variant="persistent"
@@ -251,7 +249,14 @@ function DrawerAndRoutes() {
               label={user.designation}
               disabled
               variant="outlined"
-              color={blackAndWhiteTheme ? "#000" : "secondary"}
+              style={{
+                borderRadius: "4px",
+                background: "#16B9F4",
+                color: "white",
+                fontStyle: "bold",
+                opacity: 1,
+              }}
+              // color={blackAndWhiteTheme ? "#000" : "secondary"}
             />
           </div>
           <Divider style={{ marginBottom: "10px" }} />
@@ -280,6 +285,7 @@ function DrawerAndRoutes() {
             <ListItemText primary="Vertical Settings" />
             {openVerticalSettings ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
+
           <Collapse in={openVerticalSettings} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {user && user.role === "admin" ? (
@@ -293,7 +299,7 @@ function DrawerAndRoutes() {
                   <ListItemText primary="Vertical / Group / Company" />
                 </ListItem>
               ) : null}
-              {/* {user && user.role === "admin" ? (
+              {user && user.role === "admin" ? (
                 <ListItem
                   button
                   className={classes.nested}
@@ -303,7 +309,7 @@ function DrawerAndRoutes() {
                 >
                   <ListItemText primary="Province" />
                 </ListItem>
-              ) : null} */}
+              ) : null}
               {user && user.role === "admin" ? (
                 <ListItem
                   button

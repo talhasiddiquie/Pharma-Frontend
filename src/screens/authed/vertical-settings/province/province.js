@@ -42,10 +42,10 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
     padding: "20px",
     width: "25%",
-    height: "35%",
+    inHeight: "35%",
     [theme.breakpoints.down("sm")]: {
       width: "70%",
-      height: "40%",
+      inHeight: "40%",
     },
   },
 }));

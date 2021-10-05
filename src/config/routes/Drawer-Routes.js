@@ -406,6 +406,21 @@ function DrawerAndRoutes() {
                   button
                   className={classes.nested}
                   onClick={() => {
+                    history.push("/business-parameters/designation");
+                  }}
+                >
+                  <ListItemText primary="Add Designation" />
+                </ListItem>
+              ) : null}
+              {(user && user.role === "admin") ||
+              user.role === "representative" ||
+              user.role === "National Manager" ||
+              user.role === "Regional Manager" ||
+              user.role === "Zonal Manager" ? (
+                <ListItem
+                  button
+                  className={classes.nested}
+                  onClick={() => {
                     history.push("/business-parameters/doctor");
                   }}
                 >

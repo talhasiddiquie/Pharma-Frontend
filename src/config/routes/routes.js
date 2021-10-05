@@ -33,7 +33,7 @@ import Representative from "../../screens/authed/business-parameters/representat
 import Product from "../../screens/authed/business-parameters/product/product";
 import AddSellingPitch from "../../screens/authed/business-parameters/add-sellling-pitch/add-selling-pitch";
 import AddSurvey from "../../screens/authed/business-parameters/add-survey/add-survey";
-
+import Designation from "../../screens/authed/business-parameters/designation/designation";
 //Authed/Reports-Parameters
 import DoctorReport from "../../screens/authed/reports-parameters/doctorReport/doctorReport";
 import EmployeesReport from "../../screens/authed/reports-parameters/employeeReport/employeeReport";
@@ -162,6 +162,12 @@ function Routes() {
         exact
         path="/business-parameters/doctor"
         component={Doctor}
+      />
+
+      <PrivateRoute
+        exact
+        path="/business-parameters/designation"
+        component={Designation}
       />
       <PrivateRoute
         exact

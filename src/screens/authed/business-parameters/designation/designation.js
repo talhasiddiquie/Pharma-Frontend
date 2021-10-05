@@ -42,15 +42,15 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
     padding: "20px",
     width: "25%",
-    inHeight: "65%",
+    inHeight: "50%",
     [theme.breakpoints.down("sm")]: {
       width: "70%",
-      inHeight: "65%",
+      inHeight: "55%",
     },
   },
 }));
 
-const ClinicHospital = () => {
+const Designation = () => {
   const classes = useStyles();
   const history = useHistory();
   const [emp, setEmp] = useState([]);
@@ -59,12 +59,9 @@ const ClinicHospital = () => {
   const [editModal, setEditModal] = useState(false);
   const [objectId, setObjectId] = useState("");
   const [name, setName] = useState("");
-  const [abbreviation, setAbbreviation] = useState("");
-  const [address, setAddress] = useState("");
-  const [brickId, setBrickId] = useState("");
-  const [phone, setPhone] = useState("");
+  const [type, setType] = useState("");
+  const [isActive, setIsActive] = useState("");
   const [Id, setId] = useState("");
-  const [dropDownBrick, setDropDownBrick] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
 
   const handleOpen = () => {
@@ -73,6 +70,10 @@ const ClinicHospital = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setIsActive("");
+    setName("");
+    setObjectId("");
+    setType("");
   };
 
   const handleEditOpen = (id) => {
@@ -81,75 +82,70 @@ const ClinicHospital = () => {
 
   const handleEditClose = () => {
     setEditModal(false);
+    setIsActive("");
+    setName("");
+    setObjectId("");
+    setType("");
   };
 
-  const addHospital = () => {
-    const form = { objectId, name, address, abbreviation, phone, brickId };
+  const addDesigantion = () => {
+    const form = { objectId, name, isActive, type };
     axios
-      .post(`${process.env.REACT_APP_URL}/hospitals/postHospital`, form)
+      .post(`${process.env.REACT_APP_URL}/designations/postDesignation`, form)
       .then((res) => {
         console.log(res.data);
-        enqueueSnackbar("Clinic-Hospital Add Successfully", {
-          variant: "success",
-        });
+        enqueueSnackbar("Designation Add Successfully", { variant: "success" });
         setOpen(false);
-        fetchHospital();
+        fetchDesignation();
       })
       .catch(function (error) {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-
+    setIsActive("");
     setName("");
     setObjectId("");
-    setAbbreviation("");
-    setAddress("");
-    setPhone("");
-    setBrickId("");
+    setType("");
   };
 
-  const editProvince = async (id) => {
+  const getDesignationById = async (id) => {
     const form = { id };
     let response = await axios.post(
-      `${process.env.REACT_APP_URL}/hospitals/getHospital`,
+      `${process.env.REACT_APP_URL}/designations/getDesignation`,
       form
     );
     console.log(response.data);
     setId(response.data._id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
-    setAddress(response.data.address);
-    setPhone(response.data.phone);
-    setBrickId(response.data.brickId._id);
-    setAbbreviation(response.data.abbreviation);
+    setIsActive(response.data.isActive);
+    setType(response.data.type);
     setEditModal(true);
   };
 
-  const editFormProvince = async (id) => {
-    const form = { id, objectId, name, address, abbreviation, phone, brickId };
+  const editDesignation = async (id) => {
+    const form = { id, objectId, name, isActive, type };
     await axios
-      .post(`${process.env.REACT_APP_URL}/hospitals/updateHospital`, form)
+      .post(`${process.env.REACT_APP_URL}/designations/updateDesignation`, form)
       .then((res) => {
         console.log(res.data);
         setEditModal(false);
-        enqueueSnackbar("Clinic-Hospital Edit Successfully", {
+        enqueueSnackbar("Designation Edit Successfully", {
           variant: "success",
         });
-        fetchHospital();
+        fetchDesignation();
       })
       .catch(function (error) {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
+    setIsActive("");
     setName("");
     setObjectId("");
-    setAbbreviation("");
-    setAddress("");
-    setPhone("");
-    setBrickId("");
+    setType("");
   };
 
-  const deleteProvince = (id) => {
+  const deleteDesignation = (id) => {
     const form = { id };
     confirmAlert({
       title: "Confirm to Delete",
@@ -160,12 +156,15 @@ const ClinicHospital = () => {
           onClick: () => {
             axios
               .post(
-                `${process.env.REACT_APP_URL}/hospitals/deleteHospital`,
+                `${process.env.REACT_APP_URL}/designations/deleteDesignation`,
                 form
               )
               .then((res) => {
                 console.log(res.data);
-                fetchHospital();
+                enqueueSnackbar("Designation Deleted Successfully", {
+                  variant: "success",
+                });
+                fetchDesignation();
               })
               .catch(function (error) {
                 console.log(error.response);
@@ -182,26 +181,22 @@ const ClinicHospital = () => {
 
   //Get Region
 
-  const fetchHospital = async () => {
+  const fetchDesignation = async () => {
     await axios
-      .get(`${process.env.REACT_APP_URL}/hospitals/getHospitals`)
+      .get(`${process.env.REACT_APP_URL}/designations/getDesignations`)
       .then((response) => {
-        const allHospitals = response.data;
-        setEmp(allHospitals);
+        const allRegion = response.data;
+        console.log(allRegion);
+        setEmp(allRegion);
         setLoad(false);
       })
       .catch((error) => console.log(`Error: ${error}`));
   };
 
   useEffect(() => {
-    fetchHospital();
+    fetchDesignation();
   }, [load]);
 
-  useEffect(() => {
-    axios.get(`${process.env.REACT_APP_URL}/bricks/getBricks`).then((res) => {
-      setDropDownBrick(res.data);
-    });
-  }, []);
   return (
     <div>
       <Breadcrumbs aria-label="breadcrumb">
@@ -214,8 +209,8 @@ const ClinicHospital = () => {
         >
           Home
         </Link>
-        <Typography color="textPrimary">Vertical-Settings</Typography>
-        <Typography color="textPrimary">Clinic-Hospital</Typography>
+        <Typography color="textPrimary">Business-Parameters</Typography>
+        <Typography color="textPrimary">Designation</Typography>
       </Breadcrumbs>
       <div>
         <TableContainer
@@ -237,25 +232,10 @@ const ClinicHospital = () => {
                   Name
                 </TableCell>
                 <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Abbreviation
+                  Type
                 </TableCell>
                 <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Address
-                </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Phone
-                </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Brick
-                </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Territory Name
-                </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Zone Abbreavation
-                </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Region Abbreavation
+                  IsActive
                 </TableCell>
 
                 <TableCell
@@ -276,7 +256,7 @@ const ClinicHospital = () => {
                     variant="outlined"
                     onClick={handleOpen}
                   >
-                    Add Clinic-Hospital
+                    Add Designation
                   </Button>
                 </TableCell>
               </TableRow>
@@ -291,16 +271,22 @@ const ClinicHospital = () => {
                     <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
-                    <TableCell>{user.abbreviation}</TableCell>
-                    <TableCell>{user.address}</TableCell>
-                    <TableCell>{user.phone}</TableCell>
-                    <TableCell>{user.brickId.name}</TableCell>
-                    <TableCell>{user.brickId.territoryId.name}</TableCell>
+                    <TableCell>{user.type}</TableCell>
                     <TableCell>
-                      {user.brickId.territoryId.zoneId.abbreviation}
-                    </TableCell>
-                    <TableCell>
-                      {user.brickId.territoryId.zoneId.regionId.abbreviation}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          flexWrap: "nowrap",
+                          width: "130px",
+                        }}
+                      >
+                        {user.isActive === true ? (
+                          <SuccessIcon />
+                        ) : (
+                          <PendingIcon />
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div
@@ -312,7 +298,7 @@ const ClinicHospital = () => {
                       >
                         <Button
                           onClick={() => {
-                            editProvince(user._id);
+                            getDesignationById(user._id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -320,7 +306,7 @@ const ClinicHospital = () => {
 
                         <Button
                           onClick={() => {
-                            deleteProvince(user._id);
+                            deleteDesignation(user._id);
                           }}
                         >
                           <DeleteIcon color="secondary" />
@@ -358,7 +344,7 @@ const ClinicHospital = () => {
                   alignItems: "center",
                 }}
               >
-                <h2 id="transition-modal-title">Add Region</h2>
+                <h2 id="transition-modal-title">Add Designation</h2>
                 <div style={{ marginTop: "10px", width: "80%" }}>
                   <TextField
                     style={{ width: "100%", marginTop: "10px" }}
@@ -383,52 +369,27 @@ const ClinicHospital = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Abbreviation"
+                    label="Type"
                     variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
                   />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Address"
-                    variant="outlined"
-                    value={address}
-                    multiline
-                    rows={4}
-                    onChange={(e) => setAddress(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Phone"
-                    variant="outlined"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-
                   <FormControl
-                    variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}
+                    variant="outlined"
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Brick ID
+                      isActive
                     </InputLabel>
                     <Select
-                      // value={department}
-                      onChange={(e) => setBrickId(e.target.value)}
                       native
-                      value={brickId}
-                      label="Brick ID"
+                      label="isActive"
+                      value={isActive}
+                      onChange={(e) => setIsActive(e.target.value)}
                     >
-                      <option aria-label="None" />
-                      {dropDownBrick.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
-                        </option>
-                      ))}
+                      <option aria-label="None"> </option>
+                      <option value="true">True</option>
+                      <option value="false">False</option>
                     </Select>
                   </FormControl>
                 </div>
@@ -445,7 +406,7 @@ const ClinicHospital = () => {
                     style={{ width: "45%" }}
                     variant="contained"
                     color="primary"
-                    onClick={addHospital}
+                    onClick={addDesigantion}
                   >
                     Submit
                   </Button>
@@ -503,52 +464,27 @@ const ClinicHospital = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Abbreviation"
+                    label="Type"
                     variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
                   />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Address"
-                    variant="outlined"
-                    value={address}
-                    multiline
-                    rows={4}
-                    onChange={(e) => setAddress(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Phone"
-                    variant="outlined"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-
                   <FormControl
-                    variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}
+                    variant="outlined"
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Brick ID
+                      isActive
                     </InputLabel>
                     <Select
-                      // value={department}
-                      onChange={(e) => setBrickId(e.target.value)}
                       native
-                      value={brickId}
-                      label="Brick ID"
+                      label="isActive"
+                      value={isActive}
+                      onChange={(e) => setIsActive(e.target.value)}
                     >
-                      <option aria-label="None" />
-                      {dropDownBrick.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
-                        </option>
-                      ))}
+                      <option aria-label="None"> </option>
+                      <option value="true">True</option>
+                      <option value="false">False</option>
                     </Select>
                   </FormControl>
                 </div>
@@ -565,7 +501,7 @@ const ClinicHospital = () => {
                     style={{ width: "45%" }}
                     variant="contained"
                     color="primary"
-                    onClick={() => editFormProvince(Id)}
+                    onClick={() => editDesignation(Id)}
                   >
                     Submit
                   </Button>
@@ -579,4 +515,4 @@ const ClinicHospital = () => {
   );
 };
 
-export default ClinicHospital;
+export default Designation;

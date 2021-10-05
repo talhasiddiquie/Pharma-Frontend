@@ -1,854 +1,1764 @@
-import React, { useState, useEffect } from 'react'
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import { makeStyles } from '@material-ui/core/styles';
-import { useHistory } from 'react-router-dom'
-import Breadcrumbs from '@material-ui/core/Breadcrumbs';
-import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import FormGridTabs from '../../../components/Tabs/Form-Grid-Tabs'
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import AddIcon from '@material-ui/icons/Add'
-import EditIcon from '@material-ui/icons/Edit';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import GridTable from '../../../components/GridTable/grid-table';
-import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl'
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormLabel from '@material-ui/core/FormLabel';
-import { useDispatch, useSelector } from 'react-redux';
-import * as TerritoryActions from '../../../../config/Store/Actions/territory.action'
-import * as ZoneActions from '../../../../config/Store/Actions/zone.action'
-import * as RegionActions from '../../../../config/Store/Actions/region.action';
-import * as ProvinceActions from '../../../../config/Store/Actions/provice.action'
-import * as DesignationActions from '../../../../config/Store/Actions/designation.action'
-import * as RepresentativeActions from '../../../../config/Store/Actions/representative.actions'
-import * as CityActions from '../../../../config/Store/Actions/city.action';
-import * as UsersActions from '../../../../config/Store/Actions/user.actions';
-import * as CompanyActions from '../../../../config/Store/Actions/company.action';
-import axios from 'axios';
-import ApiService from '../../../../config/ApiService';
-import { useAlert } from "react-alert";
-import moment from 'moment'
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Input from '@material-ui/core/Input';
+import React, { useState, useEffect } from "react";
+import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+import Link from "@material-ui/core/Link";
+import Typography from "@material-ui/core/Typography";
+import { useHistory } from "react-router-dom";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import axios from "axios";
+import { Button, TextField } from "@material-ui/core";
+import Autocomplete from "@mui/material/Autocomplete";
+import Modal from "@material-ui/core/Modal";
+import Backdrop from "@material-ui/core/Backdrop";
+import Fade from "@material-ui/core/Fade";
+import Card from "@material-ui/core/Card";
+import Select from "@material-ui/core/Select";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import SuccessIcon from "../../../components/Success&PendingIcon/SuccessIcon";
+import PendingIcon from "../../../components/Success&PendingIcon/PendingIcon";
+import { confirmAlert } from "react-confirm-alert"; // Import
+import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+import { useSnackbar } from "notistack";
+import { makeStyles } from "@material-ui/core/styles";
+import moment from "moment";
 
-const useStyles = makeStyles(() => ({
-    root: {
+const useStyles = makeStyles((theme) => ({
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: "2px solid white",
+    borderRadius: "4px",
+    boxShadow: theme.shadows[5],
+    padding: "20px",
+    width: "45%",
+    inHeight: "40%",
+    [theme.breakpoints.down("sm")]: {
+      width: "80%",
+      inHeight: "55%",
     },
-    inputTexts: {
-        "& .MuiInputLabel-outlined.Mui-focused": {
-            color: "black"
-        },
-        "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black"
-        },
+  },
+  paperTwo: {
+    backgroundColor: theme.palette.background.paper,
+    border: "2px solid white",
+    borderRadius: "4px",
+    boxShadow: theme.shadows[5],
+    padding: "20px",
+    width: "35%",
+    overflow: "scroll",
+    inHeight: "50%",
+    maxHeight: 800,
+    [theme.breakpoints.down("sm")]: {
+      width: "80%",
+      inHeight: "55%",
     },
-    errorInput: {
-        "& .MuiInputLabel-outlined.Mui-focused": {
-            color: "red"
-        },
-        "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-            borderColor: "red"
-        },
+  },
+
+  formDiv: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+  },
+  textFieldName: {
+    width: "100%",
+    [theme.breakpoints.down("sm")]: {
+      width: "85%",
     },
+  },
+  textFieldSsid: {
+    width: "100%",
+    marginTop: "10px",
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+    },
+  },
+  styleTableHead: {
+    padding: "5px",
+    background: "#00AEEF",
+    color: "white",
+    fontWeight: "600",
+  },
 }));
 
-function Representative() {
-    const classes = useStyles();
-    const history = useHistory();
-    const dispatch = useDispatch()
-    const user = useSelector((state) => state.user.user);
-    const alert = useAlert();
-    const allZones = useSelector((state) => state.zone.allZones);
-    const allTerritories = useSelector((state) => state.territory.allTerritorys);
-    const allRegions = useSelector((state) => state.region.allRegions);
-    const allProvinces = useSelector((state) => state.province.allProvinces);
-    const allDesignations = useSelector((state) => state.designation.allDesignations);
-    const allRepresentatives = useSelector((state) => state.representative.allRepresentatives);
-    const allCities = useSelector((state) => state.city.allCities);
-    const usersEmails = useSelector(state => state.user.allUsers);
-    const allCompanies = useSelector((state) => state.company.allCompanies)
-    const [tab, setTab] = useState(0);
-    const [name, setName] = useState('')
-    const [identifier, setIdentifier] = useState('')
-    const [phone, setPhone] = useState('')
-    const [email, setEmail] = useState('')
-    const [gender, setGender] = useState('')
-    const [workType, setWorkType] = useState('')
-    const [maritalStatus, setMaritalStatus] = useState('')
-    const [dateOfBirth, setDateOfBirth] = useState('')
-    const [bloodGroupId, setBloodGroupId] = useState('')
-    const [designationId, setDesignationId] = useState('')
-    const [provinceId, setProvinceId] = useState('')
-    const [headquarterId, setHeadquarterId] = useState('')
-    const [sellingLine, setSellingLine] = useState('')
-    const [managerId, setManager] = useState('')
-    const [zoneId, setZoneId] = useState([])
-    const [territoryId, setTerritoryId] = useState([])
-    const [regionId, setRegionId] = useState([])
-    const [objectId, setobjectId] = useState('')
-    const [managersName, setManagerName] = useState('')
-    const [designationDataStart, setDesignationDataStart] = useState('')
-    const [designationDataEnd, setDesignationDataEnd] = useState('')
-    const [password, genratePassword] = useState('')
-    const [cities, setCities] = useState([]);
-    const [emailValidate, setEmailValidate] = useState(true)
-    const [alreadyEmailExists, setAlreadyEmailExists] = useState(false)
-    const [addForm, setAddForm] = useState(false);
-    const [selectedData, setSelectedData] = useState(false)
-    const [isEditingSelectedData, setIsEditingSelectedData] = useState(false)
-    const [loader, setLoader] = useState(false);
-    const [openRegion, setOpenRegion] = useState(false)
-    const [openZone, setOpenZone] = useState(false)
-    const [openTerritory, setOpenTerritory] = useState(false)
-    const [repUserId, setRepUserId] = useState('');
-    const [repUserPassword, setRepUserPassword] = useState('');
-    const [emails, setEmails] = useState([]);
-    const [refresh, setRefresh] = useState(false)
+const Representative = () => {
+  const classes = useStyles();
+  const history = useHistory();
+  const [emp, setEmp] = useState([]);
+  const [load, setLoad] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [getModal, setGetModal] = useState(false);
+  const [objectId, setObjectId] = useState("");
+  const [name, setName] = useState("");
+  const [identifier, setIdentifier] = useState("");
+  const [designationId, setDesignationId] = useState("");
+  const [provinceId, setProvinceId] = useState("");
+  const [region_Id, setRegion_Id] = useState([]);
+  const [zone_Id, setZone_Id] = useState([]);
+  const [territory_Id, setTerritory_Id] = useState([]);
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [gender, setGender] = useState("");
+  const [maritalStatus, setMaritalStatus] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [bloodGroupId, setBloodGroupId] = useState("");
+  const [workType, setWorkType] = useState("");
+  const [sellingLine, setSellingLine] = useState("");
+  const [isActive, setIsActive] = useState("");
+  const [password, setPassword] = useState("");
+  const [Id, setId] = useState("");
+  const [dropdownRegion, setDropDownRegion] = useState("");
+  const [dropdownZone, setDropDownZone] = useState("");
+  const [dropdownTerritory, setDropDownTerritory] = useState("");
+  const [dropdownProvince, setDropDownProvince] = useState([]);
+  const [dropDownBloodGroup, setDropDownBloodGroup] = useState([]);
+  const [dropDownDesignation, setDropDownDesignation] = useState([]);
+  const { enqueueSnackbar } = useSnackbar();
 
-    useEffect(() => {
-        if (!refresh) {
-            if (!allCities) {
-                dispatch(CityActions.get_cities())
-            }
-            else {
-                setCities(allCities)
-            }
-            setRefresh(true)
-        }
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
-        if (!allRegions) {
-            dispatch(RegionActions.get_regions())
-        }
-        if (!allZones) {
-            dispatch(ZoneActions.get_zones())
-        }
-        if (!allTerritories) {
-            dispatch(TerritoryActions.get_territorys())
-        }
+  const handleClose = () => {
+    setOpen(false);
+    setObjectId("");
+    setName("");
+    setIdentifier("");
+    setDesignationId("");
+    setProvinceId("");
+    setPhone("");
+    setEmail("");
+    setGender("");
+    setMaritalStatus("");
+    setDateOfBirth("");
+    setBloodGroupId("");
+    setWorkType("");
+    setSellingLine("");
+    setPassword("");
+    setIsActive("");
+    setRegion_Id([]);
+    setZone_Id([]);
+    setTerritory_Id([]);
+  };
 
-        if (!allProvinces) {
-            dispatch(ProvinceActions.get_province())
-        }
+  const handleEditOpen = (id) => {
+    setEditModal(true);
+  };
 
-        if (!allDesignations) {
-            dispatch(DesignationActions.get_designation())
-        }
-        if (!allRepresentatives) {
-            dispatch(RepresentativeActions.get_all_representatives())
-        }
-        if (!allCompanies) {
-            dispatch(CompanyActions.get_companies())
-        }
-        if (!usersEmails) {
-            dispatch(UsersActions.all_users())
-        }
-        if (usersEmails) {
-            var arr = [];
-            for (var key in usersEmails) {
-                arr.push(usersEmails[key].email)
-            }
-            setEmails(arr)
-        }
-        generatePassword()
+  const handleEditClose = () => {
+    setEditModal(false);
+    setObjectId("");
+    setName("");
+    setIdentifier("");
+    setDesignationId("");
+    setProvinceId("");
+    setPhone("");
+    setEmail("");
+    setGender("");
+    setMaritalStatus("");
+    setDateOfBirth("");
+    setBloodGroupId("");
+    setWorkType("");
+    setSellingLine("");
+    setPassword("");
+    setIsActive("");
+    setRegion_Id([]);
+    setZone_Id([]);
+    setTerritory_Id([]);
+  };
 
-    }, [allZones, allTerritories, allRegions, allProvinces, allDesignations, allRepresentatives, allCities, usersEmails, refresh, allCompanies]);
+  const handleGetOpen = (id) => {
+    setGetModal(true);
+  };
 
-    const generatePassword = () => {
-        try {
-            var length = 8,
-                charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-                password = "";
-            for (var i = 0, n = charset.length; i < length; ++i) {
-                password += charset.charAt(Math.floor(Math.random() * n));
-            }
-            genratePassword(password)
-        }
-        catch (e) {
-            console.log(e)
-        }
+  const handleGetClose = () => {
+    setGetModal(false);
+    setObjectId("");
+    setName("");
+    setIdentifier("");
+    setDesignationId("");
+    setProvinceId("");
+    setPhone("");
+    setEmail("");
+    setGender("");
+    setMaritalStatus("");
+    setDateOfBirth("");
+    setBloodGroupId("");
+    setWorkType("");
+    setSellingLine("");
+    setPassword("");
+    setIsActive("");
+    setRegion_Id([]);
+    setZone_Id([]);
+    setTerritory_Id([]);
+  };
+
+  const addRepresentative = async () => {
+    //For Region Multi select
+    const regionId = [];
+    region_Id.forEach((value) => regionId.push(value._id));
+
+    const zoneId = [];
+    zone_Id.forEach((value) => zoneId.push(value._id));
+
+    const territoryId = [];
+    territory_Id.forEach((value) => territoryId.push(value._id));
+    const form = {
+      objectId,
+      name,
+      identifier,
+      designationId,
+      gender,
+      provinceId,
+      zoneId,
+      regionId,
+      territoryId,
+      phone,
+      email,
+      maritalStatus,
+      dateOfBirth,
+      bloodGroupId,
+      workType,
+      sellingLine,
+      password,
+      isActive,
+    };
+    await axios
+      .post(
+        `${process.env.REACT_APP_URL}/representative/postRepresentative`,
+        form
+      )
+      .then((res) => {
+        console.log(res.data);
+        enqueueSnackbar("Representative Add Successfully", {
+          variant: "success",
+        });
+        setOpen(false);
+        fetchRepresentative();
+      })
+      .catch(function (error) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
+      });
+    setObjectId("");
+    setName("");
+    setIdentifier("");
+    setDesignationId("");
+    setProvinceId("");
+    setPhone("");
+    setEmail("");
+    setGender("");
+    setMaritalStatus("");
+    setDateOfBirth("");
+    setBloodGroupId("");
+    setWorkType("");
+    setSellingLine("");
+    setPassword("");
+    setIsActive("");
+    setRegion_Id([]);
+    setZone_Id([]);
+    setTerritory_Id([]);
+  };
+
+  const viewRepresentativeData = async (id) => {
+    const form = { id };
+    let response = await axios.post(
+      `${process.env.REACT_APP_URL}/representative/getRepresentative`,
+      form
+    );
+    const dob = moment(response.data.dateOfBirth).format("DD MMM YYYY");
+    const regionArr = [];
+    const regionData = response.data.regionId?.forEach((value) =>
+      regionArr.push(value.name + ", ")
+    );
+    const zoneArr = [];
+    const zoneData = response.data.zoneId?.forEach((value) =>
+      zoneArr.push(value.name + ", ")
+    );
+    const territoryArr = [];
+    const territoryData = response.data.territoryId?.forEach((value) =>
+      territoryArr.push(value.name + ", ")
+    );
+
+    setObjectId(response.data.objectId);
+    setName(response.data.name);
+    setIdentifier(response.data.identifier);
+    setDesignationId(response.data.designationId?.name);
+    setProvinceId(response.data.provinceId?.name);
+    setPhone(response.data.phone);
+    setEmail(response.data.email);
+    setGender(response.data.gender);
+    setMaritalStatus(response.data.maritalStatus);
+    setDateOfBirth(dob);
+    setBloodGroupId(response.data.bloodGroupId?.name);
+    setWorkType(response.data.workType);
+    setSellingLine(response.data.sellingLine);
+    setPassword(response.data.password);
+    setIsActive(response.data.isActive);
+    setRegion_Id(regionArr);
+    setZone_Id(zoneArr);
+    setTerritory_Id(territoryArr);
+    handleGetOpen(true);
+  };
+
+  const getRepresentativeById = async (id) => {
+    const form = { id };
+    let response = await axios.post(
+      `${process.env.REACT_APP_URL}/representative/getRepresentative`,
+      form
+    );
+    const dob = moment(response.data.dateOfBirth).format("YYYY-MM-DD");
+    setId(response.data._id);
+    setObjectId(response.data.objectId);
+    setName(response.data.name);
+    setIdentifier(response.data.identifier);
+    setDesignationId(response.data.designationId?._id);
+    setProvinceId(response.data.provinceId?._id);
+    setPhone(response.data.phone);
+    setEmail(response.data.email);
+    setGender(response.data.gender);
+    setMaritalStatus(response.data.maritalStatus);
+    setDateOfBirth(dob);
+    setBloodGroupId(response.data.bloodGroupId?._id);
+    setWorkType(response.data.workType);
+    setSellingLine(response.data.sellingLine);
+    setPassword(response.data.password);
+    setIsActive(response.data.isActive);
+    setRegion_Id(response.data.regionId);
+    setZone_Id(response.data.zoneId);
+    setTerritory_Id(response.data.territoryId);
+    setEditModal(true);
+  };
+
+  const editRepresentative = async (id) => {
+    const regionId = [];
+    region_Id.forEach((value) => regionId.push(value._id));
+
+    const zoneId = [];
+    zone_Id.forEach((value) => zoneId.push(value._id));
+
+    const territoryId = [];
+    territory_Id.forEach((value) => territoryId.push(value._id));
+    const form = {
+      id,
+      objectId,
+      name,
+      identifier,
+      designationId,
+      provinceId,
+      zoneId,
+      regionId,
+      territoryId,
+      gender,
+      phone,
+      email,
+      maritalStatus,
+      dateOfBirth,
+      bloodGroupId,
+      workType,
+      sellingLine,
+      password,
+      isActive,
+    };
+    await axios
+      .post(
+        `${process.env.REACT_APP_URL}/representative/updateRepresentative`,
+        form
+      )
+      .then((res) => {
+        console.log(res.data);
+        setEditModal(false);
+        enqueueSnackbar("Representative Edit Successfully", {
+          variant: "success",
+        });
+        fetchRepresentative();
+      })
+      .catch(function (error) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
+      });
+    setObjectId("");
+    setName("");
+    setIdentifier("");
+    setDesignationId("");
+    setProvinceId("");
+    setPhone("");
+    setEmail("");
+    setGender("");
+    setMaritalStatus("");
+    setDateOfBirth("");
+    setBloodGroupId("");
+    setWorkType("");
+    setSellingLine("");
+    setPassword("");
+    setIsActive("");
+    setRegion_Id([]);
+    setZone_Id([]);
+    setTerritory_Id([]);
+  };
+
+  const deleteRepresentative = (id) => {
+    const form = { id };
+    confirmAlert({
+      title: "Confirm to Delete",
+      message: "Are you sure to do this.",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            axios
+              .post(
+                `${process.env.REACT_APP_URL}/representative/deleteRepresentative`,
+                form
+              )
+              .then((res) => {
+                enqueueSnackbar("Representative Delete Successfully", {
+                  variant: "success",
+                });
+                fetchRepresentative();
+              })
+              .catch(function (error) {
+                console.log(error.response);
+              });
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
+
+  //Get Region
+
+  const fetchRepresentative = async () => {
+    await axios
+      .get(`${process.env.REACT_APP_URL}/representative/getRepresentatives`)
+      .then((response) => {
+        const allRepresentative = response.data;
+        console.log(allRepresentative);
+        setEmp(allRepresentative);
+        setLoad(false);
+      })
+      .catch((error) => console.log(`Error: ${error}`));
+  };
+
+  const regionList = [];
+
+  const filterRegionId = (res) => {
+    for (let i = 0; i < res.data.length; i++) {
+      regionList.push(res.data);
     }
+    let newList = [];
+    regionList[0].map((item) => {
+      newList.push(item);
+    });
+    setDropDownRegion(newList);
+  };
 
-    function handleRowClick(data) {
-        setTab(1)
-        setIdentifier(data.identifier)
-        setName(data.name)
-        setPhone(data.phone)
-        setEmail(data.email)
-        setGender(data.gender)
-        setWorkType(data.workType)
-        setMaritalStatus(data.maritalStatus)
-        setDateOfBirth(data.dateOfBirth)
-        setBloodGroupId(data.bloodGroupId)
-        setHeadquarterId(data.headquarterId)
-        setSellingLine(data.sellingLine)
-        setManager(data.managerId)
-        setTerritoryId(data.territoryId)
-        setRegionId(data.regionId)
-        setZoneId(data.zoneId)
-        setSelectedData(true)
-        setobjectId(data._id)
-        setDesignationDataStart(data.designationDataStart)
-        setDesignationDataEnd(data.designationDataEnd)
-        setIsEditingSelectedData(true)
-        setAddForm(true)
-        setRepUserId(data.representativeId)
-        setDesignationId(data.designationId);
-        designationsHandle(data.designationId)
-        onChangeProvince(data.provinceId)
-        setRepUserPassword(data.password)
+  const zoneList = [];
+
+  const filterZoneId = (res) => {
+    for (let i = 0; i < res.data.length; i++) {
+      zoneList.push(res.data);
     }
+    let newList = [];
+    zoneList[0].map((item) => {
+      newList.push(item);
+    });
+    setDropDownZone(newList);
+  };
 
-    const handleAdd = () => {
-        setIdentifier('')
-        setName('')
-        setPhone('')
-        setEmail('')
-        setGender('')
-        setWorkType('')
-        setMaritalStatus('')
-        setDateOfBirth('')
-        setBloodGroupId('')
-        setDesignationId('')
-        setProvinceId('')
-        setHeadquarterId('')
-        setSellingLine('')
-        setManager('')
-        setDesignationDataStart('')
-        setDesignationDataEnd('')
-        setZoneId([])
-        setTerritoryId([])
-        setRegionId([])
-        setobjectId('')
-        setRepUserId('')
-        setRepUserPassword('')
-        setTab(0)
-        setSelectedData(false)
-        setIsEditingSelectedData(false)
-        setAddForm(false)
-        setLoader(false)
-        setAlreadyEmailExists(false)
+  const territoryList = [];
+
+  const filterTerritoryId = (res) => {
+    for (let i = 0; i < res.data.length; i++) {
+      territoryList.push(res.data);
     }
+    let newList = [];
+    territoryList[0].map((item) => {
+      newList.push(item);
+    });
+    setDropDownTerritory(newList);
+  };
 
-    const editData = () => {
-        setIsEditingSelectedData(false)
-        setSelectedData(false)
-        setAddForm(true)
-        setRepUserPassword('')
-    }
+  useEffect(() => {
+    fetchRepresentative();
+  }, [load]);
 
-    function handleSave() {
-        const body = {
-            identifier,
-            name,
-            phone,
-            email,
-            gender,
-            workType,
-            maritalStatus,
-            dateOfBirth,
-            bloodGroupId,
-            designationId,
-            provinceId,
-            headquarterId,
-            sellingLine,
-            managerId,
-            zoneId,
-            territoryId,
-            regionId,
-            designationDataStart,
-            designationDataEnd,
-        }
-        if (objectId !== "") {
-            body.objectId = objectId;
-            body.updatedBy = user._id;
-            let emailSignUpObj = {
-                name: body.name,
-                email: body.email,
-                designation: body.designationId.name,
-                designationId: body.designationId._id,
-                role: body.designationId.type,
-                managerId: body.managerId,
-                objectId: repUserId
-            }
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
+      .then(async (res) => {
+        await filterRegionId(res);
+      });
+  }, []);
 
-            dispatch(RepresentativeActions.update_representative(body))
-            alert.success("Representative Updated!");
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/zones/getZones`)
+      .then(async (res) => {
+        await filterZoneId(res);
+      });
+  }, []);
 
-            dispatch(UsersActions.update_user(emailSignUpObj))
-            alert.success("User Updated!");
-            handleAdd()
-        }
-        else {
-            body.password = password
-            body.createdBy = user._id
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/territory/getTerritories`)
+      .then(async (res) => {
+        await filterTerritoryId(res);
+      });
+  }, []);
 
-            if (!alreadyEmailExists && emailValidate === true && identifier !== "" && name !== "" && phone !== "" && email !== "" && gender !== "" && workType !== "" && maritalStatus !== "" && dateOfBirth !== "" && bloodGroupId !== ""
-                && designationId !== "" && provinceId !== "" && headquarterId !== "" && sellingLine !== ""
-                && managerId !== ""
-                && zoneId !== "" && territoryId !== "" && regionId !== "" && designationDataStart !== "" && designationDataEnd !== "" && password !== ''
-            ) {
-                let emailSignUpObj = {
-                    name: body.name,
-                    email: body.email,
-                    password: body.password,
-                    designation: body.designationId.name,
-                    designationId: body.designationId._id,
-                    role: body.designationId.type,
-                    managerId: body.managerId
-                }
-                setLoader(true)
-                setIsEditingSelectedData(true)
-                axios.post(ApiService.getBaseUrl() + '/representative/sendEmail', emailSignUpObj)
-                    .then((res) => {
-                        if (res.status === 200) {
-                            if (res.data.success) {
-                                axios.post(ApiService.getBaseUrl() + '/users/signUp', emailSignUpObj)
-                                    .then((res) => {
-                                        dispatch({ type: "CREATE_USER", payload: res.data.content });
-                                        body.representativeId = res.data.content._id
-                                        dispatch(RepresentativeActions.add_representatives(body))
-                                    })
-                                    .catch((error) => {
-                                        dispatch({ type: "CREATE_USER_FAILURE", payload: error });
-                                    })
-                                alert.success("Representative Added!");
-                                handleAdd()
-                            }
-                        }
-                    })
-                    .catch((error) => {
-                        console.log(error, 'error')
-                        alert.error(`${error} Check your email or network`);
-                        setLoader(false)
-                        setIsEditingSelectedData(false)
-                    })
-            }
-            else {
-                alert.error("All fields are required!");
-                setLoader(false)
-                setIsEditingSelectedData(false)
-            }
-        }
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
+      .then((res) => {
+        setDropDownProvince(res.data.content);
+      });
+  }, []);
 
-    }
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/bloodGroup/getBloodGroups`)
+      .then((res) => {
+        setDropDownBloodGroup(res.data);
+      });
+  }, []);
 
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/designations/getDesignations`)
+      .then((res) => {
+        setDropDownDesignation(res.data);
+      });
+  }, []);
+  return (
+    <div>
+      <Breadcrumbs aria-label="breadcrumb">
+        <Link
+          color="inherit"
+          href="javascript:void(0)"
+          onClick={() => {
+            history.push("/dashboard");
+          }}
+        >
+          Home
+        </Link>
+        <Typography color="textPrimary">Business-Parameters</Typography>
+        <Typography color="textPrimary">Representative</Typography>
+      </Breadcrumbs>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginBottom: "10px",
+        }}
+      >
+        <Button
+          style={{ width: "150px" }}
+          variant="contained"
+          color="primary"
+          style={{ width: "200px", color: "white" }}
+          onClick={handleOpen}
+        >
+          Add Representative
+        </Button>
+      </div>
+      <div>
+        <TableContainer
+          style={{
+            borderRadius: "4px",
+            width: "100%",
+            overflow: "auto",
+            minWidth: "450px",
+            overflowY: "auto",
+          }}
+          component={Paper}
+        >
+          <Table>
+            <TableHead style={{ background: "#00AEEF" }}>
+              <TableRow>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Object ID
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Name
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Identifier
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Email
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Phone
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Password
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Work Type
+                </TableCell>
+                <TableCell
+                  style={{
+                    fontWeight: "600",
+                    width: "15%",
+                    color: "white",
+                    textAlign: "center",
+                  }}
+                >
+                  isActive
+                </TableCell>
+                <TableCell
+                  style={{
+                    fontWeight: "600",
+                    width: "15%",
+                    textAlign: "center",
+                    color: "white",
+                  }}
+                >
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {emp.map((user, key, index) => {
+                return (
+                  <TableRow key={user._id}>
+                    <TableCell component="th" scope="row">
+                      {user.objectId}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {user.name}
+                    </TableCell>
+                    <TableCell>{user.identifier}</TableCell>
+                    <TableCell>{user.email} </TableCell>
+                    <TableCell>{user.phone}</TableCell>
+                    <TableCell>{user.password}</TableCell>
+                    <TableCell>{user.workType}</TableCell>
+                    <TableCell>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          flexWrap: "nowrap",
+                          width: "130px",
+                        }}
+                      >
+                        {user.isActive === true ? (
+                          <SuccessIcon />
+                        ) : (
+                          <PendingIcon />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Button
+                          onClick={() => {
+                            viewRepresentativeData(user._id);
+                          }}
+                        >
+                          <VisibilityIcon color="primary" />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            getRepresentativeById(user._id);
+                          }}
+                        >
+                          <EditIcon color="primary" />
+                        </Button>
 
-    const deleteRepersentative = () => {
-        let body = {
-            objectId
-        }
-        let userDelete = {
-            objectId: repUserId
-        }
-        dispatch(RepresentativeActions.delete_repersentative(body))
-        dispatch(UsersActions.delete_user(userDelete))
-        alert.success("Representative Deleted!");
-        alert.success("User Deleted!");
-        handleAdd()
-    }
+                        <Button
+                          onClick={() => {
+                            deleteRepresentative(user._id);
+                          }}
+                        >
+                          <DeleteIcon color="secondary" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
 
-    const designationsHandle = (value) => {
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={open}
+          onClose={handleClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={open}>
+            <div className={classes.paper}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">Add Representative</h2>
 
-        var data = value;
-        var startKey;
-        var endKey;
-        var manegersName = []
-
-        allDesignations && allDesignations.map(function (item, key) {
-            if (item._id === data._id) {
-                startKey = 0
-                endKey = key
-            }
-        })
-
-        if (allRepresentatives.length > 0) {
-            allRepresentatives.map(function (item, key) {
-                for (var i = startKey; i <= endKey; i++) {
-                    if (item.designationDataStart === startKey && item.designationDataEnd === i) {
-                        manegersName.push(item)
-                    }
-                }
-            })
-        }
-        else {
-            let obj = {
-                name: 'Azhar',
-                _id: '5f75de6913bbdb3238d21b40',
-                role: "admin",
-            }
-            manegersName.push(obj)
-        }
-        setManagerName(manegersName);
-        setDesignationDataStart(startKey)
-        setDesignationDataEnd(endKey)
-        setDesignationId(data)
-    }
-
-    const emailChange = (e) => {
-        const email = e.target.value
-        setEmail(email)
-        if (email !== "") {
-            checkValidateFunc(email, 'email')
-        }
-        else {
-            setEmailValidate(false)
-        }
-
-        if (emails !== null) {
-            if (emails.includes(email)) {
-                setAlreadyEmailExists(true)
-            }
-            else {
-                setAlreadyEmailExists(false)
-            }
-        }
-        else {
-            dispatch(UsersActions.all_users())
-        }
-    }
-
-    const checkValidateFunc = (text, type) => {
-        let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-
-        if (type === 'email') {
-            if (reg.test(text)) {
-                setEmailValidate(true)
-            }
-            else {
-                setEmailValidate(false)
-            }
-        }
-    }
-
-    const onChangeProvince = (value) => {
-        const arr = [];
-        setProvinceId(value)
-        for (var i = 0; i < allCities.length; i++) {
-            if (allCities[i].provinceId === value) {
-                arr.push(allCities[i])
-            }
-        }
-        setCities(arr)
-    }
-
-    return (
-        <>
-            <Breadcrumbs aria-label="breadcrumb">
-                <Link color="inherit" href="javascript:void(0)" onClick={() => { history.push('/dashboard') }}>
-                    Home
-                </Link>
-                <Typography color="textPrimary">Business-Parameters</Typography>
-                <Typography color="textPrimary">Representative</Typography>
-            </Breadcrumbs>
-            <Card className={classes.root}>
-                <CardContent>
-                    {loader && <CircularProgress color="inherit" />}
-
-                    <FormGridTabs
-                        tab={tab}
-                        afterRowClick={() => { setTab(0) }}
-                        form={
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Employee ID"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={identifier}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setIdentifier(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Employee Name"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={name}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setName(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Phone"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        type={'number'}
-                                        fullWidth
-                                        value={phone}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setPhone(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Email"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        type={'email'}
-                                        fullWidth
-                                        value={email}
-                                        className={
-                                            emailValidate ? classes.inputTexts : classes.errorInput
-                                        }
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => {
-                                            emailChange(e)
-                                        }}
-                                    />
-                                    {alreadyEmailExists &&
-                                        <div style={{
-                                            color: 'red'
-                                        }}>
-                                            Email Already Exists
-                                        </div>
-                                    }
-                                    {repUserPassword !== "" &&
-                                        <div style={{
-                                            color: 'red'
-                                        }}>
-                                            {`Password: ${repUserPassword}`}
-                                        </div>
-                                    }
-                                </Grid>
-
-                                <Grid item sm={4}>
-                                    <FormControl component="fieldset">
-                                        <FormLabel component="legend" style={{ marginBottom: "5px" }}>Gender</FormLabel>
-                                        <RadioGroup aria-label="gender" name="gender" value={gender} onChange={(event) => { setGender(event.target.value) }}>
-                                            <FormControlLabel value="Male" control={<Radio disabled={isEditingSelectedData} color={'primary'} />} label="Male" />
-                                            <FormControlLabel value="Female" control={<Radio disabled={isEditingSelectedData} color={'primary'} />} label="Female" />
-                                        </RadioGroup>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid item sm={4}>
-                                    <FormControl component="fieldset">
-                                        <FormLabel component="legend" style={{ marginBottom: "5px" }}>Work Type</FormLabel>
-                                        <RadioGroup aria-label="Work Type" name="Work Type" value={workType}
-                                            onChange={(event) => { setWorkType(event.target.value) }}>
-                                            <FormControlLabel value="Office" control={<Radio disabled={isEditingSelectedData} color={'primary'} />} label="Office" />
-                                            <FormControlLabel value="On Field" control={<Radio disabled={isEditingSelectedData} color={'primary'} />} label="On Field" />
-                                        </RadioGroup>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid item sm={4}>
-                                    <FormControl component="fieldset">
-                                        <FormLabel component="legend" style={{ marginBottom: "5px" }}>Marital Status</FormLabel>
-                                        <RadioGroup aria-label="Marital Status" name="Marital Status" value={maritalStatus} onChange={(event) => { setMaritalStatus(event.target.value) }}>
-                                            <FormControlLabel value="Single" control={<Radio disabled={isEditingSelectedData} color={'primary'} />} label="Single" />
-                                            <FormControlLabel value="Married" control={<Radio disabled={isEditingSelectedData} color={'primary'} />} label="Married" />
-                                        </RadioGroup>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Date of Birth"
-                                        type="date"
-                                        className={classes.textField}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        variant={'outlined'}
-                                        fullWidth
-                                        value={moment(`${dateOfBirth}`).format('YYYY-MM-DD')}
-                                        onChange={(e) => { setDateOfBirth(e.target.value) }}
-                                        disabled={isEditingSelectedData}
-                                    />
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="blood-group">Blood Group</InputLabel>
-                                        <Select
-                                            labelId="blood-group"
-                                            label="Blood Group"
-                                            fullWidth
-                                            value={bloodGroupId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { setBloodGroupId(e.target.value) }}
-                                        >
-                                            <MenuItem value={'O+'}>O+</MenuItem>
-                                            <MenuItem value={'O-'}>O-</MenuItem>
-                                            <MenuItem value={'A+'}>A+</MenuItem>
-                                            <MenuItem value={'A-'}>A-</MenuItem>
-                                            <MenuItem value={'B+'}>B+</MenuItem>
-                                            <MenuItem value={'B-'}>B-</MenuItem>
-                                            <MenuItem value={'AB+'}>AB+</MenuItem>
-                                            <MenuItem value={'AB-'}>AB-</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="Designation">Designation</InputLabel>
-                                        <Select
-                                            labelId="Designation"
-                                            label="Designation"
-                                            fullWidth
-                                            value={designationId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={
-                                                (e) => designationsHandle(e.target.value)
-                                            }
-
-                                        >
-                                            {allDesignations && allDesignations.map((designation, key) => {
-                                                return (
-                                                    <MenuItem key={designation} value={designation}>
-                                                        {designation.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="Manager's Name">Manager's Name</InputLabel>
-                                        {managersName &&
-
-                                            <Select
-                                                labelId="Manager's Name"
-                                                label="Manager's Name"
-                                                fullWidth
-                                                value={managerId}
-                                                disabled={isEditingSelectedData}
-                                                onChange={(e) => {
-                                                    setManager(e.target.value)
-                                                }}
-                                            >
-                                                {managersName && managersName.map((manager) => {
-                                                    return (
-                                                        <MenuItem key={manager.representativeId} value={manager.representativeId}>
-                                                            {manager.name}
-                                                        </MenuItem>
-                                                    )
-                                                }
-                                                )}
-                                            </Select>
-                                        }
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="Selling Line">Selling Line</InputLabel>
-                                        <Select
-                                            labelId="Selling Line"
-                                            label="Selling Line"
-                                            fullWidth
-                                            value={sellingLine}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { setSellingLine(e.target.value) }}
-                                        >
-                                            {allCompanies && allCompanies.map((company) => {
-                                                return (
-                                                    <MenuItem key={company.name} value={company.name}>
-                                                        {company.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="Province">Province</InputLabel>
-                                        <Select
-                                            labelId="Province"
-                                            label="Province"
-                                            fullWidth
-                                            value={provinceId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { onChangeProvince(e.target.value) }}
-                                        >
-                                            {allProvinces && allProvinces.map((provinces) => {
-                                                return (
-                                                    <MenuItem key={provinces._id} value={provinces._id}>
-                                                        {provinces.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="Head Quarter">Head Quarter</InputLabel>
-                                        <Select
-                                            labelId="Head Quarter"
-                                            label="Head Quarter"
-                                            fullWidth
-                                            value={headquarterId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { setHeadquarterId(e.target.value) }}
-                                        >
-                                            {cities && cities.map((city) => {
-                                                return (
-                                                    <MenuItem key={city._id} value={city._id}>
-                                                        {city.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="region-id">Region ID</InputLabel>
-                                        <Select
-                                            labelId="region-id"
-                                            label="Region ID"
-                                            fullWidth
-                                            value={regionId}
-                                            disabled={isEditingSelectedData}
-                                            multiple
-                                            input={<Input
-                                                onClick={() => setOpenRegion(!openRegion)} />}
-                                            onChange={(e) => {
-                                                setRegionId(e.target.value)
-                                                setOpenRegion(!openRegion)
-                                            }}
-
-                                            open={openRegion}
-                                        >
-                                            {allRegions && allRegions.map((region) => {
-                                                return (
-                                                    <MenuItem key={region._id} value={region._id}>
-                                                        {region.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="zone-id">Zone ID</InputLabel>
-                                        <Select
-                                            labelId="zone-id"
-                                            label="Zone ID"
-                                            fullWidth
-                                            value={zoneId}
-                                            disabled={isEditingSelectedData}
-                                            multiple
-                                            input={<Input
-                                                onClick={() => setOpenZone(!openZone)} />}
-                                            onChange={(e) => {
-                                                setZoneId(e.target.value)
-                                                setOpenZone(!openZone)
-                                            }}
-
-                                            open={openZone}
-                                        >
-                                            {allZones && allZones.map((zone) => {
-                                                return (
-                                                    <MenuItem key={zone._id} value={zone._id}>
-                                                        {zone.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="territory-id">Territory ID</InputLabel>
-                                        <Select
-                                            labelId="territory-id"
-                                            label="Territory ID"
-                                            fullWidth
-                                            value={territoryId}
-                                            disabled={isEditingSelectedData}
-                                            multiple
-                                            input={<Input
-                                                onClick={() => setOpenTerritory(!openTerritory)} />}
-                                            onChange={(e) => {
-                                                setTerritoryId(e.target.value)
-                                                setOpenTerritory(!openTerritory)
-                                            }}
-                                            open={openTerritory}
-                                        >
-                                            {allTerritories && allTerritories.map((territory) => {
-                                                return (
-                                                    <MenuItem key={territory._id} value={territory._id}>
-                                                        {territory.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-
-
-                                <Grid item xs={12}>
-                                    <ButtonGroup variant="contained" color="secondary" size={'large'}>
-                                        {addForm &&
-                                            <Button onClick={handleAdd}><AddIcon style={{ marginRight: "2px" }} /> Add</Button>
-                                        }
-                                        {!selectedData &&
-                                            <Button disabled={selectedData} onClick={() => { handleSave() }}><SaveAltIcon style={{ marginRight: "5px" }} /> Save</Button>
-                                        }
-                                        {isEditingSelectedData && !loader &&
-                                            <Button onClick={editData}><EditIcon style={{ marginRight: "5px" }} /> Edit</Button>
-                                        }
-                                        {isEditingSelectedData && !loader &&
-                                            <Button onClick={deleteRepersentative}><DeleteOutlineIcon style={{ marginRight: "5px" }} /> Delete</Button>
-                                        }
-                                    </ButtonGroup>
-                                </Grid>
-
-                            </Grid>
-                        }
-                        grid={
-                            <div>
-                                <GridTable
-                                    headCells={
-                                        [
-                                            { id: 'name', label: 'Name' },
-                                            { id: 'identifier', label: 'Employee ID' },
-                                            { id: 'email', label: 'Email' },
-                                            { id: 'phone', label: 'Phone' },
-
-                                        ]
-                                    }
-                                    rows={allRepresentatives}
-                                    onRowClick={(data) => { handleRowClick(data) }}
-                                />
-                            </div>
-                        }
+                <div className={classes.formDiv}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      className={classes.textFieldName}
+                      style={{ marginRight: "10px" }}
+                      id="abc"
+                      label="Object Id"
+                      name="objectid"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
                     />
-                </CardContent>
-            </Card>
-        </>
-    )
-}
 
-export default Representative
+                    <TextField
+                      className={classes.textFieldName}
+                      id="abc"
+                      label="Name"
+                      name="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
+                      id="abc"
+                      label="Identifier"
+                      name="identifier"
+                      variant="outlined"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                    />
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Province
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setProvinceId(e.target.value)}
+                        id="abc"
+                        native
+                        value={provinceId}
+                        label="Province"
+                      >
+                        <option aria-label="None" />
+                        {dropdownProvince.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
+                      id="abc"
+                      label="Email"
+                      name="email"
+                      variant="outlined"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Designation
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setDesignationId(e.target.value)}
+                        id="abc"
+                        native
+                        value={designationId}
+                        label="Designation"
+                      >
+                        <option aria-label="None" />
+                        {dropDownDesignation.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
+                      id="abc"
+                      label="Phone"
+                      name="phone"
+                      variant="outlined"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Gender
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setGender(e.target.value)}
+                        id="abc"
+                        value={gender}
+                        native
+                        label="Gender"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{ marginTop: "10px" }}
+                      className={classes.textFieldName}
+                      id="date"
+                      variant="outlined"
+                      label="Date of Birth"
+                      type="date"
+                      value={dateOfBirth}
+                      onChange={(e) => setDateOfBirth(e.target.value)}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                      style={{ marginLeft: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Marital Status
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setMaritalStatus(e.target.value)}
+                        id="abc"
+                        value={maritalStatus}
+                        native
+                        label="Marital Status"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <div style={{ display: "flex" }}>
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Work Type
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setWorkType(e.target.value)}
+                        id="abc"
+                        value={workType}
+                        native
+                        label="Work Type"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="Office">Office</option>
+                        <option value="On Field">On Field</option>
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                      style={{ marginLeft: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Blood Group
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setBloodGroupId(e.target.value)}
+                        id="abc"
+                        native
+                        value={bloodGroupId}
+                        label="Blood Group"
+                      >
+                        <option aria-label="None" />
+                        {dropDownBloodGroup.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        IsActive
+                      </InputLabel>
+                      <Select
+                        // onChange={(e) => setIsActive(e.target.value)}
+                        onChange={(e) => {
+                          setIsActive(e.target.value);
+                        }}
+                        id="abc"
+                        value={isActive}
+                        native
+                        label="IsActive"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value={true}>True</option>
+                        <option value={false}>False</option>
+                      </Select>
+                    </FormControl>
+
+                    <TextField
+                      className={classes.textFieldSsid}
+                      style={{ marginLeft: "10px" }}
+                      id="abc"
+                      label="Selling Line"
+                      name="sellingline"
+                      variant="outlined"
+                      value={sellingLine}
+                      onChange={(e) => setSellingLine(e.target.value)}
+                    />
+                  </div>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownRegion}
+                      getOptionLabel={(option) => option.name}
+                      value={region_Id}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={(e, selectedObject) => {
+                        if (selectedObject !== null) {
+                          let List = [];
+                          for (let i = 0; i < selectedObject.length; i++) {
+                            List.push(selectedObject[i]);
+                          }
+                          setRegion_Id(List);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Region"
+                        />
+                      )}
+                    />
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownZone}
+                      getOptionLabel={(option) => option.name}
+                      value={zone_Id}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={(e, selectedObject) => {
+                        if (selectedObject !== null) {
+                          let List = [];
+                          for (let i = 0; i < selectedObject.length; i++) {
+                            List.push(selectedObject[i]);
+                          }
+                          setZone_Id(List);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Zone"
+                        />
+                      )}
+                    />
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownTerritory}
+                      getOptionLabel={(option) => option.name}
+                      value={territory_Id}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={(e, selectedObject) => {
+                        if (selectedObject !== null) {
+                          let List = [];
+                          for (let i = 0; i < selectedObject.length; i++) {
+                            List.push(selectedObject[i]);
+                          }
+                          setTerritory_Id(List);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Region"
+                        />
+                      )}
+                    />
+                  </FormControl>
+
+                  <TextField
+                    className={classes.textFieldSsid}
+                    id="abc"
+                    type="password"
+                    label="Password"
+                    name="password"
+                    variant="outlined"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+
+                  <Button
+                    onClick={addRepresentative}
+                    className={classes.btn}
+                    variant="contained"
+                    style={{
+                      backgroundColor: "#69c9ef",
+                      color: "#fff",
+                      marginTop: "20px",
+                    }}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={editModal}
+          onClose={handleEditClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={editModal}>
+            <div className={classes.paper}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">Edit Representative</h2>
+                <div className={classes.formDiv}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      className={classes.textFieldName}
+                      style={{ marginRight: "10px" }}
+                      id="abc"
+                      label="Object Id"
+                      name="objectid"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+
+                    <TextField
+                      className={classes.textFieldName}
+                      id="abc"
+                      label="Name"
+                      name="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
+                      id="abc"
+                      label="Identifier"
+                      name="identifier"
+                      variant="outlined"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                    />
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Province
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setProvinceId(e.target.value)}
+                        id="abc"
+                        native
+                        value={provinceId}
+                        label="Province"
+                      >
+                        <option aria-label="None" />
+                        {dropdownProvince.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
+                      id="abc"
+                      label="Email"
+                      name="email"
+                      variant="outlined"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Designation
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setDesignationId(e.target.value)}
+                        id="abc"
+                        native
+                        value={designationId}
+                        label="Designation"
+                      >
+                        <option aria-label="None" />
+                        {dropDownDesignation.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
+                      id="abc"
+                      label="Phone"
+                      name="phone"
+                      variant="outlined"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Gender
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setGender(e.target.value)}
+                        id="abc"
+                        value={gender}
+                        native
+                        label="Gender"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{ marginTop: "10px" }}
+                      className={classes.textFieldName}
+                      id="date"
+                      variant="outlined"
+                      label="Date of Birth"
+                      type="date"
+                      value={dateOfBirth}
+                      onChange={(e) => setDateOfBirth(e.target.value)}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                      style={{ marginLeft: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Marital Status
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setMaritalStatus(e.target.value)}
+                        id="abc"
+                        value={maritalStatus}
+                        native
+                        label="Marital Status"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <div style={{ display: "flex" }}>
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Work Type
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setWorkType(e.target.value)}
+                        id="abc"
+                        value={workType}
+                        native
+                        label="Work Type"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="Office">Office</option>
+                        <option value="On Field">On Field</option>
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                      style={{ marginLeft: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Blood Group
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setBloodGroupId(e.target.value)}
+                        id="abc"
+                        native
+                        value={bloodGroupId}
+                        label="Blood Group"
+                      >
+                        <option aria-label="None" />
+                        {dropDownBloodGroup.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        IsActive
+                      </InputLabel>
+                      <Select
+                        // onChange={(e) => setIsActive(e.target.value)}
+                        onChange={(e) => {
+                          setIsActive(e.target.value);
+                        }}
+                        id="abc"
+                        value={isActive}
+                        native
+                        label="IsActive"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value={true}>True</option>
+                        <option value={false}>False</option>
+                      </Select>
+                    </FormControl>
+
+                    <TextField
+                      className={classes.textFieldSsid}
+                      style={{ marginLeft: "10px" }}
+                      id="abc"
+                      label="Selling Line"
+                      name="sellingline"
+                      variant="outlined"
+                      value={sellingLine}
+                      onChange={(e) => setSellingLine(e.target.value)}
+                    />
+                  </div>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownRegion}
+                      getOptionLabel={(option) => option.name}
+                      value={region_Id}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={(e, selectedObject) => {
+                        if (selectedObject !== null) {
+                          let List = [];
+                          for (let i = 0; i < selectedObject.length; i++) {
+                            List.push(selectedObject[i]);
+                          }
+                          setRegion_Id(List);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Region"
+                        />
+                      )}
+                    />
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownZone}
+                      getOptionLabel={(option) => option.name}
+                      value={zone_Id}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={(e, selectedObject) => {
+                        if (selectedObject !== null) {
+                          let List = [];
+                          for (let i = 0; i < selectedObject.length; i++) {
+                            List.push(selectedObject[i]);
+                          }
+                          setZone_Id(List);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Zone"
+                        />
+                      )}
+                    />
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownTerritory}
+                      getOptionLabel={(option) => option.name}
+                      value={territory_Id}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={(e, selectedObject) => {
+                        if (selectedObject !== null) {
+                          let List = [];
+                          for (let i = 0; i < selectedObject.length; i++) {
+                            List.push(selectedObject[i]);
+                          }
+                          setTerritory_Id(List);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Region"
+                        />
+                      )}
+                    />
+                  </FormControl>
+
+                  <TextField
+                    className={classes.textFieldSsid}
+                    id="abc"
+                    type="password"
+                    label="Password"
+                    name="password"
+                    variant="outlined"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+
+                  <Button
+                    onClick={() => {
+                      editRepresentative(Id);
+                    }}
+                    className={classes.btn}
+                    variant="contained"
+                    style={{
+                      backgroundColor: "#69c9ef",
+                      color: "#fff",
+                      marginTop: "20px",
+                    }}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={getModal}
+          onClose={handleGetClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={getModal}>
+            <div className={classes.paperTwo}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">View Representative</h2>
+                <Table style={{ border: "2px solid" }}>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      ObjectId
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {objectId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Name
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {name}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Identifier
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {identifier}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Designation
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {designationId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Province
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {provinceId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Phone
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {phone}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Email
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {email}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Gender
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {gender}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Marital Status
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {maritalStatus}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Date of Birth
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {dateOfBirth}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Blood Group
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {bloodGroupId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Work Type
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {workType}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Selling Line
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {sellingLine}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Password
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {password}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      IsActive
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {isActive === true ? "TRUE" : "False"}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Region
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {region_Id}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Zone
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {zone_Id}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Territory
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {territory_Id}
+                    </TableCell>
+                  </TableRow>
+                </Table>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+    </div>
+  );
+};
+
+export default Representative;

@@ -1,975 +1,1796 @@
-import React, { useState, useEffect } from 'react'
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import { makeStyles } from '@material-ui/core/styles';
-import { useHistory } from 'react-router-dom'
-import Breadcrumbs from '@material-ui/core/Breadcrumbs';
-import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import FormGridTabs from '../../../components/Tabs/Form-Grid-Tabs'
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import AddIcon from '@material-ui/icons/Add'
-import EditIcon from '@material-ui/icons/Edit';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import GridTable from '../../../components/GridTable/grid-table';
-import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import Input from '@material-ui/core/Input';
-import moment from 'moment'
-import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../../../../config/Store/Actions/doctor.action';
-import { useAlert } from "react-alert";
-import * as ZoneActions from '../../../../config/Store/Actions/zone.action';
-import * as TerritoryActions from '../../../../config/Store/Actions/territory.action';
-import * as CityActions from '../../../../config/Store/Actions/city.action';
-import * as ProvinceActions from '../../../../config/Store/Actions/provice.action';
-import * as DesignationActions from '../../../../config/Store/Actions/designation.action';
-import * as HspActions from '../../../../config/Store/Actions/hospital.actions';
-import * as QulifActions from '../../../../config/Store/Actions/qulification.action';
-import * as SpecActions from '../../../../config/Store/Actions/speciality.action';
-import * as DoctorActions from '../../../../config/Store/Actions/doctor.action';
-import * as RepresActions from '../../../../config/Store/Actions/representative.actions';
-import * as BricksActions from '../../../../config/Store/Actions/brick.action';
-import * as UsersActions from '../../../../config/Store/Actions/user.actions';
-import axios from 'axios';
-import ApiService from '../../../../config/ApiService';
+// import React, { useState, useEffect } from "react";
+// import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+// import Link from "@material-ui/core/Link";
+// import Typography from "@material-ui/core/Typography";
+// import { useHistory } from "react-router-dom";
+// import Table from "@material-ui/core/Table";
+// import TableBody from "@material-ui/core/TableBody";
+// import TableCell from "@material-ui/core/TableCell";
+// import TableContainer from "@material-ui/core/TableContainer";
+// import TableHead from "@material-ui/core/TableHead";
+// import TableRow from "@material-ui/core/TableRow";
+// import Paper from "@material-ui/core/Paper";
+// import axios from "axios";
+// import { Button, TextField } from "@material-ui/core";
+// import Autocomplete from "@mui/material/Autocomplete";
+// import Modal from "@material-ui/core/Modal";
+// import Backdrop from "@material-ui/core/Backdrop";
+// import Fade from "@material-ui/core/Fade";
+// import Card from "@material-ui/core/Card";
+// import Select from "@material-ui/core/Select";
+// import FormControl from "@material-ui/core/FormControl";
+// import InputLabel from "@material-ui/core/InputLabel";
+// import EditIcon from "@material-ui/icons/Edit";
+// import DeleteIcon from "@material-ui/icons/Delete";
+// import VisibilityIcon from "@material-ui/icons/Visibility";
+// import SuccessIcon from "../../../components/Success&PendingIcon/SuccessIcon";
+// import PendingIcon from "../../../components/Success&PendingIcon/PendingIcon";
+// import { confirmAlert } from "react-confirm-alert"; // Import
+// import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+// import { useSnackbar } from "notistack";
+// import { makeStyles } from "@material-ui/core/styles";
+// import moment from "moment";
 
-var todatDate = new Date();
+// const useStyles = makeStyles((theme) => ({
+//   modal: {
+//     display: "flex",
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+//   paper: {
+//     backgroundColor: theme.palette.background.paper,
+//     border: "2px solid white",
+//     borderRadius: "4px",
+//     boxShadow: theme.shadows[5],
+//     padding: "20px",
+//     width: "45%",
+//     inHeight: "40%",
+//     [theme.breakpoints.down("sm")]: {
+//       width: "80%",
+//       inHeight: "55%",
+//     },
+//   },
+//   paperTwo: {
+//     backgroundColor: theme.palette.background.paper,
+//     border: "2px solid white",
+//     borderRadius: "4px",
+//     boxShadow: theme.shadows[5],
+//     padding: "20px",
+//     width: "35%",
+//     overflow: "scroll",
+//     inHeight: "50%",
+//     maxHeight: 800,
+//     [theme.breakpoints.down("sm")]: {
+//       width: "80%",
+//       inHeight: "55%",
+//     },
+//   },
 
-const useStyles = makeStyles({
-    root: {
-    },
-    inputTexts: {
-        "& .MuiInputLabel-outlined.Mui-focused": {
-            color: "black"
-        },
-        "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black"
-        },
-    },
-    errorInput: {
-        "& .MuiInputLabel-outlined.Mui-focused": {
-            color: "red"
-        },
-        "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-            borderColor: "red"
-        },
+//   formDiv: {
+//     width: "100%",
+//     display: "flex",
+//     flexDirection: "column",
+//   },
+//   textFieldName: {
+//     width: "100%",
+//     [theme.breakpoints.down("sm")]: {
+//       width: "85%",
+//     },
+//   },
+//   textFieldSsid: {
+//     width: "100%",
+//     marginTop: "10px",
+//     [theme.breakpoints.down("sm")]: {
+//       width: "100%",
+//     },
+//   },
+//   styleTableHead: {
+//     padding: "5px",
+//     background: "#00AEEF",
+//     color: "white",
+//     fontWeight: "600",
+//   },
+// }));
 
-    },
-});
+// const Representative = () => {
+//   const classes = useStyles();
+//   const history = useHistory();
+//   const [emp, setEmp] = useState([]);
+//   const [load, setLoad] = useState(false);
+//   const [open, setOpen] = useState(false);
+//   const [editModal, setEditModal] = useState(false);
+//   const [getModal, setGetModal] = useState(false);
+//   const [objectId, setObjectId] = useState("");
+//   const [name, setName] = useState("");
+//   const [abbreviation, setAbbreviation] = useState("");
+//   const [identifier, setIdentifier] = useState("");
+//   const [pmdcRegistration, setPmdcRegistration] = useState("");
+//   const [phone, setPhone] = useState("");
+//   const [email, setEmail] = useState("");
+//   const [preferredTime, setPreferredTime] = useState("");
+//   const [district, setDistrict] = useState("");
+//   const [fee, setFee] = useState("");
+//   const [potential, setPotential] = useState("");
+//   const [qualificationId, setQualificationId] = useState("");
+//   const [representativeId, setRepresentativeId] = useState("");
+//   const [regionId, setRegionId] = useState("");
+//   const [zoneId, setZoneId] = useState("");
+//   const [territoryId, setTerritoryId] = useState("");
+//   const [designationId, setDesignationId] = useState("");
+//   const [specialityId, setSpecialityId] = useState("");
+//   const [hospitalId, setHospitalId] = useState("");
+//   const [provinceId, setProvinceId] = useState("");
+//   const [cityId, setCityId] = useState("");
+//   const [brickId, setBrickId] = useState("");
+//   const [lastValidatedAt, setLastValidatedAt] = useState("");
+//   const [Id, setId] = useState("");
+//   const [dropdownQualification, setDropDownQualification] = useState([]);
+//   const [dropdownRepresentative, setDropDownRepresentative] = useState([]);
+//   const [dropdownRegion, setDropDownRegion] = useState([]);
+//   const [dropdownZone, setDropDownZone] = useState([]);
+//   const [dropdownTerritory, setDropDownTerritory] = useState([]);
+//   const [dropDownDesignation, setDropDownDesignation] = useState([]);
+//   const [dropdownSpeciality, setDropDownSpeciality] = useState([]);
+//   const [dropdownHospital, setDropDownHospital] = useState([]);
+//   const [dropdownProvince, setDropDownProvince] = useState([]);
+//   const [dropDonwCity, setDropDownCity] = useState([]);
+//   const [dropDownBrick, setDropDownBrick] = useState([]);
 
-function Doctor() {
-    const classes = useStyles();
-    const history = useHistory();
-    const alert = useAlert();
-    const dispatch = useDispatch();
-    const [name, setName] = useState('')
-    const [pmdcRegistration, setPmdcRegistration] = useState('')
-    const [zoneId, setZoneId] = useState('');
-    const [territoryId, setTerritoryId] = useState('');
-    const [phone, setPhone] = useState('')
-    const [email, setEmail] = useState('')
-    const [preferredDay, setPreferredDay] = React.useState([]);
-    const [preferredTime, setpreferredTime] = useState('')
-    const [qualificationId, setQualificationId] = React.useState('');
-    const [designationId, setDesignationId] = useState('')
-    const [specialityId, setSpecialityId] = React.useState('');
-    const [hospitalId, setHospitalId] = useState('')
-    const [provinceId, setProvinceId] = useState('')
-    const [cityId, setCityId] = useState('')
-    const [district, setDistrict] = useState('')
-    const [brickId, setBrickId] = useState('')
-    const [tierId, setTierId] = useState('')
-    const [status, setStatus] = useState('')
-    const [potential, setPotential] = useState('')
-    const [representativeId, setRepresentativeId] = useState('')
-    const [fee, setFee] = useState('')
-    const [lastValidatedAt, setLastValidatedAt] = useState('')
-    const [remarks, setRemarks] = useState('')
-    const [objectId, setObjectId] = useState('')
-    const [selectedData, setSelectedData] = useState(false)
-    const [isEditingSelectedData, setIsEditingSelectedData] = useState(false)
-    const [addForm, setAddForm] = useState(false);
-    const [emailValidate, setEmailValidate] = useState(true)
-    const [alreadyEmailExists, setAlreadyEmailExists] = useState(false)
-    const [territory, setTerritory] = useState([]);
-    const [bricks, setBricks] = useState([]);
-    const [cities, setCities] = useState([]);
-    const [hospital, setHospital] = useState([]);
-    const [representative, setRepresentative] = useState([]);
-    const [tab, setTab] = useState(0);
-    const [open, setOpen] = useState(false)
-    const user = useSelector((state) => state.user.user);
-    const allZones = useSelector((state) => state.zone.allZones);
-    const allTerritories = useSelector((state) => state.territory.allTerritorys);
-    const allCities = useSelector((state) => state.city.allCities);
-    const allProvinces = useSelector((state) => state.province.allProvinces);
-    const allDesignations = useSelector((state) => state.designation.allDesignations);
-    const allHospitals = useSelector((state) => state.hospital.allHospitals);
-    const allQulifications = useSelector((state) => state.qulification.allQulifications);
-    const allSpecialities = useSelector((state) => state.speciality.allSpecialities);
-    const allDoctors = useSelector((state) => state.doctor.allDoctors);
-    const allRepresentative = useSelector((state) => state.representative.allRepresentatives);
-    const allBricks = useSelector((state) => state.bricks.allBricks);
-    const usersEmails = useSelector(state => state.user.allUsers)
-    const [emails, setEmails] = useState([])
-    const [refresh, setRefresh] = useState(false)
+//   const { enqueueSnackbar } = useSnackbar();
 
-    useEffect(() => {
-        setLastValidatedAt(todatDate);
+//   const handleOpen = () => {
+//     setOpen(true);
+//   };
 
-        if (!allZones) {
-            dispatch(ZoneActions.get_zones())
-        }
-        if (!refresh) {
-            if (!allTerritories) {
-                dispatch(TerritoryActions.get_territorys())
-            }
-            else {
-                setTerritory(allTerritories)
-            }
-            if (!allBricks) {
-                dispatch(BricksActions.get_Bricks());
-            }
-            else {
-                setBricks(allBricks)
-            }
-            if (!allHospitals) {
-                dispatch(HspActions.get_all_hospitals())
-            }
-            else {
-                setHospital(allHospitals)
-            }
-            if (!allCities) {
-                dispatch(CityActions.get_cities())
-            }
-            else {
-                setCities(allCities)
-            }
-            if (!allRepresentative) {
-                dispatch(RepresActions.get_all_representatives())
-            }
-            else {
-                setRepresentative(allRepresentative)
-            }
-            setRefresh(true)
-        }
-        if (!allProvinces) {
-            dispatch(ProvinceActions.get_province())
-        }
-        if (!allDesignations) {
-            dispatch(DesignationActions.get_designation())
-        }
-        if (!allQulifications) {
-            dispatch(QulifActions.get_qulification())
-        }
-        if (!allSpecialities) {
-            dispatch(SpecActions.get_speciality())
-        }
-        if (!allDoctors || allDoctors.length === 0) {
-            dispatch(DoctorActions.get_doctors())
-        }
-        if (!usersEmails) {
-            dispatch(UsersActions.all_users())
-        }
-        if (usersEmails) {
-            var arr = [];
-            for (var key in usersEmails) {
-                arr.push(usersEmails[key].email)
-            }
-            setEmails(arr)
-        }
+//   const handleClose = () => {
+//     setOpen(false);
+//     setObjectId("");
+//     setName("");
+//     setIdentifier("");
+//     setDesignationId("");
+//     setProvinceId("");
+//     setPhone("");
+//     setEmail("");
+//     setGender("");
+//     setMaritalStatus("");
+//     setDateOfBirth("");
+//     setBloodGroupId("");
+//     setWorkType("");
+//     setSellingLine("");
+//     setPassword("");
+//     setIsActive("");
+//     setRegion_Id([]);
+//     setZone_Id([]);
+//     setTerritory_Id([]);
+//   };
 
-    }, [allRepresentative, allZones, allTerritories, allCities, allProvinces, allDesignations,
-        allHospitals, allQulifications, allSpecialities, allDoctors, allBricks, usersEmails])
+//   const handleEditOpen = (id) => {
+//     setEditModal(true);
+//   };
 
-    const addDoctor = () => {
-        setName('')
-        setPmdcRegistration('')
-        setZoneId('')
-        setTerritoryId('')
-        setPhone('')
-        setEmail('')
-        setPreferredDay([])
-        setpreferredTime('')
-        setQualificationId([])
-        setDesignationId('')
-        setSpecialityId([])
-        setHospitalId('')
-        setProvinceId('')
-        setCityId('')
-        setDistrict('')
-        setBrickId('')
-        setTierId('')
-        setPotential('')
-        setRepresentativeId('')
-        setFee('')
-        setLastValidatedAt('')
-        setRemarks('')
-        setStatus('')
-        setObjectId('')
-        setTab(0)
-        setSelectedData(false)
-        setIsEditingSelectedData(false)
-        setAddForm(false)
-    };
+//   const handleEditClose = () => {
+//     setEditModal(false);
+//     setObjectId("");
+//     setName("");
+//     setIdentifier("");
+//     setDesignationId("");
+//     setProvinceId("");
+//     setPhone("");
+//     setEmail("");
+//     setGender("");
+//     setMaritalStatus("");
+//     setDateOfBirth("");
+//     setBloodGroupId("");
+//     setWorkType("");
+//     setSellingLine("");
+//     setPassword("");
+//     setIsActive("");
+//     setRegion_Id([]);
+//     setZone_Id([]);
+//     setTerritory_Id([]);
+//   };
 
-    const editData = () => {
-        setIsEditingSelectedData(false)
-        setSelectedData(false)
-        setAddForm(true)
-    }
+//   const handleGetOpen = (id) => {
+//     setGetModal(true);
+//   };
 
-    function handleRowClick(data) {
-        setTab(1)
-        setSelectedData(true)
-        setObjectId(data._id)
-        setName(data.name)
-        setPmdcRegistration(data.pmdcRegistration)
-        onChangeZone(data.zoneId)
-        onChangeTerritory(data.territoryId)
-        setCityId(data.cityId)
-        setDistrict(data.district)
-        setPhone(data.phone)
-        setEmail(data.email)
-        setPreferredDay(data.preferredDay)
-        setpreferredTime(data.preferredTime)
-        setQualificationId(data.qualificationId)
-        setDesignationId(data.designationId)
-        setSpecialityId(data.specialityId)
-        setHospitalId(data.hospitalId)
-        setBrickId(data.brickId)
-        setTierId(data.tierId)
-        setPotential(data.potential)
-        setRepresentativeId(data.representativeId)
-        setFee(data.fee)
-        setLastValidatedAt(data.lastValidatedAt)
-        setRemarks(data.remarks)
-        setStatus(data.status)
-        setIsEditingSelectedData(true)
-        setAddForm(true)
-    }
+//   const handleGetClose = () => {
+//     setGetModal(false);
+//     setObjectId("");
+//     setName("");
+//     setIdentifier("");
+//     setDesignationId("");
+//     setProvinceId("");
+//     setPhone("");
+//     setEmail("");
+//     setGender("");
+//     setMaritalStatus("");
+//     setDateOfBirth("");
+//     setBloodGroupId("");
+//     setWorkType("");
+//     setSellingLine("");
+//     setPassword("");
+//     setIsActive("");
+//     setRegion_Id([]);
+//     setZone_Id([]);
+//     setTerritory_Id([]);
+//   };
 
-    function handleSave() {
-        let body = {
-            name,
-            pmdcRegistration,
-            territoryId,
-            zoneId,
-            phone,
-            email,
-            preferredDay,
-            preferredTime,
-            qualificationId,
-            designationId,
-            specialityId,
-            hospitalId,
-            provinceId,
-            cityId,
-            brickId,
-            tierId,
-            potential,
-            representativeId,
-            fee,
-            lastValidatedAt,
-            remarks,
-            district,
-            status,
-        }
-        if (objectId !== "") {
-            body.updatedBy = user._id;
-            body.objectId = objectId
-            dispatch(DoctorActions.update_doctor(body))
-            alert.success("Doctor Updated!");
-            addDoctor()
-        }
-        else {
-            if (
-                name !== "" &&
-                pmdcRegistration !== "" &&
-                territoryId !== "" &&
-                zoneId !== "" &&
-                phone !== "" &&
-                email !== "" &&
-                preferredDay.length > 0 &&
-                preferredTime !== "" &&
-                qualificationId !== "" &&
-                designationId !== "" &&
-                specialityId !== "" &&
-                hospitalId !== "" &&
-                provinceId !== "" &&
-                cityId !== "" &&
-                brickId !== "" &&
-                tierId !== "" &&
-                potential !== "" &&
-                representativeId !== "" &&
-                fee !== "" &&
-                lastValidatedAt !== "" &&
-                remarks !== "" &&
-                district !== "" &&
-                status !== "" &&
-                emailValidate === true &&
-                !alreadyEmailExists
-            ) {
-                body.createdBy = user._id
-                dispatch(Actions.add_doctor(body))
-                alert.success("Doctor Added!");
-                addDoctor()
-            }
-            else {
-                alert.error("All fields are required!");
-            }
-        }
+//   const addRepresentative = async () => {
+//     //For Region Multi select
+//     const regionId = [];
+//     region_Id.forEach((value) => regionId.push(value._id));
 
-    }
+//     const zoneId = [];
+//     zone_Id.forEach((value) => zoneId.push(value._id));
 
-    const deleteDoctor = () => {
-        let body = {
-            objectId
-        }
+//     const territoryId = [];
+//     territory_Id.forEach((value) => territoryId.push(value._id));
+//     const form = {
+//       objectId,
+//       name,
+//       identifier,
+//       designationId,
+//       gender,
+//       provinceId,
+//       zoneId,
+//       regionId,
+//       territoryId,
+//       phone,
+//       email,
+//       maritalStatus,
+//       dateOfBirth,
+//       bloodGroupId,
+//       workType,
+//       sellingLine,
+//       password,
+//       isActive,
+//     };
+//     await axios
+//       .post(
+//         `${process.env.REACT_APP_URL}/representative/postRepresentative`,
+//         form
+//       )
+//       .then((res) => {
+//         console.log(res.data);
+//         enqueueSnackbar("Representative Add Successfully", {
+//           variant: "success",
+//         });
+//         setOpen(false);
+//         fetchDoctor();
+//       })
+//       .catch(function (error) {
+//         enqueueSnackbar(error.response.data.message, { variant: "error" });
+//         console.log(error.response);
+//       });
+//     setObjectId("");
+//     setName("");
+//     setIdentifier("");
+//     setDesignationId("");
+//     setProvinceId("");
+//     setPhone("");
+//     setEmail("");
+//     setGender("");
+//     setMaritalStatus("");
+//     setDateOfBirth("");
+//     setBloodGroupId("");
+//     setWorkType("");
+//     setSellingLine("");
+//     setPassword("");
+//     setIsActive("");
+//     setRegion_Id([]);
+//     setZone_Id([]);
+//     setTerritory_Id([]);
+//   };
 
-        dispatch(DoctorActions.delete_doctor(body))
-        addDoctor()
-    }
+//   const viewRepresentativeData = async (id) => {
+//     const form = { id };
+//     let response = await axios.post(
+//       `${process.env.REACT_APP_URL}/representative/getRepresentative`,
+//       form
+//     );
+//     const dob = moment(response.data.dateOfBirth).format("DD MMM YYYY");
+//     const regionArr = [];
+//     const regionData = response.data.regionId?.forEach((value) =>
+//       regionArr.push(value.name + ", ")
+//     );
+//     const zoneArr = [];
+//     const zoneData = response.data.zoneId?.forEach((value) =>
+//       zoneArr.push(value.name + ", ")
+//     );
+//     const territoryArr = [];
+//     const territoryData = response.data.territoryId?.forEach((value) =>
+//       territoryArr.push(value.name + ", ")
+//     );
 
-    const emailChange = (e) => {
-        const email = e.target.value
-        setEmail(email)
-        if (email !== "") {
-            checkValidateFunc(email, 'email')
-        }
-        else {
-            setEmailValidate(false)
-        }
+//     setObjectId(response.data.objectId);
+//     setName(response.data.name);
+//     setIdentifier(response.data.identifier);
+//     setDesignationId(response.data.designationId?.name);
+//     setProvinceId(response.data.provinceId?.name);
+//     setPhone(response.data.phone);
+//     setEmail(response.data.email);
+//     setGender(response.data.gender);
+//     setMaritalStatus(response.data.maritalStatus);
+//     setDateOfBirth(dob);
+//     setBloodGroupId(response.data.bloodGroupId?.name);
+//     setWorkType(response.data.workType);
+//     setSellingLine(response.data.sellingLine);
+//     setPassword(response.data.password);
+//     setIsActive(response.data.isActive);
+//     setRegion_Id(regionArr);
+//     setZone_Id(zoneArr);
+//     setTerritory_Id(territoryArr);
+//     handleGetOpen(true);
+//   };
 
-        if (emails !== null) {
-            if (emails.includes(email)) {
-                setAlreadyEmailExists(true)
-            }
-            else {
-                setAlreadyEmailExists(false)
-            }
-        }
-        else {
-            dispatch(UsersActions.all_users())
-        }
-    }
+//   const getRepresentativeById = async (id) => {
+//     const form = { id };
+//     let response = await axios.post(
+//       `${process.env.REACT_APP_URL}/representative/getRepresentative`,
+//       form
+//     );
+//     const dob = moment(response.data.dateOfBirth).format("YYYY-MM-DD");
+//     setId(response.data._id);
+//     setObjectId(response.data.objectId);
+//     setName(response.data.name);
+//     setIdentifier(response.data.identifier);
+//     setDesignationId(response.data.designationId?._id);
+//     setProvinceId(response.data.provinceId?._id);
+//     setPhone(response.data.phone);
+//     setEmail(response.data.email);
+//     setGender(response.data.gender);
+//     setMaritalStatus(response.data.maritalStatus);
+//     setDateOfBirth(dob);
+//     setBloodGroupId(response.data.bloodGroupId?._id);
+//     setWorkType(response.data.workType);
+//     setSellingLine(response.data.sellingLine);
+//     setPassword(response.data.password);
+//     setIsActive(response.data.isActive);
+//     setRegion_Id(response.data.regionId);
+//     setZone_Id(response.data.zoneId);
+//     setTerritory_Id(response.data.territoryId);
+//     setEditModal(true);
+//   };
 
-    const checkValidateFunc = (text, type) => {
-        let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-        if (type === 'email') {
-            if (reg.test(text)) {
-                setEmailValidate(true)
-            }
-            else {
-                setEmailValidate(false)
-            }
-        }
-    }
+//   const editRepresentative = async (id) => {
+//     const regionId = [];
+//     region_Id.forEach((value) => regionId.push(value._id));
 
+//     const zoneId = [];
+//     zone_Id.forEach((value) => zoneId.push(value._id));
 
-    const onChangeZone = (value) => {
-        const arr = [];
-        setZoneId(value)
-        for (var i = 0; i < allTerritories.length; i++) {
-            if (allTerritories[i].zoneId === value) {
-                arr.push(allTerritories[i])
-            }
-        }
-        setTerritory(arr)
-    }
+//     const territoryId = [];
+//     territory_Id.forEach((value) => territoryId.push(value._id));
+//     const form = {
+//       id,
+//       objectId,
+//       name,
+//       identifier,
+//       designationId,
+//       provinceId,
+//       zoneId,
+//       regionId,
+//       territoryId,
+//       gender,
+//       phone,
+//       email,
+//       maritalStatus,
+//       dateOfBirth,
+//       bloodGroupId,
+//       workType,
+//       sellingLine,
+//       password,
+//       isActive,
+//     };
+//     await axios
+//       .post(
+//         `${process.env.REACT_APP_URL}/representative/updateRepresentative`,
+//         form
+//       )
+//       .then((res) => {
+//         console.log(res.data);
+//         setEditModal(false);
+//         enqueueSnackbar("Representative Edit Successfully", {
+//           variant: "success",
+//         });
+//         fetchDoctor();
+//       })
+//       .catch(function (error) {
+//         enqueueSnackbar(error.response.data.message, { variant: "error" });
+//         console.log(error.response);
+//       });
+//     setObjectId("");
+//     setName("");
+//     setIdentifier("");
+//     setDesignationId("");
+//     setProvinceId("");
+//     setPhone("");
+//     setEmail("");
+//     setGender("");
+//     setMaritalStatus("");
+//     setDateOfBirth("");
+//     setBloodGroupId("");
+//     setWorkType("");
+//     setSellingLine("");
+//     setPassword("");
+//     setIsActive("");
+//     setRegion_Id([]);
+//     setZone_Id([]);
+//     setTerritory_Id([]);
+//   };
 
-    const onChangeTerritory = (value) => {
-        const arr = [];
-        const hspArr = [];
-        const representative = [];
-        const cityArr = [];
+//   const deleteRepresentative = (id) => {
+//     const form = { id };
+//     confirmAlert({
+//       title: "Confirm to Delete",
+//       message: "Are you sure to do this.",
+//       buttons: [
+//         {
+//           label: "Yes",
+//           onClick: () => {
+//             axios
+//               .post(
+//                 `${process.env.REACT_APP_URL}/representative/deleteRepresentative`,
+//                 form
+//               )
+//               .then((res) => {
+//                 enqueueSnackbar("Representative Delete Successfully", {
+//                   variant: "success",
+//                 });
+//                 fetchDoctor();
+//               })
+//               .catch(function (error) {
+//                 console.log(error.response);
+//               });
+//           },
+//         },
+//         {
+//           label: "No",
+//           onClick: () => {},
+//         },
+//       ],
+//     });
+//   };
 
-        setTerritoryId(value)
+//   //Get Region
 
-        for (var i = 0; i < allBricks.length; i++) {
-            if (allBricks[i].territoryId === value) {
-                arr.push(allBricks[i])
-            }
-        }
+//   const fetchDoctor = async () => {
+//     await axios
+//       .get(`${process.env.REACT_APP_URL}/doctors/getDoctors`)
+//       .then((response) => {
+//         const allDoctor = response.data;
+//         console.log(allDoctor);
+//         setEmp(allDoctor);
+//         setLoad(false);
+//       })
+//       .catch((error) => console.log(`Error: ${error}`));
+//   };
 
-        for (var i = 0; i < allHospitals.length; i++) {
-            if (allHospitals[i].territoryId === value) {
-                hspArr.push(allHospitals[i])
-            }
-        }
+//   const regionList = [];
 
-        for (var i = 0; i < allRepresentative.length; i++) {
-            var territory = allRepresentative[i].territoryId
-            for (var j = 0; j < territory.length; j++) {
-                if (territory[j] === value) {
-                    representative.push(allRepresentative[i])
-                }
-            }
-        }
+//   const filterRegionId = (res) => {
+//     for (let i = 0; i < res.data.length; i++) {
+//       regionList.push(res.data);
+//     }
+//     let newList = [];
+//     regionList[0].map((item) => {
+//       newList.push(item);
+//     });
+//     setDropDownRegion(newList);
+//   };
 
-        setHospital(hspArr)
-        setBricks(arr)
-        setRepresentative(representative)
+//   const zoneList = [];
 
-        let obj = {
-            objectId: value
-        }
-        axios.post(ApiService.getBaseUrl() + '/territory/getSpecificTerritoryById', obj)
-            .then((res) => {
-                var data = res.data.content[0];
-                setProvinceId(data.provinceId)
-                var citiesIds = data.cityId;
-                for (var i = 0; i < citiesIds.length; i++) {
-                    for (var j = 0; j < allCities.length; j++) {
-                        if (allCities[j]._id === citiesIds[i]) {
-                            cityArr.push(allCities[j])
-                        }
-                    }
-                }
-                setCities(cityArr)
-            })
-            .catch((error) => {
-                console.log(error, 'error')
-            })
+//   const filterZoneId = (res) => {
+//     for (let i = 0; i < res.data.length; i++) {
+//       zoneList.push(res.data);
+//     }
+//     let newList = [];
+//     zoneList[0].map((item) => {
+//       newList.push(item);
+//     });
+//     setDropDownZone(newList);
+//   };
 
-    }
+//   const territoryList = [];
 
-    return (
-        <>
-            <Breadcrumbs aria-label="breadcrumb">
-                <Link color="inherit" href="javascript:void(0)" onClick={() => { history.push('/dashboard') }}>
-                    Home
-             </Link>
-                <Typography color="textPrimary">Business-Parameters</Typography>
-                <Typography color="textPrimary">Doctor</Typography>
-            </Breadcrumbs>
-            <Card className={classes.root}>
-                <CardContent>
-                    <FormGridTabs
-                        tab={tab}
-                        afterRowClick={() => { setTab(0) }}
-                        form={
+//   const filterTerritoryId = (res) => {
+//     for (let i = 0; i < res.data.length; i++) {
+//       territoryList.push(res.data);
+//     }
+//     let newList = [];
+//     territoryList[0].map((item) => {
+//       newList.push(item);
+//     });
+//     setDropDownTerritory(newList);
+//   };
 
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Dr. Name"
-                                        placeholder="Dr."
-                                        variant="outlined"
-                                        fullWidth
-                                        name='name'
-                                        value={name}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setName(e.target.value.toUpperCase()) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="PMDC Registration No"
-                                        placeholder="PMDC No"
-                                        variant="outlined"
-                                        fullWidth
-                                        name='pmdcRegistration'
-                                        value={pmdcRegistration}
-                                        disabled={isEditingSelectedData}
+//   useEffect(() => {
+//     fetchDoctor();
+//   }, [load]);
 
-                                        onChange={(e) => { setPmdcRegistration(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Phone"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        type={'number'}
-                                        fullWidth
-                                        name='phone'
-                                        value={phone}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setPhone(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Email"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        type={'email'}
-                                        fullWidth
-                                        name='email'
-                                        value={email}
-                                        disabled={isEditingSelectedData}
-                                        className={
-                                            emailValidate ? classes.inputTexts : classes.errorInput
-                                        }
-                                        onChange={(e) => {
-                                            emailChange(e)
-                                        }}
-                                    />
-                                    {alreadyEmailExists &&
-                                        <div style={{
-                                            color: 'red'
-                                        }}>
-                                            Email Already Exists
-                                        </div>
-                                    }
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="zoneId">Zone ID</InputLabel>
-                                        <Select
-                                            labelId="zoneId"
-                                            label="Zone ID"
-                                            fullWidth
-                                            name='zoneId'
-                                            value={zoneId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { onChangeZone(e.target.value) }}
-                                        >
-                                            {allZones && allZones.map((zone) => {
-                                                return (
-                                                    <MenuItem key={zone._id} value={zone._id}>
-                                                        {zone.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="territoryId">Territory ID</InputLabel>
-                                        <Select
-                                            labelId="territoryId"
-                                            label="Territory ID"
-                                            fullWidth
-                                            name='territoryId'
-                                            value={territoryId}
-                                            disabled={isEditingSelectedData}
+//   useEffect(() => {
+//     axios
+//       .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
+//       .then(async (res) => {
+//         await filterRegionId(res);
+//       });
+//   }, []);
 
-                                            onChange={
-                                                (e) => { onChangeTerritory(e.target.value) }
-                                            }
-                                        >
-                                            {territory && territory.map((territory) => {
-                                                return (
-                                                    <MenuItem key={territory._id} value={territory._id}>
-                                                        {territory.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="brickId">Brick</InputLabel>
-                                        <Select
-                                            labelId="brickId"
-                                            label="Brick"
-                                            fullWidth
-                                            name='brickId'
-                                            value={brickId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { setBrickId(e.target.value) }}
-                                        >
-                                            {bricks && bricks.map((brick) => {
-                                                return (
-                                                    <MenuItem key={brick._id} value={brick._id}>
-                                                        {brick.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="hospitalId">Hospital / Clinic Name</InputLabel>
-                                        <Select
-                                            labelId="hospitalId"
-                                            label="Hospital / Clinic Name"
-                                            fullWidth
-                                            name='hospitalId'
-                                            value={hospitalId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { setHospitalId(e.target.value) }}
-                                        >
-                                            {hospital && hospital.map((hospitals) => {
-                                                return (
-                                                    <MenuItem key={hospitals._id} value={hospitals._id}>
-                                                        {hospitals.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="provinceId">Province</InputLabel>
-                                        <Select
-                                            labelId="provinceId"
-                                            label="Province"
-                                            fullWidth
-                                            name='provinceId'
-                                            value={provinceId}
-                                            disabled
-                                        >
-                                            {allProvinces && allProvinces.map((provinces) => {
-                                                return (
-                                                    <MenuItem key={provinces._id} value={provinces._id}>
-                                                        {provinces.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
+//   useEffect(() => {
+//     axios
+//       .get(`${process.env.REACT_APP_URL}/zones/getZones`)
+//       .then(async (res) => {
+//         await filterZoneId(res);
+//       });
+//   }, []);
 
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="cityId">City</InputLabel>
-                                        <Select
-                                            labelId="cityId"
-                                            label="City"
-                                            fullWidth
-                                            name='cityId'
-                                            value={cityId}
-                                            disabled={isEditingSelectedData}
+//   useEffect(() => {
+//     axios
+//       .get(`${process.env.REACT_APP_URL}/territory/getTerritories`)
+//       .then(async (res) => {
+//         await filterTerritoryId(res);
+//       });
+//   }, []);
 
-                                            onChange={(e) => {
-                                                setCityId(e.target.value)
-                                            }}
-                                        >
-                                            {cities && cities.map((city) => {
-                                                return (
-                                                    <MenuItem key={city._id} value={city._id}>
-                                                        {city.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
+//   useEffect(() => {
+//     axios
+//       .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
+//       .then((res) => {
+//         setDropDownProvince(res.data.content);
+//       });
+//   }, []);
 
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="District"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        name='district'
-                                        value={district}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setDistrict(e.target.value) }}
-                                    />
-                                </Grid>
+//   useEffect(() => {
+//     axios
+//       .get(`${process.env.REACT_APP_URL}/bloodGroup/getBloodGroups`)
+//       .then((res) => {
+//         setDropDownBloodGroup(res.data);
+//       });
+//   }, []);
 
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="preferredDay">Prefered Day</InputLabel>
-                                        <Select
-                                            labelId="preferredDay"
-                                            label="Prefered Day"
-                                            fullWidth
-                                            name='preferredDay'
-                                            multiple
-                                            disabled={isEditingSelectedData}
-                                            value={preferredDay}
-                                            input={<Input
-                                                onClick={() => setOpen(!open)} />}
-                                            onChange={
-                                                (e) => {
-                                                    setPreferredDay(e.target.value)
-                                                    setOpen(!open)
-                                                }
-                                            }
-                                            open={open}
-                                        >
-                                            <MenuItem value={'Monday'}>Monday</MenuItem>
-                                            <MenuItem value={'Tuesday'}>Tuesday</MenuItem>
-                                            <MenuItem value={'Wednesday'}>Wednesday</MenuItem>
-                                            <MenuItem value={'Thursday'}>Thursday</MenuItem>
-                                            <MenuItem value={'Friday'}>Friday</MenuItem>
-                                            <MenuItem value={'Saturday'}>Saturday</MenuItem>
-                                            <MenuItem value={'Sunday'}>Sunday</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        id="time"
-                                        label="Preferred Time for Remote Call"
-                                        type="time"
-                                        defaultValue={moment(preferredTime).format('THH:mm')}
-                                        className={classes.textField}
-                                        fullWidth
-                                        name='preferredTime'
-                                        value={preferredTime}
-                                        onChange={(e) => { setpreferredTime(e.target.value) }}
-                                        variant={'outlined'}
-                                        disabled={isEditingSelectedData}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        inputProps={{
-                                            step: 300, // 5 min
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="qualificationId">Qualification</InputLabel>
-                                        <Select
-                                            labelId="qualificationId"
-                                            label="Qualification"
-                                            fullWidth
-                                            name='qualificationId'
-                                            value={qualificationId}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { setQualificationId(e.target.value) }}                                        >
-                                            {allQulifications && allQulifications.map((qulification) => {
-                                                return (
-                                                    <MenuItem key={qulification._id} value={qulification._id}>
-                                                        {qulification.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="designationId">Designation</InputLabel>
-                                        <Select
-                                            labelId="designationId"
-                                            label="Designation"
-                                            fullWidth
-                                            name='designationId'
-                                            disabled={isEditingSelectedData}
+//   useEffect(() => {
+//     axios
+//       .get(`${process.env.REACT_APP_URL}/designations/getDesignations`)
+//       .then((res) => {
+//         setDropDownDesignation(res.data);
+//       });
+//   }, []);
+//   return (
+//     <div>
+//       <Breadcrumbs aria-label="breadcrumb">
+//         <Link
+//           color="inherit"
+//           href="javascript:void(0)"
+//           onClick={() => {
+//             history.push("/dashboard");
+//           }}
+//         >
+//           Home
+//         </Link>
+//         <Typography color="textPrimary">Business-Parameters</Typography>
+//         <Typography color="textPrimary">Doctor</Typography>
+//       </Breadcrumbs>
+//       <div
+//         style={{
+//           display: "flex",
+//           width: "100%",
+//           justifyContent: "flex-end",
+//           marginBottom: "10px",
+//         }}
+//       >
+//         <Button
+//           style={{ width: "150px" }}
+//           variant="contained"
+//           color="primary"
+//           style={{ width: "200px", color: "white" }}
+//           onClick={handleOpen}
+//         >
+//           Add Doctor
+//         </Button>
+//       </div>
+//       <div>
+//         <TableContainer
+//           style={{
+//             borderRadius: "4px",
+//             width: "100%",
+//             overflow: "auto",
+//             minWidth: "450px",
+//             overflowY: "auto",
+//           }}
+//           component={Paper}
+//         >
+//           <Table>
+//             <TableHead style={{ background: "#00AEEF" }}>
+//               <TableRow>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Object ID
+//                 </TableCell>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Name
+//                 </TableCell>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Abbrevation
+//                 </TableCell>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Identifier
+//                 </TableCell>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   PMDC Registration
+//                 </TableCell>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Phone
+//                 </TableCell>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Email
+//                 </TableCell>
 
-                                            value={designationId}
-                                            onChange={(e) => { setDesignationId(e.target.value) }}
-                                        >
-                                            <MenuItem value={'Administrator'}>Administrator</MenuItem>
-                                            <MenuItem value={'Assistant Professor'}>Assistant Professor</MenuItem>
-                                            <MenuItem value={'Associate Professor'}>Associate Professor</MenuItem>
-                                            <MenuItem value={'RMO'}>RMO</MenuItem>
-                                            <MenuItem value={'Medical Officer'}>Medical Officer</MenuItem>
-                                            <MenuItem value={'Professor'}>Professor</MenuItem>
-                                            <MenuItem value={'Registrar'}>Registrar</MenuItem>
-                                            <MenuItem value={'Sr. Medical Officer'}>Sr. Medical Officer</MenuItem>
-                                            <MenuItem value={'Sr. Registrar'}>Sr. Registrar</MenuItem>
-                                            <MenuItem value={'Private Practitioner'}>Private Practitioner</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="specialityId">Speciality</InputLabel>
-                                        <Select
-                                            labelId="specialityId"
-                                            label="Speciality"
-                                            fullWidth
-                                            name='specialityId'
-                                            disabled={isEditingSelectedData}
-                                            value={specialityId}
-                                            onChange={(e) => { setSpecialityId(e.target.value) }}
-                                        >
-                                            {allSpecialities && allSpecialities.map((speciality) => {
-                                                return (
-                                                    <MenuItem key={speciality._id} value={speciality._id}>
-                                                        {speciality.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Email
+//                 </TableCell>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Phone
+//                 </TableCell>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Password
+//                 </TableCell>
+//                 <TableCell
+//                   style={{ fontWeight: "600", width: "15%", color: "white" }}
+//                 >
+//                   Work Type
+//                 </TableCell>
+//                 <TableCell
+//                   style={{
+//                     fontWeight: "600",
+//                     width: "15%",
+//                     color: "white",
+//                     textAlign: "center",
+//                   }}
+//                 >
+//                   isActive
+//                 </TableCell>
+//                 <TableCell
+//                   style={{
+//                     fontWeight: "600",
+//                     width: "15%",
+//                     textAlign: "center",
+//                     color: "white",
+//                   }}
+//                 >
+//                   Actions
+//                 </TableCell>
+//               </TableRow>
+//             </TableHead>
+//             <TableBody>
+//               {emp.map((user, key, index) => {
+//                 return (
+//                   <TableRow key={user._id}>
+//                     <TableCell component="th" scope="row">
+//                       {user.objectId}
+//                     </TableCell>
+//                     <TableCell component="th" scope="row">
+//                       {user.name}
+//                     </TableCell>
+//                     <TableCell>{user.identifier}</TableCell>
+//                     <TableCell>{user.email} </TableCell>
+//                     <TableCell>{user.phone}</TableCell>
+//                     <TableCell>{user.password}</TableCell>
+//                     <TableCell>{user.workType}</TableCell>
+//                     <TableCell>
+//                       <div
+//                         style={{
+//                           display: "flex",
+//                           justifyContent: "center",
+//                           flexWrap: "nowrap",
+//                           width: "130px",
+//                         }}
+//                       >
+//                         {user.isActive === true ? (
+//                           <SuccessIcon />
+//                         ) : (
+//                           <PendingIcon />
+//                         )}
+//                       </div>
+//                     </TableCell>
+//                     <TableCell>
+//                       <div
+//                         style={{
+//                           display: "flex",
+//                           justifyContent: "center",
+//                           alignItems: "center",
+//                         }}
+//                       >
+//                         <Button
+//                           onClick={() => {
+//                             viewRepresentativeData(user._id);
+//                           }}
+//                         >
+//                           <VisibilityIcon color="primary" />
+//                         </Button>
+//                         <Button
+//                           onClick={() => {
+//                             getRepresentativeById(user._id);
+//                           }}
+//                         >
+//                           <EditIcon color="primary" />
+//                         </Button>
 
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="tierId">Call Objective</InputLabel>
-                                        <Select
-                                            labelId="tierId"
-                                            label="Call Objective"
-                                            fullWidth
-                                            name='tierId'
-                                            value={tierId}
-                                            disabled={isEditingSelectedData}
+//                         <Button
+//                           onClick={() => {
+//                             deleteRepresentative(user._id);
+//                           }}
+//                         >
+//                           <DeleteIcon color="secondary" />
+//                         </Button>
+//                       </div>
+//                     </TableCell>
+//                   </TableRow>
+//                 );
+//               })}
+//             </TableBody>
+//           </Table>
+//         </TableContainer>
+//       </div>
 
-                                            onChange={(e) => { setTierId(e.target.value) }}
-                                        >
-                                            <MenuItem value={'T1'}>T1</MenuItem>
-                                            <MenuItem value={'T2'}>T2</MenuItem>
-                                            <MenuItem value={'T3'}>T3</MenuItem>
+//       <div>
+//         <Modal
+//           aria-labelledby="transition-modal-title"
+//           aria-describedby="transition-modal-description"
+//           className={classes.modal}
+//           open={open}
+//           onClose={handleClose}
+//           closeAfterTransition
+//           BackdropComponent={Backdrop}
+//           BackdropProps={{
+//             timeout: 500,
+//           }}
+//         >
+//           <Fade in={open}>
+//             <div className={classes.paper}>
+//               <div
+//                 style={{
+//                   display: "flex",
+//                   justifyContent: "space-between",
+//                   flexDirection: "column",
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <h2 id="transition-modal-title">Add Representative</h2>
 
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
+//                 <div className={classes.formDiv}>
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       className={classes.textFieldName}
+//                       style={{ marginRight: "10px" }}
+//                       id="abc"
+//                       label="Object Id"
+//                       name="objectid"
+//                       variant="outlined"
+//                       value={objectId}
+//                       onChange={(e) => setObjectId(e.target.value)}
+//                     />
 
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Potential"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        name='potential'
-                                        value={potential}
-                                        type={"number"}
-                                        disabled={isEditingSelectedData}
+//                     <TextField
+//                       className={classes.textFieldName}
+//                       id="abc"
+//                       label="Name"
+//                       name="Name"
+//                       variant="outlined"
+//                       value={name}
+//                       onChange={(e) => setName(e.target.value)}
+//                     />
+//                   </div>
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       className={classes.textFieldSsid}
+//                       style={{ marginRight: "10px" }}
+//                       id="abc"
+//                       label="Identifier"
+//                       name="identifier"
+//                       variant="outlined"
+//                       value={identifier}
+//                       onChange={(e) => setIdentifier(e.target.value)}
+//                     />
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Province
+//                       </InputLabel>
+//                       <Select
+//                         // value={department}
+//                         onChange={(e) => setProvinceId(e.target.value)}
+//                         id="abc"
+//                         native
+//                         value={provinceId}
+//                         label="Province"
+//                       >
+//                         <option aria-label="None" />
+//                         {dropdownProvince.map((value, index) => (
+//                           <option key={value.id} value={value._id}>
+//                             {value.name}
+//                           </option>
+//                         ))}
+//                       </Select>
+//                     </FormControl>
+//                   </div>
 
-                                        onChange={(e) => { setPotential(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="status">Dr Status</InputLabel>
-                                        <Select
-                                            labelId="status"
-                                            label="Dr Status"
-                                            fullWidth
-                                            name='status'
-                                            value={status}
-                                            disabled={isEditingSelectedData}
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       className={classes.textFieldSsid}
+//                       style={{ marginRight: "10px" }}
+//                       id="abc"
+//                       label="Email"
+//                       name="email"
+//                       variant="outlined"
+//                       value={email}
+//                       onChange={(e) => setEmail(e.target.value)}
+//                     />
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Designation
+//                       </InputLabel>
+//                       <Select
+//                         // value={department}
+//                         onChange={(e) => setDesignationId(e.target.value)}
+//                         id="abc"
+//                         native
+//                         value={designationId}
+//                         label="Designation"
+//                       >
+//                         <option aria-label="None" />
+//                         {dropDownDesignation.map((value, index) => (
+//                           <option key={value.id} value={value._id}>
+//                             {value.name}
+//                           </option>
+//                         ))}
+//                       </Select>
+//                     </FormControl>
+//                   </div>
 
-                                            onChange={(e) => { setStatus(e.target.value) }}
-                                        >
-                                            <MenuItem value={'Presciber'}>Presciber</MenuItem>
-                                            <MenuItem value={'Non-Presciber'}>Non-Presciber</MenuItem>
-                                            <MenuItem value={'Purchaser'}>Purchaser</MenuItem>
-                                            <MenuItem value={'Activity'}>Activity</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       className={classes.textFieldSsid}
+//                       style={{ marginRight: "10px" }}
+//                       id="abc"
+//                       label="Phone"
+//                       name="phone"
+//                       variant="outlined"
+//                       value={phone}
+//                       onChange={(e) => setPhone(e.target.value)}
+//                     />
 
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="representativeId">Assigned Rep</InputLabel>
-                                        <Select
-                                            labelId="representativeId"
-                                            label="Assigned Rep"
-                                            fullWidth
-                                            name='representativeId'
-                                            value={representativeId}
-                                            disabled={isEditingSelectedData}
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Gender
+//                       </InputLabel>
+//                       <Select
+//                         onChange={(e) => setGender(e.target.value)}
+//                         id="abc"
+//                         value={gender}
+//                         native
+//                         label="Gender"
+//                       >
+//                         <option aria-label="None"> </option>
+//                         <option value="Male">Male</option>
+//                         <option value="Female">Female</option>
+//                       </Select>
+//                     </FormControl>
+//                   </div>
 
-                                            onChange={(e) => { setRepresentativeId(e.target.value) }}
-                                        >
-                                            {representative && representative.map((represent) => {
-                                                return (
-                                                    <MenuItem key={represent.representativeId} value={represent.representativeId}>
-                                                        {represent.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       style={{ marginTop: "10px" }}
+//                       className={classes.textFieldName}
+//                       id="date"
+//                       variant="outlined"
+//                       label="Date of Birth"
+//                       type="date"
+//                       value={dateOfBirth}
+//                       onChange={(e) => setDateOfBirth(e.target.value)}
+//                       InputLabelProps={{
+//                         shrink: true,
+//                       }}
+//                     />
 
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Dr. Fee"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        type={'number'}
-                                        fullWidth
-                                        name='fee'
-                                        value={fee}
-                                        onChange={(e) => { setFee(e.target.value) }}
-                                        disabled={isEditingSelectedData}
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                       style={{ marginLeft: "10px" }}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Marital Status
+//                       </InputLabel>
+//                       <Select
+//                         onChange={(e) => setMaritalStatus(e.target.value)}
+//                         id="abc"
+//                         value={maritalStatus}
+//                         native
+//                         label="Marital Status"
+//                       >
+//                         <option aria-label="None"> </option>
+//                         <option value="Single">Single</option>
+//                         <option value="Married">Married</option>
+//                       </Select>
+//                     </FormControl>
+//                   </div>
 
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Last Validated Date"
-                                        type="date"
-                                        defaultValue=""
-                                        variant={'outlined'}
-                                        fullWidth
-                                        value={moment(`${todatDate}`).format('YYYY-MM-DD')}
-                                        onChange={(e) => { setLastValidatedAt(todatDate) }}
-                                        className={classes.textField}
-                                        disabled={isEditingSelectedData}
+//                   <div style={{ display: "flex" }}>
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Work Type
+//                       </InputLabel>
+//                       <Select
+//                         onChange={(e) => setWorkType(e.target.value)}
+//                         id="abc"
+//                         value={workType}
+//                         native
+//                         label="Work Type"
+//                       >
+//                         <option aria-label="None"> </option>
+//                         <option value="Office">Office</option>
+//                         <option value="On Field">On Field</option>
+//                       </Select>
+//                     </FormControl>
 
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }} />
-                                </Grid>
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                       style={{ marginLeft: "10px" }}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Blood Group
+//                       </InputLabel>
+//                       <Select
+//                         // value={department}
+//                         onChange={(e) => setBloodGroupId(e.target.value)}
+//                         id="abc"
+//                         native
+//                         value={bloodGroupId}
+//                         label="Blood Group"
+//                       >
+//                         <option aria-label="None" />
+//                         {dropDownBloodGroup.map((value, index) => (
+//                           <option key={value.id} value={value._id}>
+//                             {value.name}
+//                           </option>
+//                         ))}
+//                       </Select>
+//                     </FormControl>
+//                   </div>
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         IsActive
+//                       </InputLabel>
+//                       <Select
+//                         // onChange={(e) => setIsActive(e.target.value)}
+//                         onChange={(e) => {
+//                           setIsActive(e.target.value);
+//                         }}
+//                         id="abc"
+//                         value={isActive}
+//                         native
+//                         label="IsActive"
+//                       >
+//                         <option aria-label="None"> </option>
+//                         <option value={true}>True</option>
+//                         <option value={false}>False</option>
+//                       </Select>
+//                     </FormControl>
 
-                                <Grid item xs={12}>
-                                    <TextField
-                                        label="Remarks"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        multiline
-                                        rows={4}
-                                        name='remarks'
-                                        value={remarks}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setRemarks(e.target.value) }}
-                                    />
-                                </Grid>
+//                     <TextField
+//                       className={classes.textFieldSsid}
+//                       style={{ marginLeft: "10px" }}
+//                       id="abc"
+//                       label="Selling Line"
+//                       name="sellingline"
+//                       variant="outlined"
+//                       value={sellingLine}
+//                       onChange={(e) => setSellingLine(e.target.value)}
+//                     />
+//                   </div>
 
-                                <Grid item xs={12}>
-                                    <ButtonGroup variant="contained" color="secondary" size={'large'}>
-                                        {addForm &&
-                                            <Button onClick={addDoctor}><AddIcon style={{ marginRight: "2px" }} /> Add</Button>
-                                        }
-                                        {!selectedData &&
-                                            <Button disabled={selectedData} onClick={() => { handleSave() }}><SaveAltIcon style={{ marginRight: "5px" }} /> Save</Button>
-                                        }
-                                        {isEditingSelectedData &&
-                                            <Button onClick={editData}><EditIcon style={{ marginRight: "5px" }} /> Edit</Button>
-                                        }
-                                        {isEditingSelectedData &&
-                                            <Button onClick={deleteDoctor}><DeleteOutlineIcon style={{ marginRight: "5px" }} /> Delete</Button>
-                                        }
+//                   <FormControl
+//                     variant="outlined"
+//                     className={classes.textFieldSsid}
+//                   >
+//                     <Autocomplete
+//                       multiple
+//                       id="tags-outlined"
+//                       options={dropdownRegion}
+//                       getOptionLabel={(option) => option.name}
+//                       value={region_Id}
+//                       filterSelectedOptions
+//                       getOptionSelected={(option, value) => {
+//                         if (value === "") {
+//                           return true;
+//                         } else if (value === option) {
+//                           return true;
+//                         }
+//                       }}
+//                       onChange={(e, selectedObject) => {
+//                         if (selectedObject !== null) {
+//                           let List = [];
+//                           for (let i = 0; i < selectedObject.length; i++) {
+//                             List.push(selectedObject[i]);
+//                           }
+//                           setRegion_Id(List);
+//                         }
+//                       }}
+//                       renderInput={(params) => (
+//                         <TextField
+//                           {...params}
+//                           variant="outlined"
+//                           label="Region"
+//                         />
+//                       )}
+//                     />
+//                   </FormControl>
 
-                                    </ButtonGroup>
-                                </Grid>
+//                   <FormControl
+//                     variant="outlined"
+//                     className={classes.textFieldSsid}
+//                   >
+//                     <Autocomplete
+//                       multiple
+//                       id="tags-outlined"
+//                       options={dropdownZone}
+//                       getOptionLabel={(option) => option.name}
+//                       value={zone_Id}
+//                       filterSelectedOptions
+//                       getOptionSelected={(option, value) => {
+//                         if (value === "") {
+//                           return true;
+//                         } else if (value === option) {
+//                           return true;
+//                         }
+//                       }}
+//                       onChange={(e, selectedObject) => {
+//                         if (selectedObject !== null) {
+//                           let List = [];
+//                           for (let i = 0; i < selectedObject.length; i++) {
+//                             List.push(selectedObject[i]);
+//                           }
+//                           setZone_Id(List);
+//                         }
+//                       }}
+//                       renderInput={(params) => (
+//                         <TextField
+//                           {...params}
+//                           variant="outlined"
+//                           label="Zone"
+//                         />
+//                       )}
+//                     />
+//                   </FormControl>
 
-                            </Grid>
-                        }
-                        grid={
-                            <div>
-                                <GridTable
-                                    onRowClick={(data) => { handleRowClick(data) }}
-                                    headCells={
-                                        [
-                                            { id: 'dr.name', label: 'Dr. Names' },
-                                            { id: 'tierId', label: 'Tier ID' },
-                                            { id: 'fee', label: 'Fee' },
+//                   <FormControl
+//                     variant="outlined"
+//                     className={classes.textFieldSsid}
+//                   >
+//                     <Autocomplete
+//                       multiple
+//                       id="tags-outlined"
+//                       options={dropdownTerritory}
+//                       getOptionLabel={(option) => option.name}
+//                       value={territory_Id}
+//                       filterSelectedOptions
+//                       getOptionSelected={(option, value) => {
+//                         if (value === "") {
+//                           return true;
+//                         } else if (value === option) {
+//                           return true;
+//                         }
+//                       }}
+//                       onChange={(e, selectedObject) => {
+//                         if (selectedObject !== null) {
+//                           let List = [];
+//                           for (let i = 0; i < selectedObject.length; i++) {
+//                             List.push(selectedObject[i]);
+//                           }
+//                           setTerritory_Id(List);
+//                         }
+//                       }}
+//                       renderInput={(params) => (
+//                         <TextField
+//                           {...params}
+//                           variant="outlined"
+//                           label="Region"
+//                         />
+//                       )}
+//                     />
+//                   </FormControl>
 
-                                        ]
-                                    }
-                                    rows={allDoctors} />
-                            </div>
-                        }
-                    />
-                </CardContent>
-            </Card>
-        </>
-    )
-}
+//                   <TextField
+//                     className={classes.textFieldSsid}
+//                     id="abc"
+//                     type="password"
+//                     label="Password"
+//                     name="password"
+//                     variant="outlined"
+//                     value={password}
+//                     onChange={(e) => setPassword(e.target.value)}
+//                   />
 
-export default Doctor
+//                   <Button
+//                     onClick={addRepresentative}
+//                     className={classes.btn}
+//                     variant="contained"
+//                     style={{
+//                       backgroundColor: "#69c9ef",
+//                       color: "#fff",
+//                       marginTop: "20px",
+//                     }}
+//                   >
+//                     Submit
+//                   </Button>
+//                 </div>
+//               </div>
+//             </div>
+//           </Fade>
+//         </Modal>
+//       </div>
+//       <div>
+//         <Modal
+//           aria-labelledby="transition-modal-title"
+//           aria-describedby="transition-modal-description"
+//           className={classes.modal}
+//           open={editModal}
+//           onClose={handleEditClose}
+//           closeAfterTransition
+//           BackdropComponent={Backdrop}
+//           BackdropProps={{
+//             timeout: 500,
+//           }}
+//         >
+//           <Fade in={editModal}>
+//             <div className={classes.paper}>
+//               <div
+//                 style={{
+//                   display: "flex",
+//                   justifyContent: "space-between",
+//                   flexDirection: "column",
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <h2 id="transition-modal-title">Edit Representative</h2>
+//                 <div className={classes.formDiv}>
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       className={classes.textFieldName}
+//                       style={{ marginRight: "10px" }}
+//                       id="abc"
+//                       label="Object Id"
+//                       name="objectid"
+//                       variant="outlined"
+//                       value={objectId}
+//                       onChange={(e) => setObjectId(e.target.value)}
+//                     />
+
+//                     <TextField
+//                       className={classes.textFieldName}
+//                       id="abc"
+//                       label="Name"
+//                       name="Name"
+//                       variant="outlined"
+//                       value={name}
+//                       onChange={(e) => setName(e.target.value)}
+//                     />
+//                   </div>
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       className={classes.textFieldSsid}
+//                       style={{ marginRight: "10px" }}
+//                       id="abc"
+//                       label="Identifier"
+//                       name="identifier"
+//                       variant="outlined"
+//                       value={identifier}
+//                       onChange={(e) => setIdentifier(e.target.value)}
+//                     />
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Province
+//                       </InputLabel>
+//                       <Select
+//                         // value={department}
+//                         onChange={(e) => setProvinceId(e.target.value)}
+//                         id="abc"
+//                         native
+//                         value={provinceId}
+//                         label="Province"
+//                       >
+//                         <option aria-label="None" />
+//                         {dropdownProvince.map((value, index) => (
+//                           <option key={value.id} value={value._id}>
+//                             {value.name}
+//                           </option>
+//                         ))}
+//                       </Select>
+//                     </FormControl>
+//                   </div>
+
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       className={classes.textFieldSsid}
+//                       style={{ marginRight: "10px" }}
+//                       id="abc"
+//                       label="Email"
+//                       name="email"
+//                       variant="outlined"
+//                       value={email}
+//                       onChange={(e) => setEmail(e.target.value)}
+//                     />
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Designation
+//                       </InputLabel>
+//                       <Select
+//                         // value={department}
+//                         onChange={(e) => setDesignationId(e.target.value)}
+//                         id="abc"
+//                         native
+//                         value={designationId}
+//                         label="Designation"
+//                       >
+//                         <option aria-label="None" />
+//                         {dropDownDesignation.map((value, index) => (
+//                           <option key={value.id} value={value._id}>
+//                             {value.name}
+//                           </option>
+//                         ))}
+//                       </Select>
+//                     </FormControl>
+//                   </div>
+
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       className={classes.textFieldSsid}
+//                       style={{ marginRight: "10px" }}
+//                       id="abc"
+//                       label="Phone"
+//                       name="phone"
+//                       variant="outlined"
+//                       value={phone}
+//                       onChange={(e) => setPhone(e.target.value)}
+//                     />
+
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Gender
+//                       </InputLabel>
+//                       <Select
+//                         onChange={(e) => setGender(e.target.value)}
+//                         id="abc"
+//                         value={gender}
+//                         native
+//                         label="Gender"
+//                       >
+//                         <option aria-label="None"> </option>
+//                         <option value="Male">Male</option>
+//                         <option value="Female">Female</option>
+//                       </Select>
+//                     </FormControl>
+//                   </div>
+
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <TextField
+//                       style={{ marginTop: "10px" }}
+//                       className={classes.textFieldName}
+//                       id="date"
+//                       variant="outlined"
+//                       label="Date of Birth"
+//                       type="date"
+//                       value={dateOfBirth}
+//                       onChange={(e) => setDateOfBirth(e.target.value)}
+//                       InputLabelProps={{
+//                         shrink: true,
+//                       }}
+//                     />
+
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                       style={{ marginLeft: "10px" }}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Marital Status
+//                       </InputLabel>
+//                       <Select
+//                         onChange={(e) => setMaritalStatus(e.target.value)}
+//                         id="abc"
+//                         value={maritalStatus}
+//                         native
+//                         label="Marital Status"
+//                       >
+//                         <option aria-label="None"> </option>
+//                         <option value="Single">Single</option>
+//                         <option value="Married">Married</option>
+//                       </Select>
+//                     </FormControl>
+//                   </div>
+
+//                   <div style={{ display: "flex" }}>
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Work Type
+//                       </InputLabel>
+//                       <Select
+//                         onChange={(e) => setWorkType(e.target.value)}
+//                         id="abc"
+//                         value={workType}
+//                         native
+//                         label="Work Type"
+//                       >
+//                         <option aria-label="None"> </option>
+//                         <option value="Office">Office</option>
+//                         <option value="On Field">On Field</option>
+//                       </Select>
+//                     </FormControl>
+
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                       style={{ marginLeft: "10px" }}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         Blood Group
+//                       </InputLabel>
+//                       <Select
+//                         // value={department}
+//                         onChange={(e) => setBloodGroupId(e.target.value)}
+//                         id="abc"
+//                         native
+//                         value={bloodGroupId}
+//                         label="Blood Group"
+//                       >
+//                         <option aria-label="None" />
+//                         {dropDownBloodGroup.map((value, index) => (
+//                           <option key={value.id} value={value._id}>
+//                             {value.name}
+//                           </option>
+//                         ))}
+//                       </Select>
+//                     </FormControl>
+//                   </div>
+//                   <div style={{ display: "flex", width: "100%" }}>
+//                     <FormControl
+//                       variant="outlined"
+//                       className={classes.textFieldSsid}
+//                     >
+//                       <InputLabel htmlFor="outlined-age-native-simple">
+//                         IsActive
+//                       </InputLabel>
+//                       <Select
+//                         // onChange={(e) => setIsActive(e.target.value)}
+//                         onChange={(e) => {
+//                           setIsActive(e.target.value);
+//                         }}
+//                         id="abc"
+//                         value={isActive}
+//                         native
+//                         label="IsActive"
+//                       >
+//                         <option aria-label="None"> </option>
+//                         <option value={true}>True</option>
+//                         <option value={false}>False</option>
+//                       </Select>
+//                     </FormControl>
+
+//                     <TextField
+//                       className={classes.textFieldSsid}
+//                       style={{ marginLeft: "10px" }}
+//                       id="abc"
+//                       label="Selling Line"
+//                       name="sellingline"
+//                       variant="outlined"
+//                       value={sellingLine}
+//                       onChange={(e) => setSellingLine(e.target.value)}
+//                     />
+//                   </div>
+
+//                   <FormControl
+//                     variant="outlined"
+//                     className={classes.textFieldSsid}
+//                   >
+//                     <Autocomplete
+//                       multiple
+//                       id="tags-outlined"
+//                       options={dropdownRegion}
+//                       getOptionLabel={(option) => option.name}
+//                       value={region_Id}
+//                       filterSelectedOptions
+//                       getOptionSelected={(option, value) => {
+//                         if (value === "") {
+//                           return true;
+//                         } else if (value === option) {
+//                           return true;
+//                         }
+//                       }}
+//                       onChange={(e, selectedObject) => {
+//                         if (selectedObject !== null) {
+//                           let List = [];
+//                           for (let i = 0; i < selectedObject.length; i++) {
+//                             List.push(selectedObject[i]);
+//                           }
+//                           setRegion_Id(List);
+//                         }
+//                       }}
+//                       renderInput={(params) => (
+//                         <TextField
+//                           {...params}
+//                           variant="outlined"
+//                           label="Region"
+//                         />
+//                       )}
+//                     />
+//                   </FormControl>
+
+//                   <FormControl
+//                     variant="outlined"
+//                     className={classes.textFieldSsid}
+//                   >
+//                     <Autocomplete
+//                       multiple
+//                       id="tags-outlined"
+//                       options={dropdownZone}
+//                       getOptionLabel={(option) => option.name}
+//                       value={zone_Id}
+//                       filterSelectedOptions
+//                       getOptionSelected={(option, value) => {
+//                         if (value === "") {
+//                           return true;
+//                         } else if (value === option) {
+//                           return true;
+//                         }
+//                       }}
+//                       onChange={(e, selectedObject) => {
+//                         if (selectedObject !== null) {
+//                           let List = [];
+//                           for (let i = 0; i < selectedObject.length; i++) {
+//                             List.push(selectedObject[i]);
+//                           }
+//                           setZone_Id(List);
+//                         }
+//                       }}
+//                       renderInput={(params) => (
+//                         <TextField
+//                           {...params}
+//                           variant="outlined"
+//                           label="Zone"
+//                         />
+//                       )}
+//                     />
+//                   </FormControl>
+
+//                   <FormControl
+//                     variant="outlined"
+//                     className={classes.textFieldSsid}
+//                   >
+//                     <Autocomplete
+//                       multiple
+//                       id="tags-outlined"
+//                       options={dropdownTerritory}
+//                       getOptionLabel={(option) => option.name}
+//                       value={territory_Id}
+//                       filterSelectedOptions
+//                       getOptionSelected={(option, value) => {
+//                         if (value === "") {
+//                           return true;
+//                         } else if (value === option) {
+//                           return true;
+//                         }
+//                       }}
+//                       onChange={(e, selectedObject) => {
+//                         if (selectedObject !== null) {
+//                           let List = [];
+//                           for (let i = 0; i < selectedObject.length; i++) {
+//                             List.push(selectedObject[i]);
+//                           }
+//                           setTerritory_Id(List);
+//                         }
+//                       }}
+//                       renderInput={(params) => (
+//                         <TextField
+//                           {...params}
+//                           variant="outlined"
+//                           label="Region"
+//                         />
+//                       )}
+//                     />
+//                   </FormControl>
+
+//                   <TextField
+//                     className={classes.textFieldSsid}
+//                     id="abc"
+//                     type="password"
+//                     label="Password"
+//                     name="password"
+//                     variant="outlined"
+//                     value={password}
+//                     onChange={(e) => setPassword(e.target.value)}
+//                   />
+
+//                   <Button
+//                     onClick={() => {
+//                       editRepresentative(Id);
+//                     }}
+//                     className={classes.btn}
+//                     variant="contained"
+//                     style={{
+//                       backgroundColor: "#69c9ef",
+//                       color: "#fff",
+//                       marginTop: "20px",
+//                     }}
+//                   >
+//                     Submit
+//                   </Button>
+//                 </div>
+//               </div>
+//             </div>
+//           </Fade>
+//         </Modal>
+//       </div>
+//       <div>
+//         <Modal
+//           aria-labelledby="transition-modal-title"
+//           aria-describedby="transition-modal-description"
+//           className={classes.modal}
+//           open={getModal}
+//           onClose={handleGetClose}
+//           closeAfterTransition
+//           BackdropComponent={Backdrop}
+//           BackdropProps={{
+//             timeout: 500,
+//           }}
+//         >
+//           <Fade in={getModal}>
+//             <div className={classes.paperTwo}>
+//               <div
+//                 style={{
+//                   display: "flex",
+//                   justifyContent: "space-between",
+//                   flexDirection: "column",
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <h2 id="transition-modal-title">View Representative</h2>
+//                 <Table style={{ border: "2px solid" }}>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       ObjectId
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {objectId}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Name
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {name}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Identifier
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {identifier}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Designation
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {designationId}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Province
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {provinceId}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Phone
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {phone}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Email
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {email}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Gender
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {gender}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Marital Status
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {maritalStatus}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Date of Birth
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {dateOfBirth}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Blood Group
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {bloodGroupId}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Work Type
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {workType}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Selling Line
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {sellingLine}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Password
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {password}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       IsActive
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {isActive === true ? "TRUE" : "False"}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Region
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {region_Id}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Zone
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {zone_Id}
+//                     </TableCell>
+//                   </TableRow>
+//                   <TableRow style={{ border: "2px solid" }}>
+//                     <TableCell className={classes.styleTableHead}>
+//                       Territory
+//                     </TableCell>
+//                     <TableCell
+//                       style={{ textAlign: "left", borderLeft: "2px solid" }}
+//                     >
+//                       {territory_Id}
+//                     </TableCell>
+//                   </TableRow>
+//                 </Table>
+//               </div>
+//             </div>
+//           </Fade>
+//         </Modal>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Representative;

@@ -322,15 +322,15 @@ const Territory = () => {
                     </TableCell>
 
                     <TableCell>{user.identifier}</TableCell>
-                    <TableCell>{user.zoneId.objectId}</TableCell>
-                    <TableCell>{user.zoneId.name}</TableCell>
-                    <TableCell>{user.zoneId.regionId.objectId}</TableCell>
-                    <TableCell>{user.zoneId.regionId.name}</TableCell>
+                    <TableCell>{user.zoneId?.objectId}</TableCell>
+                    <TableCell>{user.zoneId?.name}</TableCell>
+                    <TableCell>{user.zoneId?.regionId?.objectId}</TableCell>
+                    <TableCell>{user.zoneId?.regionId?.name}</TableCell>
                     <TableCell>
-                      {user.zoneId.regionId.provinceId.objectId}
+                      {user.zoneId?.regionId?.provinceId?.objectId}
                     </TableCell>
                     <TableCell>
-                      {user.zoneId.regionId.provinceId.name}
+                      {user.zoneId?.regionId?.provinceId?.name}
                     </TableCell>
                     {/* <TableCell>
                       <div

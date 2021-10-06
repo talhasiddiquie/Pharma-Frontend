@@ -316,10 +316,10 @@ const City = () => {
 
                     <TableCell>{user.abbreviation}</TableCell>
                     <TableCell>{user.identifier}</TableCell>
-                    <TableCell>{user.regionId.objectId}</TableCell>
-                    <TableCell>{user.regionId.name}</TableCell>
-                    <TableCell>{user.provinceId.objectId}</TableCell>
-                    <TableCell>{user.provinceId.name}</TableCell>
+                    <TableCell>{user.regionId?.objectId}</TableCell>
+                    <TableCell>{user.regionId?.name}</TableCell>
+                    <TableCell>{user.provinceId?.objectId}</TableCell>
+                    <TableCell>{user.provinceId?.name}</TableCell>
                     <TableCell>
                       <div
                         style={{

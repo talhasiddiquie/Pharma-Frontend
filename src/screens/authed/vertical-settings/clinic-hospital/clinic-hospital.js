@@ -320,13 +320,13 @@ const ClinicHospital = () => {
                     <TableCell>{user.abbreviation}</TableCell>
                     <TableCell>{user.address}</TableCell>
                     <TableCell>{user.phone}</TableCell>
-                    <TableCell>{user.brickId.name}</TableCell>
-                    <TableCell>{user.brickId.territoryId.name}</TableCell>
+                    <TableCell>{user.brickId?.name}</TableCell>
+                    <TableCell>{user.brickId?.territoryId?.name}</TableCell>
                     <TableCell>
-                      {user.brickId.territoryId.zoneId.abbreviation}
+                      {user.brickId?.territoryId?.zoneId?.abbreviation}
                     </TableCell>
                     <TableCell>
-                      {user.brickId.territoryId.zoneId.regionId.abbreviation}
+                      {user.brickId?.territoryId?.zoneId?.regionId?.abbreviation}
                     </TableCell>
                     <TableCell>
                       <div

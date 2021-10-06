@@ -311,11 +311,11 @@ const Zone = () => {
                     </TableCell>
                     <TableCell>{user.abbreviation}</TableCell>
                     <TableCell>
-                      {user.regionId.name !== null ? user.regionId.name : null}
+                      {user.regionId?.name}
                     </TableCell>
-                    <TableCell>{user.regionId.objectId}</TableCell>
-                    <TableCell>{user.regionId.provinceId.objectId}</TableCell>
-                    <TableCell>{user.regionId.provinceId.name}</TableCell>
+                    <TableCell>{user.regionId?.objectId}</TableCell>
+                    <TableCell>{user.regionId?.provinceId?.objectId}</TableCell>
+                    <TableCell>{user.regionId?.provinceId?.name}</TableCell>
                     {/* <TableCell>
                       <div
                         style={{

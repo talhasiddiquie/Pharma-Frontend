@@ -289,11 +289,9 @@ const Region = () => {
                     </TableCell>
                     <TableCell>{user.abbreviation}</TableCell>
                     <TableCell>
-                      {user.provinceId.name !== null
-                        ? user.provinceId.name
-                        : null}
+                      {user.provinceId?.name}
                     </TableCell>
-                    <TableCell>{user.provinceId.objectId}</TableCell>
+                    <TableCell>{user.provinceId?.objectId}</TableCell>
                     {/* <TableCell>
                       <div
                         style={{

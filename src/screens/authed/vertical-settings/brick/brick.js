@@ -332,21 +332,21 @@ const Brick = () => {
 
                     <TableCell>{user.abbreviation}</TableCell>
                     <TableCell>{user.brickType}</TableCell>
-                    <TableCell>{user.territoryId.objectId}</TableCell>
-                    <TableCell>{user.territoryId.name}</TableCell>
-                    <TableCell>{user.territoryId.zoneId.objectId}</TableCell>
-                    <TableCell>{user.territoryId.zoneId.name}</TableCell>
+                    <TableCell>{user.territoryId?.objectId}</TableCell>
+                    <TableCell>{user.territoryId?.name}</TableCell>
+                    <TableCell>{user.territoryId?.zoneId?.objectId}</TableCell>
+                    <TableCell>{user.territoryId?.zoneId?.name}</TableCell>
                     <TableCell>
-                      {user.territoryId.zoneId.regionId.objectId}
+                      {user.territoryId?.zoneId?.regionId?.objectId}
                     </TableCell>
                     <TableCell>
-                      {user.territoryId.zoneId.regionId.name}
+                      {user.territoryId?.zoneId?.regionId?.name}
                     </TableCell>
                     <TableCell>
-                      {user.territoryId.zoneId.regionId.provinceId.objectId}
+                      {user.territoryId?.zoneId?.regionId?.provinceId?.objectId}
                     </TableCell>
                     <TableCell>
-                      {user.territoryId.zoneId.regionId.provinceId.name}
+                      {user.territoryId?.zoneId?.regionId?.provinceId?.name}
                     </TableCell>
                     <TableCell>
                       <div

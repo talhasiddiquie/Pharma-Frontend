@@ -83,7 +83,7 @@ const Region = () => {
   };
 
   const addRegion = () => {
-    const form = { objectId, name, isActive, abbreviation, provinceId };
+    const form = { objectId, name, abbreviation, provinceId };
     axios
       .post(`${process.env.REACT_APP_URL}/regions/postRegion`, form)
       .then((res) => {
@@ -113,14 +113,13 @@ const Region = () => {
     setId(response.data._id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
-    setIsActive(response.data.isActive);
     setProvinceId(response.data.provinceId);
     setAbbreviation(response.data.abbreviation);
     setEditModal(true);
   };
 
   const editFormProvince = async (id) => {
-    const form = { id, objectId, name, isActive, abbreviation, provinceId };
+    const form = { id, objectId, name, abbreviation, provinceId };
     await axios
       .post(`${process.env.REACT_APP_URL}/regions/updateRegion`, form)
       .then((res) => {
@@ -133,7 +132,7 @@ const Region = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-    setIsActive("");
+   
     setName("");
     setObjectId("");
     setAbbreviation("");
@@ -167,8 +166,6 @@ const Region = () => {
       ],
     });
   };
-
-  //Get Region
 
   const fetchRegion = async () => {
     await axios
@@ -288,9 +285,7 @@ const Region = () => {
                       {user.name}
                     </TableCell>
                     <TableCell>{user.abbreviation}</TableCell>
-                    <TableCell>
-                      {user.provinceId?.name}
-                    </TableCell>
+                    <TableCell>{user.provinceId?.name}</TableCell>
                     <TableCell>{user.provinceId?.objectId}</TableCell>
                     {/* <TableCell>
                       <div

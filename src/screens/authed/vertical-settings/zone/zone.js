@@ -83,7 +83,7 @@ const Zone = () => {
   };
 
   const addZone = () => {
-    const form = { objectId, name, isActive, abbreviation, regionId };
+    const form = { objectId, name, abbreviation, regionId };
     axios
       .post(`${process.env.REACT_APP_URL}/zones/postZone`, form)
       .then((res) => {
@@ -96,7 +96,7 @@ const Zone = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-    setIsActive("");
+
     setName("");
     setObjectId("");
     setAbbreviation("");
@@ -113,14 +113,13 @@ const Zone = () => {
     setId(response.data._id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
-    setIsActive(response.data.isActive);
     setRegionId(response.data.regionId._id);
     setAbbreviation(response.data.abbreviation);
     setEditModal(true);
   };
 
   const editFormProvince = async (id) => {
-    const form = { id, objectId, name, isActive, abbreviation, regionId };
+    const form = { id, objectId, name, abbreviation, regionId };
     await axios
       .post(`${process.env.REACT_APP_URL}/zones/updateZone`, form)
       .then((res) => {
@@ -133,7 +132,7 @@ const Zone = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-    setIsActive("");
+   
     setName("");
     setObjectId("");
     setAbbreviation("");
@@ -310,9 +309,7 @@ const Zone = () => {
                       {user.name}
                     </TableCell>
                     <TableCell>{user.abbreviation}</TableCell>
-                    <TableCell>
-                      {user.regionId?.name}
-                    </TableCell>
+                    <TableCell>{user.regionId?.name}</TableCell>
                     <TableCell>{user.regionId?.objectId}</TableCell>
                     <TableCell>{user.regionId?.provinceId?.objectId}</TableCell>
                     <TableCell>{user.regionId?.provinceId?.name}</TableCell>

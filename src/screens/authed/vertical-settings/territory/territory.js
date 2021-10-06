@@ -83,7 +83,7 @@ const Territory = () => {
   };
 
   const addTerritory = () => {
-    const form = { objectId, name, isActive, identifier, zoneId };
+    const form = { objectId, name, identifier, zoneId };
     axios
       .post(`${process.env.REACT_APP_URL}/territory/postTerritory`, form)
       .then((res) => {
@@ -96,7 +96,7 @@ const Territory = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-    setIsActive("");
+    
     setName("");
     setObjectId("");
     setIdentifier("");
@@ -113,14 +113,14 @@ const Territory = () => {
     setId(response.data._id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
-    setIsActive(response.data.isActive);
+    
     setZoneId(response.data.zoneId._id);
     setIdentifier(response.data.identifier);
     setEditModal(true);
   };
 
   const editFormProvince = async (id) => {
-    const form = { id, objectId, name, isActive, identifier, zoneId };
+    const form = { id, objectId, name, identifier, zoneId };
     await axios
       .post(`${process.env.REACT_APP_URL}/territory/updateTerritory`, form)
       .then((res) => {
@@ -133,7 +133,7 @@ const Territory = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-    setIsActive("");
+    
     setName("");
     setObjectId("");
     setIdentifier("");

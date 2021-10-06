@@ -79,9 +79,9 @@ const Province = () => {
   };
 
   const addProvince = () => {
-    const form = { objectId, name, isActive };
+    const form = { objectId, name };
     axios
-      .post(`${process.env.REACT_APP_URL}/provinces/postProvince`, form)
+      .post(`${process.env.REACT_APP_URL}/provinces/createProvince`, form)
       .then((res) => {
         console.log(res.data);
         enqueueSnackbar("Province Add Successfully", { variant: "success" });
@@ -91,7 +91,7 @@ const Province = () => {
       .catch(function (error) {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
       });
-    setIsActive("");
+
     setName("");
     setObjectId("");
   };
@@ -128,7 +128,7 @@ const Province = () => {
   };
 
   const editFormProvince = async (id) => {
-    const form = { id, objectId, name, isActive };
+    const form = { id, objectId, name };
     await axios
       .post(`${process.env.REACT_APP_URL}/provinces/updateProvince`, form)
       .then((res) => {

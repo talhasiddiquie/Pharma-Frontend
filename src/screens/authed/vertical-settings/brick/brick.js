@@ -214,8 +214,26 @@ const Brick = () => {
           Home
         </Link>
         <Typography color="textPrimary">Vertical-Settings</Typography>
-        <Typography color="textPrimary">City</Typography>
+        <Typography color="textPrimary">Brick</Typography>
       </Breadcrumbs>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginBottom: "10px",
+        }}
+      >
+        <Button
+          style={{ width: "150px" }}
+          variant="contained"
+          color="primary"
+          style={{ width: "200px", color: "white" }}
+          onClick={handleOpen}
+        >
+          Add Brick
+        </Button>
+      </div>
       <div>
         <TableContainer
           style={{
@@ -229,40 +247,64 @@ const Brick = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Object ID
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Abbreviation
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Brick Type
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Territory ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Territory Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Zone ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Zone Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Region ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Region Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Province ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Province Name
                 </TableCell>
                 <TableCell
@@ -270,21 +312,10 @@ const Brick = () => {
                     fontWeight: "600",
                     width: "15%",
                     textAlign: "center",
+                    color: "white",
                   }}
                 >
                   Actions
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%" }}
-                  align="right"
-                >
-                  <Button
-                    style={{ width: "150px" }}
-                    variant="outlined"
-                    onClick={handleOpen}
-                  >
-                    Add Brick
-                  </Button>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -379,7 +410,7 @@ const Brick = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
+                    label="ID"
                     variant="outlined"
                     value={objectId}
                     onChange={(e) => setObjectId(e.target.value)}
@@ -499,7 +530,7 @@ const Brick = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
+                    label="ID"
                     variant="outlined"
                     value={objectId}
                     onChange={(e) => setObjectId(e.target.value)}

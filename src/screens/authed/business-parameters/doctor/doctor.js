@@ -138,12 +138,45 @@ const Doctor = () => {
   const [dropDownBrick, setDropDownBrick] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
 
+  const totalDays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thrusday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
   const handleOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setObjectId("");
+    setName("");
+    setAbbreviation("");
+    setIdentifier("");
+    setPmdcRegistration("");
+    setPhone("");
+    setEmail("");
+    setPreferredTime("");
+    setDistrict("");
+    setFee("");
+    setPotential("");
+    setQualificationId("");
+    setRepresentativeId("");
+    setRegionId("");
+    setZoneId("");
+    setTerritoryId("");
+    setDesignationId("");
+    setSpecialityId("");
+    setHospitalId("");
+    setProvinceId("");
+    setCityId("");
+    setBrickId("");
+    setPreferredDay([]);
   };
 
   const handleEditOpen = (id) => {
@@ -152,6 +185,29 @@ const Doctor = () => {
 
   const handleEditClose = () => {
     setEditModal(false);
+    setObjectId("");
+    setName("");
+    setAbbreviation("");
+    setIdentifier("");
+    setPmdcRegistration("");
+    setPhone("");
+    setEmail("");
+    setPreferredTime("");
+    setDistrict("");
+    setFee("");
+    setPotential("");
+    setQualificationId("");
+    setRepresentativeId("");
+    setRegionId("");
+    setZoneId("");
+    setTerritoryId("");
+    setDesignationId("");
+    setSpecialityId("");
+    setHospitalId("");
+    setProvinceId("");
+    setCityId("");
+    setBrickId("");
+    setPreferredDay([]);
   };
 
   const handleGetOpen = (id) => {
@@ -162,9 +218,22 @@ const Doctor = () => {
     setGetModal(false);
   };
 
-  const addRepresentative = async () => {
-    //For Region Multi select
+  function tConvert(time) {
+    // Check correct time format and split into components
+    time = time
+      .toString()
+      .match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
 
+    if (time.length > 1) {
+      // If time format correct
+      time = time.slice(1); // Remove full string match value
+      time[5] = +time[0] < 12 ? " AM" : " PM"; // Set AM/PM
+      time[0] = +time[0] % 12 || 12; // Adjust hours
+    }
+    return time.join(""); // return adjusted time or original string
+  }
+
+  const addDoctor = async () => {
     const form = {
       name,
       objectId,
@@ -188,8 +257,9 @@ const Doctor = () => {
       provinceId,
       cityId,
       brickId,
-      lastValidatedAt,
+      preferredDay,
     };
+    console.log(form);
     await axios
       .post(`${process.env.REACT_APP_URL}/doctors/postDoctor`, form)
       .then((res) => {
@@ -201,120 +271,134 @@ const Doctor = () => {
         fetchDoctor();
       })
       .catch(function (error) {
-        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        enqueueSnackbar("error", { variant: "error" });
         console.log(error.response);
       });
+
+    setObjectId("");
+    setName("");
+    setAbbreviation("");
+    setIdentifier("");
+    setPmdcRegistration("");
+    setPhone("");
+    setEmail("");
+    setPreferredTime("");
+    setDistrict("");
+    setFee("");
+    setPotential("");
+    setQualificationId("");
+    setRepresentativeId("");
+    setRegionId("");
+    setZoneId("");
+    setTerritoryId("");
+    setDesignationId("");
+    setSpecialityId("");
+    setHospitalId("");
+    setProvinceId("");
+    setCityId("");
+    setBrickId("");
+    setPreferredDay([]);
   };
 
-  const viewRepresentativeData = async (id) => {
+  const viewDoctorData = async (id) => {
     const form = { id };
     let response = await axios.post(
-      `${process.env.REACT_APP_URL}/representative/getRepresentative`,
+      `${process.env.REACT_APP_URL}/doctors/getDoctor`,
       form
     );
-    const dob = moment(response.data.dateOfBirth).format("DD MMM YYYY");
-    const regionArr = [];
-    const regionData = response.data.regionId?.forEach((value) =>
-      regionArr.push(value.name + ", ")
-    );
-    const zoneArr = [];
-    const zoneData = response.data.zoneId?.forEach((value) =>
-      zoneArr.push(value.name + ", ")
-    );
-    const territoryArr = [];
-    const territoryData = response.data.territoryId?.forEach((value) =>
-      territoryArr.push(value.name + ", ")
-    );
-
-    // setObjectId(response.data.objectId);
-    // setName(response.data.name);
-    // setIdentifier(response.data.identifier);
-    // setDesignationId(response.data.designationId?.name);
-    // setProvinceId(response.data.provinceId?.name);
-    // setPhone(response.data.phone);
-    // setEmail(response.data.email);
-    // setGender(response.data.gender);
-    // setMaritalStatus(response.data.maritalStatus);
-    // setDateOfBirth(dob);
-    // setBloodGroupId(response.data.bloodGroupId?.name);
-    // setWorkType(response.data.workType);
-    // setSellingLine(response.data.sellingLine);
-    // setPassword(response.data.password);
-    // setIsActive(response.data.isActive);
-    // setRegion_Id(regionArr);
-    // setZone_Id(zoneArr);
-    // setTerritory_Id(territoryArr);
+    setObjectId(response.data.objectId);
+    setName(response.data.name);
+    setAbbreviation(response.data.abbreviation);
+    setIdentifier(response.data.identifier);
+    setPmdcRegistration(response.data.pmdcRegistration);
+    setPhone(response.data.phone);
+    setEmail(response.data.email);
+    setPreferredTime(response.data.preferredTime);
+    setDistrict(response.data.district);
+    setFee(response.data.fee);
+    setPotential(response.data.potential);
+    setQualificationId(response.data.qualificationId?.name);
+    setRepresentativeId(response.data.representativeId?.name);
+    setRegionId(response.data.regionId?.name);
+    setZoneId(response.data.zoneId?.name);
+    setTerritoryId(response.data.territoryId?.name);
+    setDesignationId(response.data.designationId?.name);
+    setSpecialityId(response.data.specialityId?.name);
+    setHospitalId(response.data.hospitalId?.name);
+    setProvinceId(response.data.provinceId?.name);
+    setCityId(response.data.cityId?.name);
+    setBrickId(response.data.brickId?.name);
+    setPreferredDay(response.data.preferredDay + " ");
     handleGetOpen(true);
   };
 
-  const getRepresentativeById = async (id) => {
+  const getDoctorById = async (id) => {
     const form = { id };
     let response = await axios.post(
-      `${process.env.REACT_APP_URL}/representative/getRepresentative`,
+      `${process.env.REACT_APP_URL}/doctors/getDoctor`,
       form
     );
     const dob = moment(response.data.dateOfBirth).format("YYYY-MM-DD");
-    // setId(response.data._id);
-    // setObjectId(response.data.objectId);
-    // setName(response.data.name);
-    // setIdentifier(response.data.identifier);
-    // setDesignationId(response.data.designationId?._id);
-    // setProvinceId(response.data.provinceId?._id);
-    // setPhone(response.data.phone);
-    // setEmail(response.data.email);
-    // setGender(response.data.gender);
-    // setMaritalStatus(response.data.maritalStatus);
-    // setDateOfBirth(dob);
-    // setBloodGroupId(response.data.bloodGroupId?._id);
-    // setWorkType(response.data.workType);
-    // setSellingLine(response.data.sellingLine);
-    // setPassword(response.data.password);
-    // setIsActive(response.data.isActive);
-    // setRegion_Id(response.data.regionId);
-    // setZone_Id(response.data.zoneId);
-    // setTerritory_Id(response.data.territoryId);
+    setId(response.data._id);
+    setObjectId(response.data.objectId);
+    setName(response.data.name);
+    setAbbreviation(response.data.abbreviation);
+    setIdentifier(response.data.identifier);
+    setPmdcRegistration(response.data.pmdcRegistration);
+    setPhone(response.data.phone);
+    setEmail(response.data.email);
+    setPreferredTime(response.data.preferredTime);
+    setDistrict(response.data.district);
+    setFee(response.data.fee);
+    setPotential(response.data.potential);
+    setQualificationId(response.data.qualificationId?._id);
+    setRepresentativeId(response.data.representativeId?._id);
+    setRegionId(response.data.regionId?._id);
+    setZoneId(response.data.zoneId?._id);
+    setTerritoryId(response.data.territoryId?._id);
+    setDesignationId(response.data.designationId?._id);
+    setSpecialityId(response.data.specialityId?._id);
+    setHospitalId(response.data.hospitalId?._id);
+    setProvinceId(response.data.provinceId?._id);
+    setCityId(response.data.cityId?._id);
+    setBrickId(response.data.brickId?._id);
+    setPreferredDay(response.data.preferredDay);
     setEditModal(true);
   };
 
-  const editRepresentative = async (id) => {
-    // const regionId = [];
-    // region_Id.forEach((value) => regionId.push(value._id));
-
-    // const zoneId = [];
-    // zone_Id.forEach((value) => zoneId.push(value._id));
-
-    // const territoryId = [];
-    // territory_Id.forEach((value) => territoryId.push(value._id));
+  const editDoctor = async (id) => {
     const form = {
-      //   id,
-      //   objectId,
-      //   name,
-      //   identifier,
-      //   designationId,
-      //   provinceId,
-      //   zoneId,
-      //   regionId,
-      //   territoryId,
-      //   gender,
-      //   phone,
-      //   email,
-      //   maritalStatus,
-      //   dateOfBirth,
-      //   bloodGroupId,
-      //   workType,
-      //   sellingLine,
-      //   password,
-      //   isActive,
+      id,
+      name,
+      objectId,
+      abbreviation,
+      identifier,
+      pmdcRegistration,
+      phone,
+      email,
+      preferredTime,
+      district,
+      fee,
+      potential,
+      qualificationId,
+      representativeId,
+      regionId,
+      zoneId,
+      territoryId,
+      designationId,
+      specialityId,
+      hospitalId,
+      provinceId,
+      cityId,
+      brickId,
+      preferredDay,
     };
     await axios
-      .post(
-        `${process.env.REACT_APP_URL}/representative/updateRepresentative`,
-        form
-      )
+      .post(`${process.env.REACT_APP_URL}/doctors/updateDoctor`, form)
       .then((res) => {
         console.log(res.data);
         setEditModal(false);
-        enqueueSnackbar("Representative Edit Successfully", {
+        enqueueSnackbar("Doctor Edit Successfully", {
           variant: "success",
         });
         fetchDoctor();
@@ -325,7 +409,7 @@ const Doctor = () => {
       });
   };
 
-  const deleteRepresentative = (id) => {
+  const deleteDoctor = (id) => {
     const form = { id };
     confirmAlert({
       title: "Confirm to Delete",
@@ -335,12 +419,9 @@ const Doctor = () => {
           label: "Yes",
           onClick: () => {
             axios
-              .post(
-                `${process.env.REACT_APP_URL}/representative/deleteRepresentative`,
-                form
-              )
+              .post(`${process.env.REACT_APP_URL}/doctors/deleteDoctor`, form)
               .then((res) => {
-                enqueueSnackbar("Representative Delete Successfully", {
+                enqueueSnackbar("Doctor Delete Successfully", {
                   variant: "success",
                 });
                 fetchDoctor();
@@ -554,16 +635,6 @@ const Doctor = () => {
                   style={{
                     fontWeight: "600",
                     width: "15%",
-                    color: "white",
-                    textAlign: "center",
-                  }}
-                >
-                  isActive
-                </TableCell>
-                <TableCell
-                  style={{
-                    fontWeight: "600",
-                    width: "15%",
                     textAlign: "center",
                     color: "white",
                   }}
@@ -574,6 +645,8 @@ const Doctor = () => {
             </TableHead>
             <TableBody>
               {emp.map((user, key, index) => {
+                var convertedTime = tConvert(`${user.preferredTime}`);
+
                 return (
                   <TableRow key={user._id}>
                     <TableCell component="th" scope="row">
@@ -587,7 +660,7 @@ const Doctor = () => {
                     <TableCell>{user.pmdcRegistration} </TableCell>
                     <TableCell>{user.phone}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.preferredTime}</TableCell>
+                    <TableCell>{convertedTime}</TableCell>
 
                     <TableCell>
                       <div
@@ -599,14 +672,14 @@ const Doctor = () => {
                       >
                         <Button
                           onClick={() => {
-                            viewRepresentativeData(user._id);
+                            viewDoctorData(user._id);
                           }}
                         >
                           <VisibilityIcon color="primary" />
                         </Button>
                         <Button
                           onClick={() => {
-                            getRepresentativeById(user._id);
+                            getDoctorById(user._id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -614,7 +687,7 @@ const Doctor = () => {
 
                         <Button
                           onClick={() => {
-                            deleteRepresentative(user._id);
+                            deleteDoctor(user._id);
                           }}
                         >
                           <DeleteIcon color="secondary" />
@@ -690,7 +763,6 @@ const Doctor = () => {
                     />
                     <TextField
                       className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
                       id="abc"
                       label="Identifier"
                       name="identifier"
@@ -713,7 +785,6 @@ const Doctor = () => {
                     />
                     <TextField
                       className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
                       id="abc"
                       label="Phone"
                       name="phone"
@@ -736,13 +807,16 @@ const Doctor = () => {
                     />
                     <TextField
                       className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
-                      id="abc"
+                      id="time"
                       label="Preferred Time"
-                      name="preferredTime"
                       variant="outlined"
+                      type="time"
+                      ampm="true"
                       value={preferredTime}
                       onChange={(e) => setPreferredTime(e.target.value)}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
                     />
                   </div>
 
@@ -759,7 +833,6 @@ const Doctor = () => {
                     />
                     <TextField
                       className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
                       id="abc"
                       label="Fee"
                       name="fee"
@@ -769,26 +842,16 @@ const Doctor = () => {
                     />
                   </div>
                   <div style={{ display: "flex", width: "100%" }}>
-                    <TextField
-                      className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
-                      id="abc"
-                      label="Last Validated At"
-                      name="lastValidatedAt"
-                      variant="outlined"
-                      value={lastValidatedAt}
-                      onChange={(e) => setLastValidatedAt(e.target.value)}
-                    />
-                    {/* <FormControl
+                    <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
                     >
                       <Autocomplete
                         multiple
                         id="tags-outlined"
-                        options={dropdownTenrritory}
-                        getOptionLabel={(option) => option.name}
-                        value={territory_Id}
+                        options={totalDays}
+                        getOptionLabel={(option) => option}
+                        value={preferredDay}
                         filterSelectedOptions
                         getOptionSelected={(option, value) => {
                           if (value === "") {
@@ -803,18 +866,18 @@ const Doctor = () => {
                             for (let i = 0; i < selectedObject.length; i++) {
                               List.push(selectedObject[i]);
                             }
-                            setTerritory_Id(List);
+                            setPreferredDay(List);
                           }
                         }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
                             variant="outlined"
-                            label="Region"
+                            label="Prefered Days"
                           />
                         )}
                       />
-                    </FormControl> */}
+                    </FormControl>
                   </div>
 
                   <div style={{ display: "flex", width: "100%" }}>
@@ -856,6 +919,7 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
+                      style={{ marginRight: "10px" }}
                       className={classes.textFieldSsid}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
@@ -906,6 +970,7 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
+                      style={{ marginRight: "10px" }}
                       className={classes.textFieldSsid}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
@@ -956,6 +1021,7 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
+                      style={{ marginRight: "10px" }}
                       className={classes.textFieldSsid}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
@@ -1007,6 +1073,7 @@ const Doctor = () => {
                     <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
                         Hospital
@@ -1057,6 +1124,7 @@ const Doctor = () => {
                     <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
                         City
@@ -1104,7 +1172,7 @@ const Doctor = () => {
                   </div>
 
                   <Button
-                    onClick={addRepresentative}
+                    onClick={addDoctor}
                     className={classes.btn}
                     variant="contained"
                     style={{
@@ -1144,7 +1212,7 @@ const Doctor = () => {
                   alignItems: "center",
                 }}
               >
-                <h2 id="transition-modal-title">Edit Representative</h2>
+                <h2 id="transition-modal-title">Edit Doctor</h2>
                 <div className={classes.formDiv}>
                   <div style={{ display: "flex", width: "100%" }}>
                     <TextField
@@ -1181,7 +1249,6 @@ const Doctor = () => {
                     />
                     <TextField
                       className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
                       id="abc"
                       label="Identifier"
                       name="identifier"
@@ -1204,7 +1271,6 @@ const Doctor = () => {
                     />
                     <TextField
                       className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
                       id="abc"
                       label="Phone"
                       name="phone"
@@ -1227,13 +1293,16 @@ const Doctor = () => {
                     />
                     <TextField
                       className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
-                      id="abc"
+                      id="time"
                       label="Preferred Time"
-                      name="preferredTime"
                       variant="outlined"
+                      type="time"
+                      ampm="true"
                       value={preferredTime}
                       onChange={(e) => setPreferredTime(e.target.value)}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
                     />
                   </div>
 
@@ -1250,7 +1319,6 @@ const Doctor = () => {
                     />
                     <TextField
                       className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
                       id="abc"
                       label="Fee"
                       name="fee"
@@ -1260,26 +1328,16 @@ const Doctor = () => {
                     />
                   </div>
                   <div style={{ display: "flex", width: "100%" }}>
-                    <TextField
-                      className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
-                      id="abc"
-                      label="Last Validated At"
-                      name="lastValidatedAt"
-                      variant="outlined"
-                      value={lastValidatedAt}
-                      onChange={(e) => setLastValidatedAt(e.target.value)}
-                    />
-                    {/* <FormControl
+                    <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
                     >
                       <Autocomplete
                         multiple
                         id="tags-outlined"
-                        options={dropdownTenrritory}
-                        getOptionLabel={(option) => option.name}
-                        value={territory_Id}
+                        options={totalDays}
+                        getOptionLabel={(option) => option}
+                        value={preferredDay}
                         filterSelectedOptions
                         getOptionSelected={(option, value) => {
                           if (value === "") {
@@ -1294,18 +1352,18 @@ const Doctor = () => {
                             for (let i = 0; i < selectedObject.length; i++) {
                               List.push(selectedObject[i]);
                             }
-                            setTerritory_Id(List);
+                            setPreferredDay(List);
                           }
                         }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
                             variant="outlined"
-                            label="Region"
+                            label="Prefered Days"
                           />
                         )}
                       />
-                    </FormControl> */}
+                    </FormControl>
                   </div>
 
                   <div style={{ display: "flex", width: "100%" }}>
@@ -1347,6 +1405,7 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
+                      style={{ marginRight: "10px" }}
                       className={classes.textFieldSsid}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
@@ -1397,56 +1456,7 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Representative
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setRepresentativeId(e.target.value)}
-                        id="abc"
-                        native
-                        value={representativeId}
-                        label="Representative"
-                      >
-                        <option aria-label="None" />
-                        {dropdownRepresentative.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Region
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setRegionId(e.target.value)}
-                        id="abc"
-                        native
-                        value={regionId}
-                        label="Region"
-                      >
-                        <option aria-label="None" />
-                        {dropdownRegion.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
-
-                  <div style={{ display: "flex", width: "100%" }}>
-                    <FormControl
-                      variant="outlined"
+                      style={{ marginRight: "10px" }}
                       className={classes.textFieldSsid}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
@@ -1497,6 +1507,7 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
+                      style={{ marginRight: "10px" }}
                       className={classes.textFieldSsid}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
@@ -1548,6 +1559,7 @@ const Doctor = () => {
                     <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
                         Hospital
@@ -1598,6 +1610,7 @@ const Doctor = () => {
                     <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
                         City
@@ -1645,7 +1658,7 @@ const Doctor = () => {
                   </div>
 
                   <Button
-                    onClick={addRepresentative}
+                    onClick={() => editDoctor(Id)}
                     className={classes.btn}
                     variant="contained"
                     style={{
@@ -1685,7 +1698,7 @@ const Doctor = () => {
                   alignItems: "center",
                 }}
               >
-                <h2 id="transition-modal-title">View Representative</h2>
+                <h2 id="transition-modal-title">View Doctor</h2>
                 <Table style={{ border: "2px solid" }}>
                   <TableRow style={{ border: "2px solid" }}>
                     <TableCell className={classes.styleTableHead}>
@@ -1705,6 +1718,236 @@ const Doctor = () => {
                       style={{ textAlign: "left", borderLeft: "2px solid" }}
                     >
                       {name}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      ObjectId
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {objectId}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Abbreviation
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {abbreviation}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Identifier
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {identifier}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      PMDC Registartaion
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {pmdcRegistration}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Phone
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {phone}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Email
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {email}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Preferred Time
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {preferredTime}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      District
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {district}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Fee
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {fee}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Potential
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {potential}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Qualification
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {qualificationId}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Representative
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {representativeId}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Region
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {regionId}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Zone
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {zoneId}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Territory
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {territoryId}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Designation
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {designationId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Speciality
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {specialityId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Hospital
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {hospitalId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Province
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {provinceId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      City
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {cityId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Brick
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {brickId}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      Preferred Day
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {preferredDay}
                     </TableCell>
                   </TableRow>
                 </Table>

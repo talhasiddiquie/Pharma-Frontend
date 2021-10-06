@@ -205,6 +205,24 @@ const Zone = () => {
         <Typography color="textPrimary">Vertical-Settings</Typography>
         <Typography color="textPrimary">Zone</Typography>
       </Breadcrumbs>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginBottom: "10px",
+        }}
+      >
+        <Button
+          style={{ width: "150px" }}
+          variant="contained"
+          color="primary"
+          style={{ width: "200px", color: "white" }}
+          onClick={handleOpen}
+        >
+          Add Zone
+        </Button>
+      </div>
       <div>
         <TableContainer
           style={{
@@ -218,41 +236,56 @@ const Zone = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Object ID
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Abbreviation
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Region ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Region Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Province ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Province Name
                 </TableCell>
 
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                {/* <TableCell style={{ fontWeight: "600", width: "15%" }}>
                   isActive
-                </TableCell>
+                </TableCell> */}
                 <TableCell
                   style={{
                     fontWeight: "600",
                     width: "15%",
                     textAlign: "center",
+                    color: "white",
                   }}
                 >
                   Actions
                 </TableCell>
-                <TableCell
+                {/* <TableCell
                   style={{ fontWeight: "600", width: "15%" }}
                   align="right"
                 >
@@ -263,7 +296,7 @@ const Zone = () => {
                   >
                     Add Zone
                   </Button>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -283,7 +316,7 @@ const Zone = () => {
                     <TableCell>{user.regionId.objectId}</TableCell>
                     <TableCell>{user.regionId.provinceId.objectId}</TableCell>
                     <TableCell>{user.regionId.provinceId.name}</TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <div
                         style={{
                           display: "flex",
@@ -298,7 +331,7 @@ const Zone = () => {
                           <PendingIcon />
                         )}
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
                       <div
                         style={{
@@ -361,7 +394,7 @@ const Zone = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
+                    label="ID"
                     variant="outlined"
                     value={objectId}
                     onChange={(e) => setObjectId(e.target.value)}
@@ -385,7 +418,7 @@ const Zone = () => {
                     value={abbreviation}
                     onChange={(e) => setAbbreviation(e.target.value)}
                   />
-                  <FormControl
+                  {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -402,7 +435,7 @@ const Zone = () => {
                       <option value="true">True</option>
                       <option value="false">False</option>
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
                   <FormControl
                     variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}
@@ -478,7 +511,7 @@ const Zone = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
+                    label="ID"
                     variant="outlined"
                     value={objectId}
                     onChange={(e) => setObjectId(e.target.value)}
@@ -502,7 +535,7 @@ const Zone = () => {
                     value={abbreviation}
                     onChange={(e) => setAbbreviation(e.target.value)}
                   />
-                  <FormControl
+                  {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -519,7 +552,7 @@ const Zone = () => {
                       <option value="true">True</option>
                       <option value="false">False</option>
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
                   <FormControl
                     variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}

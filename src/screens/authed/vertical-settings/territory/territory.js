@@ -209,6 +209,24 @@ const Territory = () => {
         <Typography color="textPrimary">Vertical-Settings</Typography>
         <Typography color="textPrimary">Territory</Typography>
       </Breadcrumbs>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginBottom: "10px",
+        }}
+      >
+        <Button
+          style={{ width: "150px" }}
+          variant="contained"
+          color="primary"
+          style={{ width: "200px", color: "white" }}
+          onClick={handleOpen}
+        >
+          Add Territory
+        </Button>
+      </div>
       <div>
         <TableContainer
           style={{
@@ -222,46 +240,63 @@ const Territory = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  Object ID
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Identifier
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Zone ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Zone Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   RegionID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Region Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Province ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Province Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  isActive
-                </TableCell>
+
                 <TableCell
                   style={{
                     fontWeight: "600",
                     width: "15%",
                     textAlign: "center",
+                    color: "white",
                   }}
                 >
                   Actions
                 </TableCell>
-                <TableCell
+                {/* <TableCell
                   style={{ fontWeight: "600", width: "15%" }}
                   align="right"
                 >
@@ -272,7 +307,7 @@ const Territory = () => {
                   >
                     Add Territory
                   </Button>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -297,7 +332,7 @@ const Territory = () => {
                     <TableCell>
                       {user.zoneId.regionId.provinceId.name}
                     </TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <div
                         style={{
                           display: "flex",
@@ -312,7 +347,7 @@ const Territory = () => {
                           <PendingIcon />
                         )}
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
                       <div
                         style={{
@@ -375,7 +410,7 @@ const Territory = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
+                    label="ID"
                     variant="outlined"
                     value={objectId}
                     onChange={(e) => setObjectId(e.target.value)}
@@ -399,7 +434,7 @@ const Territory = () => {
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                   />
-                  <FormControl
+                  {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -416,7 +451,7 @@ const Territory = () => {
                       <option value="true">True</option>
                       <option value="false">False</option>
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
                   <FormControl
                     variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}
@@ -492,7 +527,7 @@ const Territory = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
+                    label="ID"
                     variant="outlined"
                     value={objectId}
                     onChange={(e) => setObjectId(e.target.value)}
@@ -516,7 +551,7 @@ const Territory = () => {
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                   />
-                  <FormControl
+                  {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -533,7 +568,7 @@ const Territory = () => {
                       <option value="true">True</option>
                       <option value="false">False</option>
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
                   <FormControl
                     variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}

@@ -189,6 +189,24 @@ const Province = () => {
         <Typography color="textPrimary">Vertical-Settings</Typography>
         <Typography color="textPrimary">Province</Typography>
       </Breadcrumbs>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginBottom: "10px",
+        }}
+      >
+        <Button
+          style={{ width: "150px" }}
+          variant="contained"
+          color="primary"
+          style={{ width: "200px", color: "white" }}
+          onClick={handleOpen}
+        >
+          Add Province
+        </Button>
+      </div>
       <div>
         <TableContainer
           style={{
@@ -202,31 +220,28 @@ const Province = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell style={{ fontWeight: "600", width: "20%" }}>
-                  Object ID
+                <TableCell
+                  style={{ fontWeight: "600", width: "30%", color: "white" }}
+                >
+                  ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "20%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "30%", color: "white" }}
+                >
                   Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "20%" }}>
+                {/* <TableCell style={{ fontWeight: "600", width: "20%" }}>
                   isActive
-                </TableCell>
+                </TableCell> */}
                 <TableCell
                   style={{
                     fontWeight: "600",
-                    width: "20%",
+                    width: "40%",
+                    color: "white",
                     textAlign: "center",
                   }}
                 >
                   Actions
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "10%" }}
-                  align="right"
-                >
-                  <Button variant="outlined" onClick={handleOpen}>
-                    Add Province
-                  </Button>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -240,7 +255,7 @@ const Province = () => {
                     <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <div
                         style={{
                           display: "flex",
@@ -255,7 +270,7 @@ const Province = () => {
                           <PendingIcon />
                         )}
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
                       <div
                         style={{
@@ -318,7 +333,7 @@ const Province = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
+                    label="ID"
                     variant="outlined"
                     value={objectId}
                     onChange={(e) => setObjectId(e.target.value)}
@@ -332,7 +347,7 @@ const Province = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
-                  <FormControl
+                  {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -349,7 +364,7 @@ const Province = () => {
                       <option value="true">True</option>
                       <option value="false">False</option>
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
                 </div>
 
                 <div
@@ -403,7 +418,7 @@ const Province = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
+                    label="ID"
                     variant="outlined"
                     value={objectId}
                     onChange={(e) => setObjectId(e.target.value)}
@@ -417,7 +432,7 @@ const Province = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
-                  <FormControl
+                  {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -434,7 +449,7 @@ const Province = () => {
                       <option value="true">True</option>
                       <option value="false">False</option>
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
                 </div>
 
                 <div

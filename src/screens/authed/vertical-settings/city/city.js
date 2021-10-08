@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "4px",
     boxShadow: theme.shadows[5],
     padding: "20px",
-    width: "25%",
+    width: "35%",
     inHeight: "55%",
     [theme.breakpoints.down("sm")]: {
       width: "70%",
@@ -61,10 +61,12 @@ const City = () => {
   const [name, setName] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
-  const [regionId, setRegionId] = useState("");
   const [provinceId, setProvinceId] = useState("");
+  const [regionId, setRegionId] = useState("");
+  const [zoneId, setZoneId] = useState("");
   const [Id, setId] = useState("");
   const [dropdownProvince, setDropDownProvince] = useState([]);
+  const [dropdownZone, setDropDownZone] = useState([]);
   const [dropdownRegion, setDropDownRegion] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -74,6 +76,13 @@ const City = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setAbbreviation("");
+    setName("");
+    setObjectId("");
+    setIdentifier("");
+    setRegionId("");
+    setZoneId("");
+    setProvinceId("");
   };
 
   const handleEditOpen = (id) => {
@@ -82,6 +91,36 @@ const City = () => {
 
   const handleEditClose = () => {
     setEditModal(false);
+    setAbbreviation("");
+    setName("");
+    setObjectId("");
+    setIdentifier("");
+    setRegionId("");
+    setZoneId("");
+    setProvinceId("");
+  };
+
+  const handleProvinceChange = async (e) => {
+    setProvinceId(e.target.value);
+    const id = e.target.value;
+    setRegionId("");
+    setZoneId("");
+    await axios
+      .get(`${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${id}`)
+      .then((res) => {
+        setDropDownRegion(res.data.results);
+      });
+  };
+
+  const handleRegionChange = async (e) => {
+    setRegionId(e.target.value);
+    const id = e.target.value;
+    setZoneId("");
+    await axios
+      .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${id}`)
+      .then((res) => {
+        setDropDownZone(res.data.results);
+      });
   };
 
   const addCity = () => {
@@ -91,6 +130,7 @@ const City = () => {
       abbreviation,
       identifier,
       regionId,
+      zoneId,
       provinceId,
     };
     axios
@@ -110,6 +150,7 @@ const City = () => {
     setObjectId("");
     setIdentifier("");
     setRegionId("");
+    setZoneId("");
     setProvinceId("");
   };
 
@@ -120,13 +161,31 @@ const City = () => {
       form
     );
     console.log(response.data);
-    setId(response.data._id);
+    setId(response.data.id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
     setAbbreviation(response.data.abbreviation);
-    setRegionId(response.data.regionId._id);
-    setProvinceId(response.data.provinceId._id);
+    setProvinceId(response.data.provinceId?.id);
     setIdentifier(response.data.identifier);
+    console.log(response.data.zoneId?.id);
+    const newid = response.data.provinceId?.id;
+    axios
+      .get(
+        `${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${newid}`
+      )
+      .then((res) => {
+        setDropDownRegion(res.data.results);
+        setRegionId(res.data.results[0].id);
+
+        const newid = response.data.regionId?.id;
+        axios
+          .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${newid}`)
+          .then((res) => {
+            setDropDownZone(res.data.results);
+            setZoneId(res.data.results[0].id);
+          });
+      });
+
     setEditModal(true);
   };
 
@@ -138,6 +197,7 @@ const City = () => {
       abbreviation,
       identifier,
       regionId,
+      zoneId,
       provinceId,
     };
     await axios
@@ -157,6 +217,7 @@ const City = () => {
     setObjectId("");
     setIdentifier("");
     setRegionId("");
+    setZoneId("");
     setProvinceId("");
   };
 
@@ -188,13 +249,11 @@ const City = () => {
     });
   };
 
-  //Get Region
-
   const fetchCity = async () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/cities/getCities`)
       .then((response) => {
-        const allfetchCity = response.data;
+        const allfetchCity = response.data.results;
         setEmp(allfetchCity);
         setLoad(false);
       })
@@ -206,20 +265,14 @@ const City = () => {
   }, [load]);
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
-      setDropDownRegion(res.data);
-      console.log(res.data);
-    });
-  }, []);
-
-  useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
       .then((res) => {
-        setDropDownProvince(res.data.content);
-        console.log(res.data);
+        setDropDownProvince(res.data.results);
       });
   }, []);
+
+  useEffect(() => {}, []);
   return (
     <div>
       <Breadcrumbs aria-label="breadcrumb">
@@ -266,29 +319,42 @@ const City = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell style={{ fontWeight: "600", width: "15%",color:"white" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%",color:"white" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" ,color:"white"}}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Abbreviation
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%",color:"white" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Identifier
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" ,color:"white"}}>
-                  Region ID
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Province
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%",color:"white" }}>
-                  Region Name
+
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Region
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%",color:"white" }}>
-                  Province ID
-                </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%",color:"white" }}>
-                  Province Name
+
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Zone
                 </TableCell>
 
                 <TableCell
@@ -296,7 +362,7 @@ const City = () => {
                     fontWeight: "600",
                     width: "15%",
                     textAlign: "center",
-                    color:"white"
+                    color: "white",
                   }}
                 >
                   Actions
@@ -316,10 +382,9 @@ const City = () => {
 
                     <TableCell>{user.abbreviation}</TableCell>
                     <TableCell>{user.identifier}</TableCell>
-                    <TableCell>{user.regionId?.objectId}</TableCell>
-                    <TableCell>{user.regionId?.name}</TableCell>
-                    <TableCell>{user.provinceId?.objectId}</TableCell>
                     <TableCell>{user.provinceId?.name}</TableCell>
+                    <TableCell>{user.regionId?.name}</TableCell>
+                    <TableCell>{user.zoneId?.name}</TableCell>
                     <TableCell>
                       <div
                         style={{
@@ -330,7 +395,7 @@ const City = () => {
                       >
                         <Button
                           onClick={() => {
-                            editProvince(user._id);
+                            editProvince(user.id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -338,7 +403,7 @@ const City = () => {
 
                         <Button
                           onClick={() => {
-                            deleteProvince(user._id);
+                            deleteProvince(user.id);
                           }}
                         >
                           <DeleteIcon color="secondary" />
@@ -377,84 +442,126 @@ const City = () => {
                 }}
               >
                 <h2 id="transition-modal-title">Add City</h2>
-                <div style={{ marginTop: "10px", width: "80%" }}>
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Name"
-                    variant="outlined"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Abbreviation"
-                    variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
-                  />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Identifier"
+                      variant="outlined"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Province
+                      </InputLabel>
+                      <Select
+                        onChange={handleProvinceChange}
+                        native
+                        value={provinceId}
+                        label="Province"
+                      >
+                        <option aria-label="None" />
+                        {dropdownProvince.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Identifier"
-                    variant="outlined"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                  />
+                    <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Region
+                      </InputLabel>
+                      <Select
+                        onChange={handleRegionChange}
+                        native
+                        value={regionId}
+                        label="Region"
+                      >
+                        <option aria-label="None" />
+                        {dropdownRegion.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
                   <FormControl
                     variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Region ID
+                      Zone
                     </InputLabel>
                     <Select
-                      onChange={(e) => setRegionId(e.target.value)}
+                      onChange={(e) => setZoneId(e.target.value)}
                       native
-                      value={regionId}
-                      label="Region ID"
+                      value={zoneId}
+                      label="Zone"
                     >
                       <option aria-label="None" />
-                      {dropdownRegion.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl
-                    variant="outlined"
-                    style={{ width: "100%", marginTop: "10px" }}
-                  >
-                    <InputLabel htmlFor="outlined-age-native-simple">
-                      Province ID
-                    </InputLabel>
-                    <Select
-                      onChange={(e) => setProvinceId(e.target.value)}
-                      native
-                      value={provinceId}
-                      label="Province ID"
-                    >
-                      <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
+                      {dropdownZone.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
                         </option>
                       ))}
                     </Select>
@@ -470,7 +577,7 @@ const City = () => {
                   }}
                 >
                   <Button
-                    style={{ width: "45%" }}
+                    style={{ width: "100%", color: "white" }}
                     variant="contained"
                     color="primary"
                     onClick={addCity}
@@ -507,84 +614,126 @@ const City = () => {
                 }}
               >
                 <h2 id="transition-modal-title">Edit City</h2>
-                <div style={{ marginTop: "10px", width: "80%" }}>
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Name"
-                    variant="outlined"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Abbreviation"
-                    variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
-                  />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Identifier"
+                      variant="outlined"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Province
+                      </InputLabel>
+                      <Select
+                        onChange={handleProvinceChange}
+                        native
+                        value={provinceId}
+                        label="Province"
+                      >
+                        <option aria-label="None" />
+                        {dropdownProvince.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Identifier"
-                    variant="outlined"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                  />
+                    <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Region
+                      </InputLabel>
+                      <Select
+                        onChange={handleRegionChange}
+                        native
+                        value={regionId}
+                        label="Region"
+                      >
+                        <option aria-label="None" />
+                        {dropdownRegion.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
                   <FormControl
                     variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Region ID
+                      Zone
                     </InputLabel>
                     <Select
-                      onChange={(e) => setRegionId(e.target.value)}
+                      onChange={(e) => setZoneId(e.target.value)}
                       native
-                      value={regionId}
-                      label="Region ID"
+                      value={zoneId}
+                      label="Zone"
                     >
                       <option aria-label="None" />
-                      {dropdownRegion.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl
-                    variant="outlined"
-                    style={{ width: "100%", marginTop: "10px" }}
-                  >
-                    <InputLabel htmlFor="outlined-age-native-simple">
-                      Province ID
-                    </InputLabel>
-                    <Select
-                      onChange={(e) => setProvinceId(e.target.value)}
-                      native
-                      value={provinceId}
-                      label="Province ID"
-                    >
-                      <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
+                      {dropdownZone.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
                         </option>
                       ))}
                     </Select>
@@ -600,7 +749,7 @@ const City = () => {
                   }}
                 >
                   <Button
-                    style={{ width: "45%" }}
+                    style={{ width: "100%", color: "white" }}
                     variant="contained"
                     color="primary"
                     onClick={() => editFormProvince(Id)}

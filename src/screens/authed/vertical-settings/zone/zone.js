@@ -41,10 +41,10 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "4px",
     boxShadow: theme.shadows[5],
     padding: "20px",
-    width: "25%",
+    width: "35%",
     inHeight: "50%",
     [theme.breakpoints.down("sm")]: {
-      width: "70%",
+      width: "95%",
       inHeight: "55%",
     },
   },
@@ -61,9 +61,11 @@ const Zone = () => {
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
   const [regionId, setRegionId] = useState("");
+  const [provinceId, setProvinceId] = useState("");
   const [isActive, setIsActive] = useState("");
   const [Id, setId] = useState("");
-  const [dropdownZone, setDropDownZone] = useState([]);
+  const [dropdownRegion, setDropDownRegion] = useState([]);
+  const [dropdownProvince, setDropDownProvince] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
 
   const handleOpen = () => {
@@ -72,6 +74,11 @@ const Zone = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setName("");
+    setObjectId("");
+    setAbbreviation("");
+    setRegionId("");
+    setProvinceId("");
   };
 
   const handleEditOpen = (id) => {
@@ -80,10 +87,26 @@ const Zone = () => {
 
   const handleEditClose = () => {
     setEditModal(false);
+    setName("");
+    setObjectId("");
+    setAbbreviation("");
+    setRegionId("");
+    setProvinceId("");
+  };
+
+  const handleProvinceChange = async (e) => {
+    setProvinceId(e.target.value);
+    const id = e.target.value;
+    setRegionId("");
+    await axios
+      .get(`${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${id}`)
+      .then((res) => {
+        setDropDownRegion(res.data.results);
+      });
   };
 
   const addZone = () => {
-    const form = { objectId, name, abbreviation, regionId };
+    const form = { objectId, name, abbreviation, regionId, provinceId };
     axios
       .post(`${process.env.REACT_APP_URL}/zones/postZone`, form)
       .then((res) => {
@@ -101,6 +124,7 @@ const Zone = () => {
     setObjectId("");
     setAbbreviation("");
     setRegionId("");
+    setProvinceId("");
   };
 
   const editProvince = async (id) => {
@@ -110,16 +134,27 @@ const Zone = () => {
       form
     );
     console.log(response.data);
-    setId(response.data._id);
+    setId(response.data.id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
-    setRegionId(response.data.regionId._id);
+    setProvinceId(response.data.provinceId?.id);
     setAbbreviation(response.data.abbreviation);
+
+    const newid = response.data.provinceId?.id;
+    axios
+      .get(
+        `${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${newid}`
+      )
+      .then((res) => {
+        setDropDownRegion(res.data.results);
+        setRegionId(res.data.results[0].id);
+      });
+
     setEditModal(true);
   };
 
   const editFormProvince = async (id) => {
-    const form = { id, objectId, name, abbreviation, regionId };
+    const form = { id, objectId, name, abbreviation, regionId, provinceId };
     await axios
       .post(`${process.env.REACT_APP_URL}/zones/updateZone`, form)
       .then((res) => {
@@ -132,11 +167,12 @@ const Zone = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-   
+
     setName("");
     setObjectId("");
     setAbbreviation("");
     setRegionId("");
+    setProvinceId("");
   };
 
   const deleteProvince = (id) => {
@@ -173,7 +209,7 @@ const Zone = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/zones/getZones`)
       .then((response) => {
-        const allZone = response.data;
+        const allZone = response.data.results;
         setEmp(allZone);
         setLoad(false);
       })
@@ -185,9 +221,11 @@ const Zone = () => {
   }, [load]);
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
-      setDropDownZone(res.data);
-    });
+    axios
+      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
+      .then((res) => {
+        setDropDownProvince(res.data.results);
+      });
   }, []);
   return (
     <div>
@@ -250,25 +288,17 @@ const Zone = () => {
                 >
                   Abbreviation
                 </TableCell>
+
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  Region ID
+                  Province
                 </TableCell>
+
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  Region Name
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  Province ID
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  Province Name
+                  Region
                 </TableCell>
 
                 {/* <TableCell style={{ fontWeight: "600", width: "15%" }}>
@@ -309,10 +339,9 @@ const Zone = () => {
                       {user.name}
                     </TableCell>
                     <TableCell>{user.abbreviation}</TableCell>
+                    <TableCell>{user.provinceId?.name}</TableCell>
                     <TableCell>{user.regionId?.name}</TableCell>
-                    <TableCell>{user.regionId?.objectId}</TableCell>
-                    <TableCell>{user.regionId?.provinceId?.objectId}</TableCell>
-                    <TableCell>{user.regionId?.provinceId?.name}</TableCell>
+
                     {/* <TableCell>
                       <div
                         style={{
@@ -339,7 +368,7 @@ const Zone = () => {
                       >
                         <Button
                           onClick={() => {
-                            editProvince(user._id);
+                            editProvince(user.id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -347,7 +376,7 @@ const Zone = () => {
 
                         <Button
                           onClick={() => {
-                            deleteProvince(user._id);
+                            deleteProvince(user.id);
                           }}
                         >
                           <DeleteIcon color="secondary" />
@@ -386,36 +415,47 @@ const Zone = () => {
                 }}
               >
                 <h2 id="transition-modal-title">Add Zone</h2>
-                <div style={{ marginTop: "10px", width: "80%" }}>
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Name"
-                    variant="outlined"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Abbreviation"
-                    variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
-                  />
-                  {/* <FormControl
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
+                    {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -433,24 +473,48 @@ const Zone = () => {
                       <option value="false">False</option>
                     </Select>
                   </FormControl> */}
+                    <FormControl
+                      variant="outlined"
+                      style={{ width: "100%", marginTop: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Province
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleProvinceChange}
+                        native
+                        value={provinceId}
+                        label="Region"
+                      >
+                        <option aria-label="None" />
+                        {dropdownProvince.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
                   <FormControl
                     variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Region ID
+                      Region
                     </InputLabel>
                     <Select
                       // value={department}
                       onChange={(e) => setRegionId(e.target.value)}
                       native
                       value={regionId}
-                      label="Province ID"
+                      label="Region"
                     >
                       <option aria-label="None" />
-                      {dropdownZone.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
+                      {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
                         </option>
                       ))}
                     </Select>
@@ -466,7 +530,7 @@ const Zone = () => {
                   }}
                 >
                   <Button
-                    style={{ width: "45%" }}
+                    style={{ width: "100%", color: "white" }}
                     variant="contained"
                     color="primary"
                     onClick={addZone}
@@ -503,36 +567,47 @@ const Zone = () => {
                 }}
               >
                 <h2 id="transition-modal-title">Edit Zone</h2>
-                <div style={{ marginTop: "10px", width: "80%" }}>
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Name"
-                    variant="outlined"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Abbreviation"
-                    variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
-                  />
-                  {/* <FormControl
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
+                    {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -550,24 +625,48 @@ const Zone = () => {
                       <option value="false">False</option>
                     </Select>
                   </FormControl> */}
+                    <FormControl
+                      variant="outlined"
+                      style={{ width: "100%", marginTop: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Province
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleProvinceChange}
+                        native
+                        value={provinceId}
+                        label="Province"
+                      >
+                        <option aria-label="None" />
+                        {dropdownProvince.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
                   <FormControl
                     variant="outlined"
                     style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Region ID
+                      Region
                     </InputLabel>
                     <Select
                       // value={department}
                       onChange={(e) => setRegionId(e.target.value)}
                       native
                       value={regionId}
-                      label="Region ID"
+                      label="Region"
                     >
                       <option aria-label="None" />
-                      {dropdownZone.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
+                      {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
                         </option>
                       ))}
                     </Select>
@@ -583,7 +682,7 @@ const Zone = () => {
                   }}
                 >
                   <Button
-                    style={{ width: "45%" }}
+                    style={{ width: "100%", color: "white" }}
                     variant="contained"
                     color="primary"
                     onClick={() => editFormProvince(Id)}

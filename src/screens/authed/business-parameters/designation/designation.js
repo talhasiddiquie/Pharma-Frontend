@@ -60,7 +60,6 @@ const Designation = () => {
   const [objectId, setObjectId] = useState("");
   const [name, setName] = useState("");
   const [type, setType] = useState("");
-  const [isActive, setIsActive] = useState("");
   const [Id, setId] = useState("");
   const { enqueueSnackbar } = useSnackbar();
 
@@ -70,7 +69,7 @@ const Designation = () => {
 
   const handleClose = () => {
     setOpen(false);
-    setIsActive("");
+
     setName("");
     setObjectId("");
     setType("");
@@ -82,14 +81,14 @@ const Designation = () => {
 
   const handleEditClose = () => {
     setEditModal(false);
-    setIsActive("");
+
     setName("");
     setObjectId("");
     setType("");
   };
 
   const addDesigantion = () => {
-    const form = { objectId, name, isActive, type };
+    const form = { objectId, name, type };
     axios
       .post(`${process.env.REACT_APP_URL}/designations/postDesignation`, form)
       .then((res) => {
@@ -102,7 +101,7 @@ const Designation = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-    setIsActive("");
+
     setName("");
     setObjectId("");
     setType("");
@@ -118,13 +117,12 @@ const Designation = () => {
     setId(response.data._id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
-    setIsActive(response.data.isActive);
     setType(response.data.type);
     setEditModal(true);
   };
 
   const editDesignation = async (id) => {
-    const form = { id, objectId, name, isActive, type };
+    const form = { id, objectId, name, type };
     await axios
       .post(`${process.env.REACT_APP_URL}/designations/updateDesignation`, form)
       .then((res) => {
@@ -139,7 +137,7 @@ const Designation = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-    setIsActive("");
+
     setName("");
     setObjectId("");
     setType("");
@@ -212,6 +210,24 @@ const Designation = () => {
         <Typography color="textPrimary">Business-Parameters</Typography>
         <Typography color="textPrimary">Designation</Typography>
       </Breadcrumbs>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginBottom: "10px",
+        }}
+      >
+        <Button
+          style={{ width: "150px" }}
+          variant="contained"
+          color="primary"
+          style={{ width: "200px", color: "white" }}
+          onClick={handleOpen}
+        >
+          Add Representative
+        </Button>
+      </div>
       <div>
         <TableContainer
           style={{
@@ -225,17 +241,20 @@ const Designation = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Object ID
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Name
                 </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Type
-                </TableCell>
-                <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  IsActive
                 </TableCell>
 
                 <TableCell
@@ -243,21 +262,10 @@ const Designation = () => {
                     fontWeight: "600",
                     width: "15%",
                     textAlign: "center",
+                    color: "white",
                   }}
                 >
                   Actions
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%" }}
-                  align="right"
-                >
-                  <Button
-                    style={{ width: "150px" }}
-                    variant="outlined"
-                    onClick={handleOpen}
-                  >
-                    Add Designation
-                  </Button>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -272,22 +280,7 @@ const Designation = () => {
                       {user.name}
                     </TableCell>
                     <TableCell>{user.type}</TableCell>
-                    <TableCell>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          flexWrap: "nowrap",
-                          width: "130px",
-                        }}
-                      >
-                        {user.isActive === true ? (
-                          <SuccessIcon />
-                        ) : (
-                          <PendingIcon />
-                        )}
-                      </div>
-                    </TableCell>
+
                     <TableCell>
                       <div
                         style={{
@@ -374,7 +367,7 @@ const Designation = () => {
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                   />
-                  <FormControl
+                  {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -391,7 +384,7 @@ const Designation = () => {
                       <option value="true">True</option>
                       <option value="false">False</option>
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
                 </div>
 
                 <div
@@ -469,7 +462,7 @@ const Designation = () => {
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                   />
-                  <FormControl
+                  {/* <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
@@ -486,7 +479,7 @@ const Designation = () => {
                       <option value="true">True</option>
                       <option value="false">False</option>
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
                 </div>
 
                 <div

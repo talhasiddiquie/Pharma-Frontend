@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "4px",
     boxShadow: theme.shadows[5],
     padding: "20px",
-    width: "25%",
+    width: "35%",
     inHeight: "50%",
     [theme.breakpoints.down("sm")]: {
       width: "70%",
@@ -403,75 +403,83 @@ const VerticalGroupCompany = () => {
                 }}
               >
                 <h2 id="transition-modal-title">Add Comapny</h2>
-                <div style={{ marginTop: "10px", width: "80%" }}>
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Name"
-                    variant="outlined"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Abbreviation"
-                    variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
-                  />
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Identifier"
-                    variant="outlined"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                  />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Identifier"
+                      variant="outlined"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                    />
+                  </div>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Address"
-                    variant="outlined"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                  />
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Contact Person"
+                      variant="outlined"
+                      value={contactPerson}
+                      onChange={(e) => setContactPerson(e.target.value)}
+                    />
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Contact Person"
-                    variant="outlined"
-                    value={contactPerson}
-                    onChange={(e) => setContactPerson(e.target.value)}
-                  />
-
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Contact Number"
-                    variant="outlined"
-                    value={contactNumber}
-                    onChange={(e) => setContactNumber(e.target.value)}
-                  />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Contact Number"
+                      variant="outlined"
+                      value={contactNumber}
+                      onChange={(e) => setContactNumber(e.target.value)}
+                    />
+                  </div>
 
                   <TextField
                     style={{ width: "100%", marginTop: "10px" }}
@@ -483,8 +491,20 @@ const VerticalGroupCompany = () => {
                     onChange={(e) => setContactDetail(e.target.value)}
                   />
 
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Address"
+                    variant="outlined"
+                    multiline
+                    rows={3}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+
                   <Button
-                    style={{ marginTop: "10px" }}
+                    style={{ marginTop: "10px", color: "white" }}
                     variant="contained"
                     component="label"
                     color="primary"
@@ -509,7 +529,7 @@ const VerticalGroupCompany = () => {
                   }}
                 >
                   <Button
-                    style={{ width: "45%" }}
+                    style={{ width: "100%", color: "white" }}
                     variant="contained"
                     color="primary"
                     onClick={addCompany}
@@ -545,76 +565,84 @@ const VerticalGroupCompany = () => {
                   alignItems: "center",
                 }}
               >
-                <h2 id="transition-modal-title">Edit Region</h2>
-                <div style={{ marginTop: "10px", width: "80%" }}>
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Name"
-                    variant="outlined"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                <h2 id="transition-modal-title">Add Comapny</h2>
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Abbreviation"
-                    variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
-                  />
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Identifier"
-                    variant="outlined"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                  />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Identifier"
+                      variant="outlined"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                    />
+                  </div>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Address"
-                    variant="outlined"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                  />
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Contact Person"
+                      variant="outlined"
+                      value={contactPerson}
+                      onChange={(e) => setContactPerson(e.target.value)}
+                    />
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Contact Person"
-                    variant="outlined"
-                    value={contactPerson}
-                    onChange={(e) => setContactPerson(e.target.value)}
-                  />
-
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Contact Number"
-                    variant="outlined"
-                    value={contactNumber}
-                    onChange={(e) => setContactNumber(e.target.value)}
-                  />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Contact Number"
+                      variant="outlined"
+                      value={contactNumber}
+                      onChange={(e) => setContactNumber(e.target.value)}
+                    />
+                  </div>
 
                   <TextField
                     style={{ width: "100%", marginTop: "10px" }}
@@ -626,8 +654,20 @@ const VerticalGroupCompany = () => {
                     onChange={(e) => setContactDetail(e.target.value)}
                   />
 
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Address"
+                    variant="outlined"
+                    multiline
+                    rows={3}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+
                   <Button
-                    style={{ marginTop: "10px" }}
+                    style={{ marginTop: "10px", color: "white" }}
                     variant="contained"
                     component="label"
                     color="primary"
@@ -635,6 +675,7 @@ const VerticalGroupCompany = () => {
                   >
                     Upload Image
                     <input
+                      name="CompanyLogo"
                       type="file"
                       onChange={(e) => setCompanyLogo(e.target.files[0])}
                       hidden
@@ -651,7 +692,7 @@ const VerticalGroupCompany = () => {
                   }}
                 >
                   <Button
-                    style={{ width: "45%" }}
+                    style={{ width: "100%", color: "white" }}
                     variant="contained"
                     color="primary"
                     onClick={() => editFormProvince(Id)}

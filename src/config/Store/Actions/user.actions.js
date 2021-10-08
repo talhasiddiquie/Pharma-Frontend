@@ -30,7 +30,7 @@ export const login_user = (values, enqueueSnackbar) => {
   return (dispatch) => {
     dispatch({ type: "LOGIN_USER" });
     axios
-      .post(ApiService.getBaseUrl() + "/users/login", values)
+      .post(`${process.env.REACT_APP_URL}/users/login`, values)
       .then((res) => {
         console.log(res, "response");
         if (res.data.message !== undefined) {
@@ -62,7 +62,7 @@ export const all_users = () => {
   return (dispatch) => {
     axios
       .get(
-        ApiService.getBaseUrl() + "/users/all",
+        `${process.env.REACT_APP_URL}/users/all`,
         // , { headers: { "Authorization": `Bearer ${token}` } }
         AuthToken()
       )
@@ -85,7 +85,7 @@ export const all_users = () => {
 export const create_user = (values) => {
   return (dispatch) => {
     axios
-      .post(ApiService.getBaseUrl() + "/users/signUp", values)
+      .post(`${process.env.REACT_APP_URL}/users/signUp`, values)
       .then((res) => {
         dispatch({ type: "CREATE_USER", payload: res.data.content });
       })
@@ -99,7 +99,7 @@ export const user_forgot_paasword = (values, enqueueSnackbar) => {
   return (dispatch) => {
     try {
       axios
-        .post(ApiService.getBaseUrl() + "/users/forgotpassword", values)
+        .post(`${process.env.REACT_APP_URL}/users/forgotpassword`, values)
         .then((res) => {
           // console.log("RES", res.status);
           enqueueSnackbar(res.data.message, { variant: "success" });
@@ -126,7 +126,7 @@ export const user_verification_code = (values, enqueueSnackbar) => {
   return (dispatch) => {
     try {
       axios
-        .post(ApiService.getBaseUrl() + "/users/activateID", values)
+        .post(`${process.env.REACT_APP_URL}/users/activateID`, values)
         .then((res) => {
           enqueueSnackbar("Verified", { variant: "success" });
           dispatch(redirectToForgot("redirecttoupdatepassword"));
@@ -152,7 +152,7 @@ export const user_update_password = (values, enqueueSnackbar) => {
   return (dispatch) => {
     try {
       axios
-        .post(ApiService.getBaseUrl() + "/users/updatePassword", values)
+        .post(`${process.env.REACT_APP_URL}/users/updatePassword`, values)
         .then((res) => {
           console.log("RES", res);
           console.log(res);
@@ -173,7 +173,7 @@ export const user_update_password = (values, enqueueSnackbar) => {
 export const update_user = (values) => {
   return (dispatch) => {
     axios
-      .post(ApiService.getBaseUrl() + "/users/userUpdate", values)
+      .post(`${process.env.REACT_APP_URL}/users/userUpdate`, values)
       .then((res) => {
         dispatch({ type: "UPDATE_USER", payload: res.data.content });
       })
@@ -186,7 +186,7 @@ export const update_user = (values) => {
 export const delete_user = (values) => {
   return (dispatch) => {
     axios
-      .post(ApiService.getBaseUrl() + "/users/deleteUser", values)
+      .post(`${process.env.REACT_APP_URL}/users/deleteUser`, values)
       .then((res) => {
         dispatch({ type: "DELETE_USER", payload: values.objectId });
       })

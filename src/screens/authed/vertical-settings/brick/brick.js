@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "4px",
     boxShadow: theme.shadows[5],
     padding: "20px",
-    width: "25%",
+    width: "35%",
     inHeight: "50%",
     [theme.breakpoints.down("sm")]: {
       width: "70%",
@@ -58,8 +58,16 @@ const Brick = () => {
   const [abbreviation, setAbbreviation] = useState("");
   const [brickType, setBrickType] = useState("");
   const [territoryId, setTerritoryId] = useState("");
+  const [zoneId, setZoneId] = useState("");
+  const [regionId, setRegionId] = useState("");
+  const [cityId, setCityId] = useState("");
+  const [provinceId, setProvinceId] = useState("");
   const [Id, setId] = useState("");
   const [dropDownTerritory, setDropDownTerritory] = useState([]);
+  const [dropdownProvince, setDropDownProvince] = useState([]);
+  const [dropdownRegion, setDropDownRegion] = useState([]);
+  const [dropdownZone, setDropDownZone] = useState([]);
+  const [dropdownCity, setDropDownCity] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
 
   const handleOpen = () => {
@@ -68,6 +76,15 @@ const Brick = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setAbbreviation("");
+    setName("");
+    setObjectId("");
+    setBrickType("");
+    setTerritoryId("");
+    setRegionId("");
+    setProvinceId("");
+    setZoneId("");
+    setCityId("");
   };
 
   const handleEditOpen = (id) => {
@@ -76,6 +93,73 @@ const Brick = () => {
 
   const handleEditClose = () => {
     setEditModal(false);
+    setAbbreviation("");
+    setName("");
+    setObjectId("");
+    setBrickType("");
+    setTerritoryId("");
+    setRegionId("");
+    setProvinceId("");
+    setZoneId("");
+    setCityId("");
+  };
+
+  const handleProvinceChange = async (e) => {
+    setProvinceId(e.target.value);
+    const id = e.target.value;
+    setRegionId("");
+    setZoneId("");
+    setCityId("");
+    setTerritoryId("");
+    await axios
+      .get(`${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${id}`)
+      .then((res) => {
+        setDropDownRegion(res.data.results);
+      });
+  };
+
+  const handleRegionChange = async (e) => {
+    setRegionId(e.target.value);
+    const id = e.target.value;
+    const form = { id };
+    setZoneId("");
+    setCityId("");
+    setTerritoryId("");
+    console.log(form);
+    await axios
+      .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${id}`)
+      .then((res) => {
+        setDropDownZone(res.data.results);
+      });
+  };
+
+  const handleZoneChange = async (e) => {
+    setZoneId(e.target.value);
+    const id = e.target.value;
+    const form = { id };
+    console.log(form);
+    setCityId("");
+    setTerritoryId("");
+    await axios
+      .get(`${process.env.REACT_APP_URL}/cities/getCities?zoneId=${id}`)
+      .then((res) => {
+        setDropDownCity(res.data.results);
+      });
+  };
+
+  const handleCityChange = async (e) => {
+    setCityId(e.target.value);
+    const id = e.target.value;
+    const form = { id };
+    console.log(form);
+    setTerritoryId("");
+    await axios
+      .get(
+        `${process.env.REACT_APP_URL}/territory/getTerritories/?cityId=${id}`
+      )
+      .then((res) => {
+        setDropDownTerritory(res.data.results);
+      });
   };
 
   const addBrick = () => {
@@ -85,6 +169,10 @@ const Brick = () => {
       abbreviation,
       brickType,
       territoryId,
+      zoneId,
+      regionId,
+      cityId,
+      provinceId,
     };
     axios
       .post(`${process.env.REACT_APP_URL}/bricks/postBrick`, form)
@@ -101,7 +189,12 @@ const Brick = () => {
     setAbbreviation("");
     setName("");
     setObjectId("");
+    setBrickType("");
     setTerritoryId("");
+    setRegionId("");
+    setProvinceId("");
+    setZoneId("");
+    setCityId("");
   };
 
   const editProvince = async (id) => {
@@ -111,12 +204,50 @@ const Brick = () => {
       form
     );
     console.log(response.data);
-    setId(response.data._id);
+    setId(response.data.id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
     setAbbreviation(response.data.abbreviation);
     setBrickType(response.data.brickType);
-    setTerritoryId(response.data.territoryId._id);
+    setProvinceId(response.data.provinceId?.id);
+    // setTerritoryId(response.data.territoryId.id);
+
+    const newid = response.data.provinceId?.id;
+    axios
+      .get(
+        `${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${newid}`
+      )
+      .then((res) => {
+        setDropDownRegion(res.data.results);
+        setRegionId(res.data.results[0].id);
+
+        const newid = response.data.regionId?.id;
+        axios
+          .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${newid}`)
+          .then((res) => {
+            setDropDownZone(res.data.results);
+            setZoneId(res.data.results[0].id);
+
+            const newid = response.data.zoneId?.id;
+            axios
+              .get(
+                `${process.env.REACT_APP_URL}/cities/getCities?zoneId=${newid}`
+              )
+              .then((res) => {
+                setDropDownCity(res.data.results);
+                setCityId(res.data.results[0].id);
+                const newid = res.data.results[0]?.id;
+                axios
+                  .get(
+                    `${process.env.REACT_APP_URL}/territory/getTerritories/?cityId=${newid}`
+                  )
+                  .then((res) => {
+                    setDropDownTerritory(res.data.results);
+                    setTerritoryId(res.data.results[0].id);
+                  });
+              });
+          });
+      });
     setEditModal(true);
   };
 
@@ -128,6 +259,10 @@ const Brick = () => {
       abbreviation,
       brickType,
       territoryId,
+      zoneId,
+      regionId,
+      cityId,
+      provinceId,
     };
     await axios
       .post(`${process.env.REACT_APP_URL}/bricks/updateBrick`, form)
@@ -144,7 +279,12 @@ const Brick = () => {
     setAbbreviation("");
     setName("");
     setObjectId("");
+    setBrickType("");
     setTerritoryId("");
+    setRegionId("");
+    setProvinceId("");
+    setZoneId("");
+    setCityId("");
   };
 
   const deleteProvince = (id) => {
@@ -160,6 +300,9 @@ const Brick = () => {
               .post(`${process.env.REACT_APP_URL}/bricks/deleteBrick`, form)
               .then((res) => {
                 console.log(res.data);
+                enqueueSnackbar("Brick Delete Successfully", {
+                  variant: "success",
+                });
                 fetchBrick();
               })
               .catch(function (error) {
@@ -181,7 +324,7 @@ const Brick = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/bricks/getBricks`)
       .then((response) => {
-        const allfetchBrick = response.data;
+        const allfetchBrick = response.data.results;
         setEmp(allfetchBrick);
         setLoad(false);
       })
@@ -194,13 +337,11 @@ const Brick = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_URL}/territory/getTerritories`)
+      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
       .then((res) => {
-        setDropDownTerritory(res.data);
-        console.log(res.data);
+        setDropDownProvince(res.data.results);
       });
   }, []);
-
   return (
     <div>
       <Breadcrumbs aria-label="breadcrumb">
@@ -267,45 +408,29 @@ const Brick = () => {
                 >
                   Brick Type
                 </TableCell>
+
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  Territory ID
+                  Territory
                 </TableCell>
+
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  Territory Name
+                  Zone
                 </TableCell>
+
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  Zone ID
+                  Region
                 </TableCell>
+
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  Zone Name
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  Region ID
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  Region Name
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  Province ID
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  Province Name
+                  Province
                 </TableCell>
                 <TableCell
                   style={{
@@ -332,22 +457,10 @@ const Brick = () => {
 
                     <TableCell>{user.abbreviation}</TableCell>
                     <TableCell>{user.brickType}</TableCell>
-                    <TableCell>{user.territoryId?.objectId}</TableCell>
                     <TableCell>{user.territoryId?.name}</TableCell>
-                    <TableCell>{user.territoryId?.zoneId?.objectId}</TableCell>
-                    <TableCell>{user.territoryId?.zoneId?.name}</TableCell>
-                    <TableCell>
-                      {user.territoryId?.zoneId?.regionId?.objectId}
-                    </TableCell>
-                    <TableCell>
-                      {user.territoryId?.zoneId?.regionId?.name}
-                    </TableCell>
-                    <TableCell>
-                      {user.territoryId?.zoneId?.regionId?.provinceId?.objectId}
-                    </TableCell>
-                    <TableCell>
-                      {user.territoryId?.zoneId?.regionId?.provinceId?.name}
-                    </TableCell>
+                    <TableCell>{user.zoneId?.name}</TableCell>
+                    <TableCell>{user.regionId?.name}</TableCell>
+                    <TableCell>{user.cityId?.name}</TableCell>
                     <TableCell>
                       <div
                         style={{
@@ -358,7 +471,7 @@ const Brick = () => {
                       >
                         <Button
                           onClick={() => {
-                            editProvince(user._id);
+                            editProvince(user.id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -366,7 +479,7 @@ const Brick = () => {
 
                         <Button
                           onClick={() => {
-                            deleteProvince(user._id);
+                            deleteProvince(user.id);
                           }}
                         >
                           <DeleteIcon color="secondary" />
@@ -405,54 +518,92 @@ const Brick = () => {
                 }}
               >
                 <h2 id="transition-modal-title">Add Brick</h2>
-                <div style={{ marginTop: "10px", width: "80%" }}>
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Name"
-                    variant="outlined"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ width: "100%", display: "flex" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Abbreviation"
-                    variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
-                  />
+                  <div style={{ width: "100%", display: "flex" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
+
+                    <FormControl
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                      variant="outlined"
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Brick Type
+                      </InputLabel>
+                      <Select
+                        native
+                        label="Brick Type"
+                        value={brickType}
+                        onChange={(e) => setBrickType(e.target.value)}
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="Ims Brick">Ims Brick</option>
+                        <option value="Distributor Brick">
+                          Distributor Brick
+                        </option>
+                      </Select>
+                    </FormControl>
+                  </div>
 
                   <FormControl
-                    style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Brick Type
+                      Province
                     </InputLabel>
                     <Select
+                      // value={department}
+                      onChange={handleProvinceChange}
                       native
-                      label="Brick Type"
-                      value={brickType}
-                      onChange={(e) => setBrickType(e.target.value)}
+                      value={provinceId}
+                      label="Province"
                     >
-                      <option aria-label="None"> </option>
-                      <option value="Ims Brick">Ims Brick</option>
-                      <option value="Distributor Brick">
-                        Distributor Brick
-                      </option>
+                      <option aria-label="None" />
+                      {dropdownProvince.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
                     </Select>
                   </FormControl>
 
@@ -461,18 +612,88 @@ const Brick = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Territory ID
+                      Region
                     </InputLabel>
                     <Select
+                      // value={department}
+                      onChange={handleRegionChange}
+                      native
+                      value={regionId}
+                      label="Region"
+                    >
+                      <option aria-label="None" />
+                      {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Zone
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={handleZoneChange}
+                      native
+                      value={zoneId}
+                      label="Zone"
+                    >
+                      <option aria-label="None" />
+                      {dropdownZone.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      City
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={handleCityChange}
+                      native
+                      value={cityId}
+                      label="City"
+                    >
+                      <option aria-label="None" />
+                      {dropdownCity.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Territory
+                    </InputLabel>
+                    <Select
+                      // value={department}
                       onChange={(e) => setTerritoryId(e.target.value)}
                       native
                       value={territoryId}
-                      label="Territory ID"
+                      label="Territory"
                     >
                       <option aria-label="None" />
                       {dropDownTerritory.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
+                        <option key={value.id} value={value.id}>
+                          {value.name}
                         </option>
                       ))}
                     </Select>
@@ -488,7 +709,7 @@ const Brick = () => {
                   }}
                 >
                   <Button
-                    style={{ width: "45%" }}
+                    style={{ width: "100%", color: "white" }}
                     variant="contained"
                     color="primary"
                     onClick={addBrick}
@@ -524,55 +745,93 @@ const Brick = () => {
                   alignItems: "center",
                 }}
               >
-                <h2 id="transition-modal-title">Edit City</h2>
-                <div style={{ marginTop: "10px", width: "80%" }}>
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Name"
-                    variant="outlined"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                <h2 id="transition-modal-title">Edit Brick</h2>
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ width: "100%", display: "flex" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Abbreviation"
-                    variant="outlined"
-                    value={abbreviation}
-                    onChange={(e) => setAbbreviation(e.target.value)}
-                  />
+                  <div style={{ width: "100%", display: "flex" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
+
+                    <FormControl
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                      variant="outlined"
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Brick Type
+                      </InputLabel>
+                      <Select
+                        native
+                        label="Brick Type"
+                        value={brickType}
+                        onChange={(e) => setBrickType(e.target.value)}
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="Ims Brick">Ims Brick</option>
+                        <option value="Distributor Brick">
+                          Distributor Brick
+                        </option>
+                      </Select>
+                    </FormControl>
+                  </div>
 
                   <FormControl
-                    style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Brick Type
+                      Province
                     </InputLabel>
                     <Select
+                      // value={department}
+                      onChange={handleProvinceChange}
                       native
-                      label="Brick Type"
-                      value={brickType}
-                      onChange={(e) => setBrickType(e.target.value)}
+                      value={provinceId}
+                      label="Province"
                     >
-                      <option aria-label="None"> </option>
-                      <option value="Ims Brick">Ims Brick</option>
-                      <option value="Distributor Brick">
-                        Distributor Brick
-                      </option>
+                      <option aria-label="None" />
+                      {dropdownProvince.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
                     </Select>
                   </FormControl>
 
@@ -581,24 +840,93 @@ const Brick = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Territory ID
+                      Region
                     </InputLabel>
                     <Select
+                      // value={department}
+                      onChange={handleRegionChange}
+                      native
+                      value={regionId}
+                      label="Region"
+                    >
+                      <option aria-label="None" />
+                      {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Zone
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={handleZoneChange}
+                      native
+                      value={zoneId}
+                      label="Zone"
+                    >
+                      <option aria-label="None" />
+                      {dropdownZone.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      City
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={handleCityChange}
+                      native
+                      value={cityId}
+                      label="City"
+                    >
+                      <option aria-label="None" />
+                      {dropdownCity.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Territory
+                    </InputLabel>
+                    <Select
+                      // value={department}
                       onChange={(e) => setTerritoryId(e.target.value)}
                       native
                       value={territoryId}
-                      label="Territory ID"
+                      label="Territory"
                     >
                       <option aria-label="None" />
                       {dropDownTerritory.map((value, index) => (
-                        <option key={value.id} value={value._id}>
-                          {value.objectId}
+                        <option key={value.id} value={value.id}>
+                          {value.name}
                         </option>
                       ))}
                     </Select>
                   </FormControl>
                 </div>
-
                 <div
                   style={{
                     display: "flex",
@@ -608,7 +936,7 @@ const Brick = () => {
                   }}
                 >
                   <Button
-                    style={{ width: "45%" }}
+                    style={{ width: "100%", color: "white" }}
                     variant="contained"
                     color="primary"
                     onClick={() => editFormProvince(Id)}

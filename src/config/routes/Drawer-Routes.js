@@ -332,17 +332,7 @@ function DrawerAndRoutes() {
                   <ListItemText primary="Zone" />
                 </ListItem>
               ) : null}
-              {user && user.role === "admin" ? (
-                <ListItem
-                  button
-                  className={classes.nested}
-                  onClick={() => {
-                    history.push("/vertical-settings/territory");
-                  }}
-                >
-                  <ListItemText primary="Teritory" />
-                </ListItem>
-              ) : null}
+
               {user && user.role === "admin" ? (
                 <ListItem
                   button
@@ -352,6 +342,17 @@ function DrawerAndRoutes() {
                   }}
                 >
                   <ListItemText primary="City" />
+                </ListItem>
+              ) : null}
+              {user && user.role === "admin" ? (
+                <ListItem
+                  button
+                  className={classes.nested}
+                  onClick={() => {
+                    history.push("/vertical-settings/territory");
+                  }}
+                >
+                  <ListItemText primary="Territory" />
                 </ListItem>
               ) : null}
               {user && user.role === "admin" ? (

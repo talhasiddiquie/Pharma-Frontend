@@ -89,7 +89,8 @@ const Province = () => {
         fetchProvince();
       })
       .catch(function (error) {
-        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        // enqueueSnackbar(error, { variant: "error" });
+        console.log(error.message);
       });
 
     setName("");
@@ -147,11 +148,17 @@ const Province = () => {
   };
 
   const editProvince = async (id) => {
+    const newId = id;
+    const form = {
+      id: newId,
+    };
+    console.log(newId);
     let response = await axios.post(
-      `${process.env.REACT_APP_URL}/provinces/${id}`
+      `${process.env.REACT_APP_URL}/provinces/getProvince`,
+      form
     );
     console.log(response.data);
-    setId(response.data._id);
+    setId(response.data.id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
     setIsActive(response.data.isActive);
@@ -164,7 +171,7 @@ const Province = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
       .then((response) => {
-        const allProvince = response.data.content;
+        const allProvince = response.data.results;
         setEmp(allProvince);
         setLoad(false);
       })
@@ -281,7 +288,7 @@ const Province = () => {
                       >
                         <Button
                           onClick={() => {
-                            editProvince(user._id);
+                            editProvince(user.id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -289,7 +296,7 @@ const Province = () => {
 
                         <Button
                           onClick={() => {
-                            deleteProvince(user._id);
+                            deleteProvince(user.id);
                           }}
                         >
                           <DeleteIcon color="secondary" />

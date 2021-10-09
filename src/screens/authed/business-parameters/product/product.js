@@ -1,576 +1,897 @@
-import React, { useState, useEffect } from 'react'
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import { makeStyles } from '@material-ui/core/styles';
-import { useHistory } from 'react-router-dom'
-import Breadcrumbs from '@material-ui/core/Breadcrumbs';
-import Link from '@material-ui/core/Link';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import FormGridTabs from '../../../components/Tabs/Form-Grid-Tabs'
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import AddIcon from '@material-ui/icons/Add'
-import EditIcon from '@material-ui/icons/Edit';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import GridTable from '../../../components/GridTable/grid-table';
-import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl'
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import { useDispatch, useSelector } from 'react-redux'
-import * as ProductActions from '../../../../config/Store/Actions/products.actions'
-import * as CompanyActions from '../../../../config/Store/Actions/company.action';
-import * as AttachmentAction from '../../../../config/Store/Actions/attachmentsUpload.action';
-import { useAlert } from "react-alert";
-import { Upload, message } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
-import axios from 'axios';
-import ApiService from '../../../../config/ApiService';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import PDFIMAGE from '../../../../assets/images/pdf.png';
-import DOCSIMAGE from '../../../../assets/images/docx.jpg';
-import GIFIMAGE from '../../../../assets/images/gif.png';
-import JPGIMAGE from '../../../../assets/images/jpg.png';
-import PNGIMAGE from '../../../../assets/images/png.png';
-import CSVIMAGE from '../../../../assets/images/csv.jpg';
-import MP3IMAGE from '../../../../assets/images/mp3.png';
-import MP4IMAGE from '../../../../assets/images/mp4.png';
-import TEXTIMAGE from '../../../../assets/images/text.png';
-import WEBMIMAGE from '../../../../assets/images/webm.png';
-import WEBPIMAGE from '../../../../assets/images/webp.png';
-import XLSXIMAGE from '../../../../assets/images/xlsx.png';
-import ZIPIMAGE from '../../../../assets/images/zip.png';
-import Modal from '../../../components/Modal/Modal';
+import React, { useState, useEffect } from "react";
+import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+import Link from "@material-ui/core/Link";
+import Typography from "@material-ui/core/Typography";
+import { useHistory } from "react-router-dom";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import axios from "axios";
+import { Button, TextField } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
+import Modal from "@material-ui/core/Modal";
+import Backdrop from "@material-ui/core/Backdrop";
+import Fade from "@material-ui/core/Fade";
+import Card from "@material-ui/core/Card";
+import Select from "@material-ui/core/Select";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
+import SuccessIcon from "../../../components/Success&PendingIcon/SuccessIcon";
+import PendingIcon from "../../../components/Success&PendingIcon/PendingIcon";
+import { confirmAlert } from "react-confirm-alert"; // Import
+import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+import { useSnackbar } from "notistack";
+import { makeStyles } from "@material-ui/core/styles";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import { object } from "joi";
 
-const Dragger = Upload.Dragger;
-
-const useStyles = makeStyles({
-    root: {
+const useStyles = makeStyles((theme) => ({
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: "2px solid white",
+    borderRadius: "4px",
+    boxShadow: theme.shadows[5],
+    padding: "20px",
+    width: "35%",
+    inHeight: "50%",
+    [theme.breakpoints.down("sm")]: {
+      width: "70%",
+      inHeight: "55%",
     },
-    media: {
-        maxWidth: 150,
-        height: 30,
-    },
-    dragger: {
-        padding: '2% 0%'
-    },
-    filenames: {
-        padding: '0.5% 0%'
-    },
-    imageThumbnail: {
-        width: "70px",
-        height: "70px"
-    }
-});
+  },
+}));
 
-function Product() {
-    const classes = useStyles();
-    const history = useHistory();
-    const dispatch = useDispatch()
-    const user = useSelector((state) => state.user.user);
-    const allProducts = useSelector((state) => state.product.allProducts);
-    const allCompanies = useSelector((state) => state.company.allCompanies);
-    const attachment = useSelector((state) => state.attachment.attachmentsFiles)
-    const [tab, setTab] = useState(0);
-    const alert = useAlert();
-    const [name, setName] = useState('')
-    const [abbreviation, setAbbreviation] = useState('')
-    const [molecule, setMolecule] = useState('')
-    const [sellingLine, setSellingLine] = useState('')
-    const [approvedIndication, setApprovedIndication] = useState('')
-    const [mrp, setMrp] = useState('')
-    const [tp, setTp] = useState('')
-    const [sellingMessages, setSellingMessages] = useState('')
-    const [additionalInfo, setAdditionalInfo] = useState('')
-    const [discount, setDiscount] = useState(null)
-    const [company, setCompany] = useState('')
-    const [addForm, setAddForm] = useState(false);
-    const [selectedData, setSelectedData] = useState(false)
-    const [isEditingSelectedData, setIsEditingSelectedData] = useState(false)
-    const [objectId, setobjectId] = useState('')
-    const [fileList, setFileList] = useState([])
-    const [files, setFiles] = useState([])
-    const [refersh, setRefresh] = useState(false)
-    const [loader, setLoader] = useState(false);
-    const [previewFile, setPreviewFile] = useState('')
-    const [openDialog, setOpenDialog] = useState(false)
+const Product = () => {
+  const classes = useStyles();
+  const history = useHistory();
+  const [emp, setEmp] = useState([]);
+  const [load, setLoad] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [objectId, setObjectId] = useState("");
+  const [name, setName] = useState("");
+  const [abbreviation, setAbbreviation] = useState("");
+  const [molecule, setMolecule] = useState("");
+  const [company, setCompany] = useState("");
+  const [sellingLine, setSellingLine] = useState("");
+  const [approvedIndication, setApprovedIndication] = useState("");
+  const [mrp, setMrp] = useState("");
+  const [tp, setTp] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [keySellingMessage, setKeySellingMessage] = useState("");
+  const [additionalInfo, setAdditionalInfo] = useState("");
+  const [Id, setId] = useState("");
+  const [dropdownSellingLine, setDropDownSellingLine] = useState([]);
+  const [files, setFiles] = useState([]);
+  const { enqueueSnackbar } = useSnackbar();
 
-    useEffect(() => {
-        if (!allCompanies) {
-            dispatch(CompanyActions.get_companies())
-        }
-        if (!allProducts) {
-            dispatch(ProductActions.get_all_products())
-        }
-        if (!refersh) {
-            if (attachment) {
-                dispatch(AttachmentAction.upload_attachment())
-            }
-        }
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
-    }, [allProducts, allCompanies])
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-    function handleRowClick(data) {
-        setTab(1)
-        setName(data.name)
-        setAbbreviation(data.abbreviation)
-        setMolecule(data.molecule)
-        setSellingLine(data.sellingLine)
-        setApprovedIndication(data.approvedIndication)
-        setMrp(data.mrp)
-        setTp(data.tp)
-        setCompany(data.company)
-        setSellingMessages(data.sellingMessages)
-        setAdditionalInfo(data.additionalInfo)
-        setDiscount(data.discount)
-        setSelectedData(true)
-        setobjectId(data._id)
-        setFiles(data.files)
-        setIsEditingSelectedData(true)
-        setAddForm(true)
-    }
+  const handleEditOpen = (id) => {
+    setEditModal(true);
+  };
 
-    function handleAdd() {
-        setName('')
-        setAbbreviation('')
-        setMolecule('')
-        setSellingLine('')
-        setApprovedIndication('')
-        setMrp('')
-        setTp('')
-        setSellingMessages('')
-        setAdditionalInfo('')
-        setDiscount('')
-        setobjectId('')
-        setCompany('')
-        setFileList([])
-        setFiles([])
-        setTab(0)
-        setSelectedData(false)
-        setIsEditingSelectedData(false)
-        setAddForm(false)
-        setLoader(false)
+  const handleEditClose = () => {
+    setEditModal(false);
+  };
 
-    }
+  const addProduct = () => {
+    const form = new FormData();
+    form.append("objectId", objectId);
+    form.append("name", name);
+    form.append("abbreviation", abbreviation);
+    form.append("sellingLine", sellingLine);
+    form.append("company", company);
+    form.append("molecule", molecule);
+    form.append("approvedIndication", approvedIndication);
+    form.append("mrp", mrp);
+    form.append("tp", tp);
+    form.append("sellingMessage", keySellingMessage);
+    form.append("discount", discount);
+    form.append("additionalInfo", additionalInfo);
+    form.append("files", files);
 
-    const editData = () => {
-        setIsEditingSelectedData(false)
-        setSelectedData(false)
-        setAddForm(true)
-    }
-
-    const handleSave = async () => {
-        setLoader(true)
-        setIsEditingSelectedData(true)
-        const arr = []
-        await Promise.all(fileList.map(async (val, i) => {
-            var data = new FormData()
-            data.append('file', val.originFileObj);
-            await axios.post(ApiService.getBaseUrl() + '/attachmnets/uploadAttachments', data, {
-                headers: {
-                    'content-type': 'multipart/form-data'
-                }
-            }).then((res) => {
-                arr.push(res.data.content)
-                dispatch({ type: "UPLOAD_ATTACHMENT", payload: res.data });
-            }).catch((error) => {
-                dispatch({ type: "UPLOAD_ATTACHMENT_FAILURE", payload: error });
-            })
-        })).then((results) => {
-
-        })
-
-        const body = {
-            name,
-            abbreviation,
-            molecule,
-            sellingLine,
-            approvedIndication,
-            mrp,
-            tp,
-            sellingMessages,
-            additionalInfo,
-            discount,
-            company
-        }
-        if (objectId !== "") {
-            body.objectId = objectId;
-            body.updatedBy = user._id;
-            body.files = [...files, ...arr]
-            dispatch(ProductActions.update_product(body))
-            alert.success("Product Updated!");
-            handleAdd()
-        }
-        else {
-            body.createdBy = user._id;
-            if (name !== '' && abbreviation !== "" && molecule !== "" && sellingLine !== "" && approvedIndication !== "" && mrp !== "" &&
-                tp !== "" && sellingMessages !== "" && additionalInfo !== "" && arr.length !== 0
-            ) {
-                body.files = arr;
-                dispatch(ProductActions.add_product(body))
-                alert.success("Product Added!");
-                handleAdd()
-            }
-            else {
-                alert.error("All fields are required!");
-                setLoader(false)
-                setIsEditingSelectedData(false)
-            }
-        }
-    }
-
-    const deleteProduct = () => {
-        let body = {
-            objectId
-        }
-        dispatch(ProductActions.delete_product(body));
-        handleAdd()
-    }
-
-    const props = {
-        name: 'file',
-        multiple: true,
-        action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-        onChange(info) {
-            const { status } = info.file;
-            if (status !== 'uploading') {
-                setFileList(info.fileList)
-                setRefresh(true)
-            }
-            if (status === 'done') {
-                message.success(`${info.file.name} file uploaded successfully.`);
-            } else if (status === 'error') {
-                message.error(`${info.file.name} file upload failed.`);
-            }
+    console.log(form);
+    axios
+      .post(`${process.env.REACT_APP_URL}/products/postProduct`, form, {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
         },
-    };
+      })
+      .then((res) => {
+        console.log(res.data);
+        enqueueSnackbar("Product Add Successfully", { variant: "success" });
+        setOpen(false);
+        fetchProduct();
+      })
+      .catch(function (error) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
+      });
+  };
 
-    const handleChanged = (file, index) => {
-        setPreviewFile(file)
-        setOpenDialog(true)
-    }
+  const getCompanyById = async (id) => {
+    console.log();
+    const form = { id };
+    let response = await axios.post(
+      `${process.env.REACT_APP_URL}/products/getProduct`,
+      form
+    );
+    console.log(response.data);
+    setId(response.data._id);
+    setName(response.data.name);
+    setObjectId(response.data.objectId);
+    setAbbreviation(response.data.abbreviation);
+    setMolecule(response.data.molecule);
+    setCompany(response.data.company);
+    setSellingLine(response.data.sellingLine?._id);
+    setApprovedIndication(response.data.approvedIndication);
+    setMrp(response.data.mrp);
+    setTp(response.data.tp);
+    setDiscount(response.data.discount);
+    setKeySellingMessage(response.data.sellingMessage);
+    setAdditionalInfo(response.data.additionalInfo);
 
-    const handleChangeDelete = (file, index) => {
-        var filesDataChanged = []
-        for (var keys in files) {
-            var data = files[keys];
-            if (data._id !== file._id) {
-                filesDataChanged.push(data)
-            }
-        }
-        setFiles(filesDataChanged)
-    }
+    setEditModal(true);
+  };
 
+  const editFormProvince = async (id) => {
+    console.log(id, "-----------------------.");
+    const form = new FormData();
+    form.append("id", id);
+    form.append("objectId", objectId);
+    form.append("name", name);
+    form.append("abbreviation", abbreviation);
+    form.append("sellingLine", sellingLine);
+    form.append("company", company);
+    form.append("molecule", molecule);
+    form.append("approvedIndication", approvedIndication);
+    form.append("mrp", mrp);
+    form.append("tp", tp);
+    form.append("sellingMessage", keySellingMessage);
+    form.append("discount", discount);
+    form.append("additionalInfo", additionalInfo);
+    form.append("files", files);
 
-    return (
-        <>
-            <Breadcrumbs aria-label="breadcrumb">
-                <Link color="inherit" href="javascript:void(0)" onClick={() => { history.push('/dashboard') }}>
-                    Home
-             </Link>
-                <Typography color="textPrimary">Business-Parameters</Typography>
-                <Typography color="textPrimary">Product</Typography>
-            </Breadcrumbs>
-            <Modal
-                open={openDialog}
-                previewFile={previewFile}
-                close={() => { setOpenDialog(false) }}
-            />
-            <Card className={classes.root}>
-                <CardContent>
-                    {loader && <CircularProgress color="inherit" />}
-                    <FormGridTabs
-                        tab={tab}
-                        afterRowClick={() => { setTab(0) }}
-                        form={
+    console.log(form);
+    await axios
+      .post(`${process.env.REACT_APP_URL}/products/updateProduct`, form, {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+        setEditModal(false);
+        enqueueSnackbar("Product Edit Successfully", { variant: "success" });
+        fetchProduct();
+      })
+      .catch(function (error) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
+      });
+  };
 
-                            <Grid container spacing={3}>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        label="Product ID"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        disabled
-                                        fullWidth
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Product Name"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        disabled={isEditingSelectedData}
-                                        value={name}
-                                        onChange={(e) => { setName(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Product Abbreviation"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={abbreviation}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setAbbreviation(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Molecule"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={molecule}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setMolecule(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Company"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={company}
-                                        disabled={isEditingSelectedData}
-                                        onChange={(e) => { setCompany(e.target.value) }}
-                                    />
+  const deleteProvince = (id) => {
+    const form = { id };
+    confirmAlert({
+      title: "Confirm to Delete",
+      message: "Are you sure to do this.",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            axios
+              .post(`${process.env.REACT_APP_URL}/products/deleteProduct`, form)
+              .then((res) => {
+                console.log(res.data);
+                fetchProduct();
+              })
+              .catch(function (error) {
+                console.log(error.response);
+              });
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
 
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl variant="outlined" className={classes.formControl} fullWidth>
-                                        <InputLabel id="Selling Line">Selling Line</InputLabel>
-                                        <Select
-                                            labelId="Selling Line"
-                                            label="Selling Line"
-                                            fullWidth
-                                            value={sellingLine}
-                                            disabled={isEditingSelectedData}
-                                            onChange={(e) => { setSellingLine(e.target.value) }}
-                                        >
-                                            {allCompanies && allCompanies.map((company) => {
-                                                return (
-                                                    <MenuItem key={company._id} value={company._id}>
-                                                        {company.name}
-                                                    </MenuItem>
-                                                )
-                                            }
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Approved Indication"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        disabled={isEditingSelectedData}
-                                        value={approvedIndication}
-                                        onChange={(e) => { setApprovedIndication(e.target.value) }}
-                                    />
-                                </Grid>
+  const fetchProduct = async () => {
+    await axios
+      .get(`${process.env.REACT_APP_URL}/products/getProducts`)
+      .then((response) => {
+        const allProduct = response.data;
+        console.log(allProduct);
+        setEmp(allProduct);
+        setLoad(false);
+      })
+      .catch((error) => console.log(`Error: ${error}`));
+  };
 
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="MRP"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        type={"number"}
-                                        disabled={isEditingSelectedData}
-                                        value={mrp}
-                                        onChange={(e) => { setMrp(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="TP"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        type={"number"}
-                                        disabled={isEditingSelectedData}
-                                        value={tp}
-                                        onChange={(e) => { setTp(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Scheme / Discount"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        disabled={isEditingSelectedData}
-                                        value={discount}
-                                        onChange={(e) => { setDiscount(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        label="Key Selling Messages"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        disabled={isEditingSelectedData}
-                                        value={sellingMessages}
-                                        onChange={(e) => { setSellingMessages(e.target.value) }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        label="Additional Info"
-                                        placeholder="type"
-                                        variant="outlined"
-                                        fullWidth
-                                        multiline
-                                        rows={4}
-                                        disabled={isEditingSelectedData}
-                                        value={additionalInfo}
-                                        onChange={(e) => { setAdditionalInfo(e.target.value) }}
-                                    />
-                                </Grid>
+  useEffect(() => {
+    fetchProduct();
+  }, [load]);
 
-                                <Grid item xs={12} sm={12}
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
+      .then((res) => {
+        setDropDownSellingLine(res.data);
+      });
+  }, []);
+  return (
+    <div>
+      <Breadcrumbs aria-label="breadcrumb">
+        <Link
+          color="inherit"
+          href="javascript:void(0)"
+          onClick={() => {
+            history.push("/dashboard");
+          }}
+        >
+          Home
+        </Link>
+        <Typography color="textPrimary">Business-Parameters</Typography>
+        <Typography color="textPrimary">Product</Typography>
+      </Breadcrumbs>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginBottom: "10px",
+        }}
+      >
+        <Button
+          style={{ width: "150px" }}
+          variant="contained"
+          color="primary"
+          style={{ width: "200px", color: "white" }}
+          onClick={handleOpen}
+        >
+          Add Product
+        </Button>
+      </div>
+      <div>
+        <TableContainer
+          style={{
+            borderRadius: "4px",
+            width: "100%",
+            overflow: "auto",
+            minWidth: "450px",
+          }}
+          component={Paper}
+        >
+          <Table>
+            <TableHead style={{ background: "#00AEEF" }}>
+              <TableRow>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  ID
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Name
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Abbrevation
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Molecule
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Company
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Selling Line
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Approved Indication
+                </TableCell>
 
-                                >
-                                    <div className={classes.dragger}>
-                                        <Dragger {...props}
-                                            disabled={isEditingSelectedData}
-                                        >
-                                            <p className="ant-upload-drag-icon" >
-                                                <InboxOutlined />
-                                            </p>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Mrp
+                </TableCell>
 
-                                            <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                                            <p className="ant-upload-hint">
-                                                Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-                                                band files
-                                        </p>
-                                        </Dragger>
-                                    </div>
-                                </Grid>
-                                <Grid item xs={12} sm={12}>
-                                    <div style={{
-                                        display: "flex",
-                                    }}>
-                                        {files && files.length > 0 && files.map((elem, key) => {
-                                            var fileTypes = elem.fileName.substring(elem.fileName.lastIndexOf('.'), elem.fileName.length);
-                                            var fileName = elem.fileName.substring(elem.fileName.indexOf('f'), elem.fileName.lastIndexOf('-'));
-                                            return (
-                                                <Grid item xs={12} sm={2}
-                                                >
-                                                    <Button
-                                                        disabled={isEditingSelectedData}
-                                                        onClick={() => { handleChangeDelete(elem, key) }}
-                                                    >
-                                                        <RemoveCircleOutlineIcon />
-                                                    </Button>
-                                                    <Button
-                                                        disabled={isEditingSelectedData}
-                                                        onClick={() => { handleChanged(elem, key) }}
-                                                    >
-                                                        <VisibilityIcon />
-                                                    </Button>
-                                                    <div style={{
-                                                        display: "table-caption",
-                                                        alignItems: "center",
-                                                        justifyContent: "space-between",
-                                                        marginRight: '10px',
-                                                        marginLeft: '10px',
-                                                    }}>
-                                                        <div>
-                                                            {fileName}
-                                                        </div>
-                                                        <div>
-                                                            {fileTypes}
-                                                        </div>
-                                                        <div className={classes.filenames}>
-                                                            {fileTypes === '.pdf' ? <img src={PDFIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                :
-                                                                fileTypes === '.docx' ? <img src={DOCSIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                    :
-                                                                    fileTypes === '.gif' ? <img src={GIFIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                        :
-                                                                        fileTypes === '.jpg' ? <img src={JPGIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                            :
-                                                                            fileTypes === '.png' ? <img src={PNGIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                                :
-                                                                                fileTypes === '.csv' ? <img src={CSVIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                                    :
-                                                                                    fileTypes === '.mp3' ? <img src={MP3IMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                                        :
-                                                                                        fileTypes === '.mp4' ? <img src={MP4IMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                                            :
-                                                                                            fileTypes === '.txt' ? <img src={TEXTIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                                                :
-                                                                                                fileTypes === '.webm' ? <img src={WEBMIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                                                    :
-                                                                                                    fileTypes === '.webp' ? <img src={WEBPIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                                                        :
-                                                                                                        fileTypes === '.xlsx' ? <img src={XLSXIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                                                            :
-                                                                                                            fileTypes === '.zip' ? <img src={ZIPIMAGE} alt='img' className={classes.imageThumbnail} />
-                                                                                                                :
-                                                                                                                null
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                </Grid>
-                                            )
-                                        })}
-                                    </div>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <ButtonGroup variant="contained" color="secondary" size={'large'}>
-                                        {addForm &&
-                                            <Button onClick={handleAdd}><AddIcon style={{ marginRight: "2px" }} /> Add</Button>
-                                        }
-                                        {!selectedData &&
-                                            <Button disabled={selectedData} onClick={() => { handleSave() }}><SaveAltIcon style={{ marginRight: "5px" }} /> Save</Button>
-                                        }
-                                        {isEditingSelectedData && !loader &&
-                                            <Button onClick={editData}><EditIcon style={{ marginRight: "5px" }} /> Edit</Button>
-                                        }
-                                        {isEditingSelectedData && !loader &&
-                                            <Button onClick={deleteProduct}><DeleteOutlineIcon style={{ marginRight: "5px" }} /> Delete</Button>
-                                        }
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Tp
+                </TableCell>
 
-                                    </ButtonGroup>
-                                </Grid>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Discount
+                </TableCell>
 
-                            </Grid>
-                        }
-                        grid={
-                            <div>
-                                <GridTable
-                                    onRowClick={(data) => { handleRowClick(data) }}
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Key Selling Message
+                </TableCell>
 
-                                    headCells={
-                                        [
-                                            { id: 'name', label: 'Name' },
-                                            { id: 'company', label: 'Company' },
-                                            { id: 'molecule', label: 'Molecule' },
-                                            { id: 'files', label: 'Files' },
-                                        ]
-                                    }
-                                    rows={
-                                        allProducts
-                                    } />
-                            </div>
-                        }
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Additional Info
+                </TableCell>
+
+                {/* <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  File
+                </TableCell> */}
+
+                <TableCell
+                  style={{
+                    fontWeight: "600",
+                    width: "15%",
+                    textAlign: "center",
+                    color: "white",
+                  }}
+                >
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {emp.map((user, key, index) => {
+                return (
+                  <TableRow key={user._id}>
+                    <TableCell component="th" scope="row">
+                      {user.objectId}
+                    </TableCell>
+
+                    <TableCell component="th" scope="row">
+                      {user.name}
+                    </TableCell>
+                    <TableCell>{user.abbreviation}</TableCell>
+                    <TableCell>{user.molecule}</TableCell>
+                    <TableCell>{user.company}</TableCell>
+                    <TableCell>{user.sellingLine?.name}</TableCell>
+                    <TableCell>{user.approvedIndication}</TableCell>
+                    <TableCell>{user.mrp}</TableCell>
+                    <TableCell>{user.tp}</TableCell>
+                    <TableCell>{user.discount}</TableCell>
+                    <TableCell>{user.sellingMessage}</TableCell>
+                    <TableCell>{user.additionalInfo}</TableCell>
+                    {/* <TableCell>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          flexWrap: "nowrap",
+                          width: "150px",
+                        }}
+                      >
+                        <strong>
+                          {user.fileName ? (
+                            <a
+                              style={{ textDecoration: "none" }}
+                              //   href={`${BASE_ASSET}${user.fileName}`}
+                            >
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                style={{ marginLeft: 16 }}
+                              >
+                                Download CV
+                              </Button>
+                            </a>
+                          ) : null}
+                        </strong>
+                      </div>
+                    </TableCell> */}
+                    <TableCell>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Button
+                          onClick={() => {
+                            getCompanyById(user._id);
+                          }}
+                        >
+                          <EditIcon color="primary" />
+                        </Button>
+
+                        <Button
+                          onClick={() => {
+                            deleteProvince(user._id);
+                          }}
+                        >
+                          <DeleteIcon color="secondary" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
+
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={open}
+          onClose={handleClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={open}>
+            <div className={classes.paper}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">Add Product</h2>
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
                     />
-                </CardContent>
-            </Card>
-        </>
-    )
-}
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
 
-export default Product
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
+
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Molecule"
+                      variant="outlined"
+                      value={molecule}
+                      onChange={(e) => setMolecule(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex" }}>
+                    <TextField
+                      style={{
+                        marginTop: "10px",
+                        marginRight: "10px",
+                        width: "100%",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Company"
+                      variant="outlined"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                    />
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                      style={{ width: "100%", marginTop: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Selling Line
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setSellingLine(e.target.value)}
+                        id="abc"
+                        native
+                        value={sellingLine}
+                        label="Selling Line"
+                      >
+                        <option aria-label="None" />
+                        {dropdownSellingLine.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Approved Indication"
+                    variant="outlined"
+                    value={approvedIndication}
+                    onChange={(e) => setApprovedIndication(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="mrp"
+                    variant="outlined"
+                    value={mrp}
+                    onChange={(e) => setMrp(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Tp"
+                    variant="outlined"
+                    value={tp}
+                    onChange={(e) => setTp(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Discount"
+                    variant="outlined"
+                    value={discount}
+                    onChange={(e) => setDiscount(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Key Selling Message"
+                    variant="outlined"
+                    value={keySellingMessage}
+                    onChange={(e) => setKeySellingMessage(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Addtional Info"
+                    variant="outlined"
+                    multiline
+                    rows={4}
+                    value={additionalInfo}
+                    onChange={(e) => setAdditionalInfo(e.target.value)}
+                  />
+                  <Button
+                    style={{ marginTop: "10px", color: "white" }}
+                    variant="contained"
+                    component="label"
+                    color="primary"
+                    startIcon={<CloudUploadIcon />}
+                  >
+                    Upload Image
+                    <input
+                      name="flies"
+                      type="file"
+                      multiple
+                      onChange={(e) => setFiles(e.target.files[0])}
+                      hidden
+                    />
+                  </Button>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    marginTop: "15px",
+                  }}
+                >
+                  <Button
+                    style={{ width: "100%", color: "white" }}
+                    variant="contained"
+                    color="primary"
+                    onClick={addProduct}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={editModal}
+          onClose={handleEditClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={editModal}>
+            <div className={classes.paper}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">Edit Company</h2>
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="ID"
+                      variant="outlined"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                    />
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abbreviation"
+                      variant="outlined"
+                      value={abbreviation}
+                      onChange={(e) => setAbbreviation(e.target.value)}
+                    />
+
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Molecule"
+                      variant="outlined"
+                      value={molecule}
+                      onChange={(e) => setMolecule(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex" }}>
+                    <TextField
+                      style={{
+                        marginTop: "10px",
+                        marginRight: "10px",
+                        width: "100%",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Company"
+                      variant="outlined"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                    />
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                      style={{ width: "100%", marginTop: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Selling Line
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setSellingLine(e.target.value)}
+                        id="abc"
+                        native
+                        value={sellingLine}
+                        label="Selling Line"
+                      >
+                        <option aria-label="None" />
+                        {dropdownSellingLine.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Approved Indication"
+                    variant="outlined"
+                    value={approvedIndication}
+                    onChange={(e) => setApprovedIndication(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="mrp"
+                    variant="outlined"
+                    value={mrp}
+                    onChange={(e) => setMrp(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Tp"
+                    variant="outlined"
+                    value={tp}
+                    onChange={(e) => setTp(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Discount"
+                    variant="outlined"
+                    value={discount}
+                    onChange={(e) => setDiscount(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Key Selling Message"
+                    variant="outlined"
+                    value={keySellingMessage}
+                    onChange={(e) => setKeySellingMessage(e.target.value)}
+                  />
+
+                  <TextField
+                    style={{ width: "100%", marginTop: "10px" }}
+                    required
+                    id="outlined-required"
+                    label="Addtional Info"
+                    variant="outlined"
+                    multiline
+                    rows={4}
+                    value={additionalInfo}
+                    onChange={(e) => setAdditionalInfo(e.target.value)}
+                  />
+                  <Button
+                    style={{ marginTop: "10px", color: "white" }}
+                    variant="contained"
+                    component="label"
+                    color="primary"
+                    startIcon={<CloudUploadIcon />}
+                  >
+                    Upload Image
+                    <input
+                      name="flies"
+                      type="file"
+                      multiple
+                      onChange={(e) => setFiles(e.target.files[0])}
+                      hidden
+                    />
+                  </Button>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    marginTop: "15px",
+                  }}
+                >
+                  <Button
+                    style={{ width: "100%", color: "white" }}
+                    variant="contained"
+                    color="primary"
+                    onClick={() => editFormProvince(Id)}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+    </div>
+  );
+};
+
+export default Product;

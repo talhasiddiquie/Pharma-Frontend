@@ -124,17 +124,18 @@ const Doctor = () => {
   const [brickId, setBrickId] = useState("");
   const [lastValidatedAt, setLastValidatedAt] = useState("");
   const [preferredDay, setPreferredDay] = useState([]);
+  const [tier, setTier] = useState("");
   const [Id, setId] = useState("");
   const [dropdownQualification, setDropDownQualification] = useState([]);
   const [dropdownRepresentative, setDropDownRepresentative] = useState([]);
   const [dropdownRegion, setDropDownRegion] = useState([]);
   const [dropdownZone, setDropDownZone] = useState([]);
-  const [dropdownTerritory, setDropDownTerritory] = useState([]);
+  const [dropDownTerritory, setDropDownTerritory] = useState([]);
   const [dropDownDesignation, setDropDownDesignation] = useState([]);
   const [dropdownSpeciality, setDropDownSpeciality] = useState([]);
   const [dropdownHospital, setDropDownHospital] = useState([]);
   const [dropdownProvince, setDropDownProvince] = useState([]);
-  const [dropDonwCity, setDropDownCity] = useState([]);
+  const [dropdownCity, setDropDownCity] = useState([]);
   const [dropDownBrick, setDropDownBrick] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -233,6 +234,77 @@ const Doctor = () => {
     return time.join(""); // return adjusted time or original string
   }
 
+  const handleProvinceChange = async (e) => {
+    setProvinceId(e.target.value);
+    const id = e.target.value;
+    setRegionId("");
+    setZoneId("");
+    setCityId("");
+    setTerritoryId("");
+    await axios
+      .get(`${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${id}`)
+      .then((res) => {
+        setDropDownRegion(res.data.results);
+      });
+  };
+
+  const handleRegionChange = async (e) => {
+    setRegionId(e.target.value);
+    const id = e.target.value;
+    const form = { id };
+    setZoneId("");
+    setCityId("");
+    setTerritoryId("");
+    console.log(form);
+    await axios
+      .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${id}`)
+      .then((res) => {
+        setDropDownZone(res.data.results);
+      });
+  };
+
+  const handleZoneChange = async (e) => {
+    setZoneId(e.target.value);
+    const id = e.target.value;
+    const form = { id };
+    console.log(form);
+    setCityId("");
+    setTerritoryId("");
+    await axios
+      .get(`${process.env.REACT_APP_URL}/cities/getCities?zoneId=${id}`)
+      .then((res) => {
+        setDropDownCity(res.data.results);
+      });
+  };
+
+  const handleCityChange = async (e) => {
+    setCityId(e.target.value);
+    const id = e.target.value;
+    const form = { id };
+    console.log(form);
+
+    await axios
+      .get(
+        `${process.env.REACT_APP_URL}/territory/getTerritories/?cityId=${id}`
+      )
+      .then((res) => {
+        setDropDownTerritory(res.data.results);
+      });
+  };
+
+  const handleTerritoryChange = async (e) => {
+    setTerritoryId(e.target.value);
+    const id = e.target.value;
+    const form = { id };
+    console.log(form);
+
+    await axios
+      .get(`${process.env.REACT_APP_URL}/bricks/getBricks/?territoryId=${id}`)
+      .then((res) => {
+        setDropDownBrick(res.data.results);
+      });
+  };
+
   const addDoctor = async () => {
     const form = {
       name,
@@ -247,7 +319,7 @@ const Doctor = () => {
       fee,
       potential,
       qualificationId,
-      representativeId,
+      assignedRepresentativeId: representativeId,
       regionId,
       zoneId,
       territoryId,
@@ -258,6 +330,7 @@ const Doctor = () => {
       cityId,
       brickId,
       preferredDay,
+      tierId: tier,
     };
     console.log(form);
     await axios
@@ -297,6 +370,7 @@ const Doctor = () => {
     setProvinceId("");
     setCityId("");
     setBrickId("");
+    setTier("");
     setPreferredDay([]);
   };
 
@@ -315,10 +389,11 @@ const Doctor = () => {
     setEmail(response.data.email);
     setPreferredTime(response.data.preferredTime);
     setDistrict(response.data.district);
+    setTier(response.data.tier);
     setFee(response.data.fee);
     setPotential(response.data.potential);
     setQualificationId(response.data.qualificationId?.name);
-    setRepresentativeId(response.data.representativeId?.name);
+    setRepresentativeId(response.data.assignedRepresentativeId?.name);
     setRegionId(response.data.regionId?.name);
     setZoneId(response.data.zoneId?.name);
     setTerritoryId(response.data.territoryId?.name);
@@ -339,7 +414,7 @@ const Doctor = () => {
       form
     );
     const dob = moment(response.data.dateOfBirth).format("YYYY-MM-DD");
-    setId(response.data._id);
+    setId(response.data.id);
     setObjectId(response.data.objectId);
     setName(response.data.name);
     setAbbreviation(response.data.abbreviation);
@@ -352,17 +427,60 @@ const Doctor = () => {
     setFee(response.data.fee);
     setPotential(response.data.potential);
     setQualificationId(response.data.qualificationId?._id);
-    setRepresentativeId(response.data.representativeId?._id);
-    setRegionId(response.data.regionId?._id);
-    setZoneId(response.data.zoneId?._id);
-    setTerritoryId(response.data.territoryId?._id);
-    setDesignationId(response.data.designationId?._id);
+    setRepresentativeId(response.data.assignedRepresentativeId?.id);
+    setDesignationId(response.data.designationId?.id);
     setSpecialityId(response.data.specialityId?._id);
-    setHospitalId(response.data.hospitalId?._id);
-    setProvinceId(response.data.provinceId?._id);
-    setCityId(response.data.cityId?._id);
-    setBrickId(response.data.brickId?._id);
+    setHospitalId(response.data.hospitalId?.id);
+    setProvinceId(response.data.provinceId?.id);
+    setBrickId(response.data.brickId?.id);
     setPreferredDay(response.data.preferredDay);
+    setTier(response.data.tierId);
+
+    const newid = response.data.provinceId?.id;
+    axios
+      .get(
+        `${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${newid}`
+      )
+      .then((res) => {
+        setDropDownRegion(res.data.results);
+        setRegionId(res.data.results[0].id);
+
+        const newid = response.data.regionId?.id;
+        axios
+          .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${newid}`)
+          .then((res) => {
+            setDropDownZone(res.data.results);
+            setZoneId(res.data.results[0].id);
+
+            const newid = response.data.zoneId?.id;
+            axios
+              .get(
+                `${process.env.REACT_APP_URL}/cities/getCities?zoneId=${newid}`
+              )
+              .then((res) => {
+                setDropDownCity(res.data.results);
+                setCityId(res.data.results[0].id);
+                const newid = res.data.results[0]?.id;
+                axios
+                  .get(
+                    `${process.env.REACT_APP_URL}/territory/getTerritories/?cityId=${newid}`
+                  )
+                  .then((res) => {
+                    setDropDownTerritory(res.data.results);
+                    setTerritoryId(res.data.results[0].id);
+                    const newid = res.data.results[0]?.id;
+                    axios
+                      .get(
+                        `${process.env.REACT_APP_URL}/bricks/getBricks/?territoryId=${newid}`
+                      )
+                      .then((res) => {
+                        setDropDownBrick(res.data.results);
+                        setBrickId(res.data.results[0].id);
+                      });
+                  });
+              });
+          });
+      });
     setEditModal(true);
   };
 
@@ -381,7 +499,7 @@ const Doctor = () => {
       fee,
       potential,
       qualificationId,
-      representativeId,
+      assignedRepresentativeId: representativeId,
       regionId,
       zoneId,
       territoryId,
@@ -392,6 +510,7 @@ const Doctor = () => {
       cityId,
       brickId,
       preferredDay,
+      tierId: tier,
     };
     await axios
       .post(`${process.env.REACT_APP_URL}/doctors/updateDoctor`, form)
@@ -445,7 +564,7 @@ const Doctor = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/doctors/getDoctors`)
       .then((response) => {
-        const allDoctor = response.data;
+        const allDoctor = response.data.results;
         console.log(allDoctor);
         setEmp(allDoctor);
         setLoad(false);
@@ -470,39 +589,39 @@ const Doctor = () => {
     axios
       .get(`${process.env.REACT_APP_URL}/representative/getRepresentatives`)
       .then(async (res) => {
-        setDropDownRepresentative(res.data);
+        setDropDownRepresentative(res.data.results);
       });
   }, []);
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
-      .then(async (res) => {
-        setDropDownRegion(res.data);
-      });
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
+  //     .then(async (res) => {
+  //       setDropDownRegion(res.data.results);
+  //     });
+  // }, []);
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_URL}/zones/getZones`)
-      .then(async (res) => {
-        setDropDownZone(res.data);
-      });
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_URL}/zones/getZones`)
+  //     .then(async (res) => {
+  //       setDropDownZone(res.data.results);
+  //     });
+  // }, []);
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_URL}/territory/getTerritories`)
-      .then(async (res) => {
-        setDropDownTerritory(res.data);
-      });
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_URL}/territory/getTerritories`)
+  //     .then(async (res) => {
+  //       setDropDownTerritory(res.data.results);
+  //     });
+  // }, []);
 
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_URL}/designations/getDesignations`)
       .then((res) => {
-        setDropDownDesignation(res.data);
+        setDropDownDesignation(res.data.results);
       });
   }, []);
 
@@ -518,7 +637,7 @@ const Doctor = () => {
     axios
       .get(`${process.env.REACT_APP_URL}/hospitals/getHospitals`)
       .then((res) => {
-        setDropDownHospital(res.data);
+        setDropDownHospital(res.data.results);
       });
   }, []);
 
@@ -526,20 +645,8 @@ const Doctor = () => {
     axios
       .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
       .then((res) => {
-        setDropDownProvince(res.data.content);
+        setDropDownProvince(res.data.results);
       });
-  }, []);
-
-  useEffect(() => {
-    axios.get(`${process.env.REACT_APP_URL}/cities/getCities`).then((res) => {
-      setDropDownCity(res.data);
-    });
-  }, []);
-
-  useEffect(() => {
-    axios.get(`${process.env.REACT_APP_URL}/bricks/getBricks`).then((res) => {
-      setDropDownBrick(res.data);
-    });
   }, []);
 
   return (
@@ -672,14 +779,14 @@ const Doctor = () => {
                       >
                         <Button
                           onClick={() => {
-                            viewDoctorData(user._id);
+                            viewDoctorData(user.id);
                           }}
                         >
                           <VisibilityIcon color="primary" />
                         </Button>
                         <Button
                           onClick={() => {
-                            getDoctorById(user._id);
+                            getDoctorById(user.id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -687,7 +794,7 @@ const Doctor = () => {
 
                         <Button
                           onClick={() => {
-                            deleteDoctor(user._id);
+                            deleteDoctor(user.id);
                           }}
                         >
                           <DeleteIcon color="secondary" />
@@ -845,6 +952,7 @@ const Doctor = () => {
                     <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
                     >
                       <Autocomplete
                         multiple
@@ -877,6 +985,27 @@ const Doctor = () => {
                           />
                         )}
                       />
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Tier
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setTier(e.target.value)}
+                        id="abc"
+                        value={tier}
+                        native
+                        label="Tier"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="T1">T1</option>
+                        <option value="T2">T2</option>
+                        <option value="T3">T3</option>
+                      </Select>
                     </FormControl>
                   </div>
 
@@ -919,7 +1048,30 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
+                      className={classes.textFieldSsid}
                       style={{ marginRight: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Hospital
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setHospitalId(e.target.value)}
+                        id="abc"
+                        native
+                        value={hospitalId}
+                        label="Designation"
+                      >
+                        <option aria-label="None" />
+                        {dropdownHospital.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <FormControl
+                      variant="outlined"
                       className={classes.textFieldSsid}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
@@ -935,31 +1087,7 @@ const Doctor = () => {
                       >
                         <option aria-label="None" />
                         {dropdownRepresentative.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Region
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setRegionId(e.target.value)}
-                        id="abc"
-                        native
-                        value={regionId}
-                        label="Region"
-                      >
-                        <option aria-label="None" />
-                        {dropdownRegion.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -967,56 +1095,7 @@ const Doctor = () => {
                     </FormControl>
                   </div>
 
-                  <div style={{ display: "flex", width: "100%" }}>
-                    <FormControl
-                      variant="outlined"
-                      style={{ marginRight: "10px" }}
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Zone
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setZoneId(e.target.value)}
-                        id="abc"
-                        native
-                        value={zoneId}
-                        label="Zone"
-                      >
-                        <option aria-label="None" />
-                        {dropdownZone.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Territory
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setTerritoryId(e.target.value)}
-                        id="abc"
-                        native
-                        value={territoryId}
-                        label="Territory"
-                      >
-                        <option aria-label="None" />
-                        {dropdownTerritory.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
+                  <div style={{ display: "flex", width: "100%" }}></div>
 
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
@@ -1037,7 +1116,7 @@ const Doctor = () => {
                       >
                         <option aria-label="None" />
                         {dropDownDesignation.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -1072,74 +1151,127 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
-                      className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Hospital
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setHospitalId(e.target.value)}
-                        id="abc"
-                        native
-                        value={hospitalId}
-                        label="Designation"
-                      >
-                        <option aria-label="None" />
-                        {dropdownHospital.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
                         Province
                       </InputLabel>
                       <Select
                         // value={department}
-                        onChange={(e) => setProvinceId(e.target.value)}
-                        id="abc"
+                        onChange={handleProvinceChange}
                         native
                         value={provinceId}
                         label="Province"
                       >
                         <option aria-label="None" />
                         {dropdownProvince.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
+                      style={{ width: "100%", marginTop: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Region
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleRegionChange}
+                        native
+                        value={regionId}
+                        label="Region"
+                      >
+                        <option aria-label="None" />
+                        {dropdownRegion.map((value, index) => (
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
                       </Select>
                     </FormControl>
                   </div>
-
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
-                      className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Zone
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleZoneChange}
+                        native
+                        value={zoneId}
+                        label="Zone"
+                      >
+                        <option aria-label="None" />
+                        {dropdownZone.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
+                      style={{ width: "100%", marginTop: "10px" }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
                         City
                       </InputLabel>
                       <Select
                         // value={department}
-                        onChange={(e) => setCityId(e.target.value)}
-                        id="abc"
+                        onChange={handleCityChange}
                         native
                         value={cityId}
                         label="City"
                       >
                         <option aria-label="None" />
-                        {dropDonwCity.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                        {dropdownCity.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Territory
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleTerritoryChange}
+                        native
+                        value={territoryId}
+                        label="Territory"
+                      >
+                        <option aria-label="None" />
+                        {dropDownTerritory.map((value, index) => (
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -1159,11 +1291,11 @@ const Doctor = () => {
                         id="abc"
                         native
                         value={brickId}
-                        label="Province"
+                        label="Brick"
                       >
                         <option aria-label="None" />
                         {dropDownBrick.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -1331,6 +1463,7 @@ const Doctor = () => {
                     <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
                     >
                       <Autocomplete
                         multiple
@@ -1363,6 +1496,27 @@ const Doctor = () => {
                           />
                         )}
                       />
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Tier
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setTier(e.target.value)}
+                        id="abc"
+                        value={tier}
+                        native
+                        label="Tier"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="T1">T1</option>
+                        <option value="T2">T2</option>
+                        <option value="T3">T3</option>
+                      </Select>
                     </FormControl>
                   </div>
 
@@ -1405,7 +1559,30 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
+                      className={classes.textFieldSsid}
                       style={{ marginRight: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Hospital
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setHospitalId(e.target.value)}
+                        id="abc"
+                        native
+                        value={hospitalId}
+                        label="Designation"
+                      >
+                        <option aria-label="None" />
+                        {dropdownHospital.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <FormControl
+                      variant="outlined"
                       className={classes.textFieldSsid}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
@@ -1421,31 +1598,7 @@ const Doctor = () => {
                       >
                         <option aria-label="None" />
                         {dropdownRepresentative.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Region
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setRegionId(e.target.value)}
-                        id="abc"
-                        native
-                        value={regionId}
-                        label="Region"
-                      >
-                        <option aria-label="None" />
-                        {dropdownRegion.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -1453,56 +1606,7 @@ const Doctor = () => {
                     </FormControl>
                   </div>
 
-                  <div style={{ display: "flex", width: "100%" }}>
-                    <FormControl
-                      variant="outlined"
-                      style={{ marginRight: "10px" }}
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Zone
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setZoneId(e.target.value)}
-                        id="abc"
-                        native
-                        value={zoneId}
-                        label="Zone"
-                      >
-                        <option aria-label="None" />
-                        {dropdownZone.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Territory
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setTerritoryId(e.target.value)}
-                        id="abc"
-                        native
-                        value={territoryId}
-                        label="Territory"
-                      >
-                        <option aria-label="None" />
-                        {dropdownTerritory.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
+                  <div style={{ display: "flex", width: "100%" }}></div>
 
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
@@ -1523,7 +1627,7 @@ const Doctor = () => {
                       >
                         <option aria-label="None" />
                         {dropDownDesignation.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -1558,74 +1662,127 @@ const Doctor = () => {
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
-                      className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Hospital
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setHospitalId(e.target.value)}
-                        id="abc"
-                        native
-                        value={hospitalId}
-                        label="Designation"
-                      >
-                        <option aria-label="None" />
-                        {dropdownHospital.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
                         Province
                       </InputLabel>
                       <Select
                         // value={department}
-                        onChange={(e) => setProvinceId(e.target.value)}
-                        id="abc"
+                        onChange={handleProvinceChange}
                         native
                         value={provinceId}
                         label="Province"
                       >
                         <option aria-label="None" />
                         {dropdownProvince.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
+                      style={{ width: "100%", marginTop: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Region
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleRegionChange}
+                        native
+                        value={regionId}
+                        label="Region"
+                      >
+                        <option aria-label="None" />
+                        {dropdownRegion.map((value, index) => (
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
                       </Select>
                     </FormControl>
                   </div>
-
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
-                      className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Zone
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleZoneChange}
+                        native
+                        value={zoneId}
+                        label="Zone"
+                      >
+                        <option aria-label="None" />
+                        {dropdownZone.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
+                      style={{ width: "100%", marginTop: "10px" }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
                         City
                       </InputLabel>
                       <Select
                         // value={department}
-                        onChange={(e) => setCityId(e.target.value)}
-                        id="abc"
+                        onChange={handleCityChange}
                         native
                         value={cityId}
                         label="City"
                       >
                         <option aria-label="None" />
-                        {dropDonwCity.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                        {dropdownCity.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Territory
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleTerritoryChange}
+                        native
+                        value={territoryId}
+                        label="Territory"
+                      >
+                        <option aria-label="None" />
+                        {dropDownTerritory.map((value, index) => (
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -1645,11 +1802,11 @@ const Doctor = () => {
                         id="abc"
                         native
                         value={brickId}
-                        label="Province"
+                        label="Brick"
                       >
                         <option aria-label="None" />
                         {dropDownBrick.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}

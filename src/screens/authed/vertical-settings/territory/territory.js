@@ -8,6 +8,7 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
+import Autocomplete from "@mui/material/Autocomplete";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import axios from "axios";
@@ -60,10 +61,10 @@ const Territory = () => {
   const [objectId, setObjectId] = useState("");
   const [name, setName] = useState("");
   const [identifier, setIdentifier] = useState("");
-  const [provinceId, setProvinceId] = useState("");
+  const [province_Id, setProvince_Id] = useState([]);
   const [zoneId, setZoneId] = useState("");
   const [regionId, setRegionId] = useState("");
-  const [cityId, setCityId] = useState("");
+  const [city_Id, setCity_Id] = useState([]);
   const [isActive, setIsActive] = useState("");
   const [Id, setId] = useState("");
   const [dropdownProvince, setDropDownProvince] = useState([]);
@@ -83,7 +84,7 @@ const Territory = () => {
     setIdentifier("");
     setZoneId("");
     setRegionId("");
-    setCityId("");
+    setCity_Id([]);
   };
 
   const handleEditOpen = (id) => {
@@ -97,17 +98,29 @@ const Territory = () => {
     setIdentifier("");
     setZoneId("");
     setRegionId("");
-    setCityId("");
+    setCity_Id([]);
   };
 
-  const handleProvinceChange = async (e) => {
-    setProvinceId(e.target.value);
-    const id = e.target.value;
-    setRegionId("");
-    setZoneId("");
-    setCityId("");
+  const handleProvinceChange = async (e, selectedObject) => {
+    let List = [];
+    if (selectedObject !== null) {
+      for (let i = 0; i < selectedObject.length; i++) {
+        List.push(selectedObject[i]);
+      }
+      setProvince_Id(List);
+    }
+
+    console.log(List);
+
+    const Arr = [];
+    let a = "";
+    List.map((x) => {
+      Arr.push({ provinceId: x.id });
+      a = a + "provinceId=" + x.id + "&";
+    });
+
     await axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${id}`)
+      .get(`${process.env.REACT_APP_URL}/regions/getRegions?${a}`)
       .then((res) => {
         setDropDownRegion(res.data.results);
       });
@@ -117,8 +130,7 @@ const Territory = () => {
     setRegionId(e.target.value);
     const id = e.target.value;
     const form = { id };
-    setZoneId("");
-    setCityId("");
+
     console.log(form);
     await axios
       .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${id}`)
@@ -132,7 +144,7 @@ const Territory = () => {
     const id = e.target.value;
     const form = { id };
     console.log(form);
-    setCityId("");
+
     await axios
       .get(`${process.env.REACT_APP_URL}/cities/getCities?zoneId=${id}`)
       .then((res) => {
@@ -141,6 +153,11 @@ const Territory = () => {
   };
 
   const addTerritory = () => {
+    const provinceId = [];
+    province_Id.forEach((value) => provinceId.push(value.id));
+
+    const cityId = [];
+    city_Id.forEach((value) => cityId.push(value.id));
     const form = {
       objectId,
       name,
@@ -168,7 +185,7 @@ const Territory = () => {
     setIdentifier("");
     setZoneId("");
     setRegionId("");
-    setCityId("");
+    setCity_Id([]);
   };
 
   const editProvince = async (id) => {
@@ -181,19 +198,21 @@ const Territory = () => {
     setId(response.data.id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
-    setProvinceId(response.data.provinceId?.id);
-
+    setProvince_Id(response.data.provinceId);
+    console.log(response.data.provinceId, "provinceeeeeeeeeeeeeeeeeee");
     setIdentifier(response.data.identifier);
+    const Arr = [];
+    let a = "";
+    response.data.provinceId.map((x) => {
+      Arr.push({ province_Id: x.id });
+      a = a + "provinceId=" + x.id + "&";
+    });
 
-    const newid = response.data.provinceId?.id;
     axios
-      .get(
-        `${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${newid}`
-      )
+      .get(`${process.env.REACT_APP_URL}/regions/getRegions?${a}`)
       .then((res) => {
         setDropDownRegion(res.data.results);
         setRegionId(res.data.results[0].id);
-
         const newid = response.data.regionId?.id;
         axios
           .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${newid}`)
@@ -208,7 +227,7 @@ const Territory = () => {
               )
               .then((res) => {
                 setDropDownCity(res.data.results);
-                setCityId(res.data.results[0].id);
+                // setCity_Id(res.data.results[0]);
               });
           });
       });
@@ -217,6 +236,11 @@ const Territory = () => {
   };
 
   const editFormProvince = async (id) => {
+    const provinceId = [];
+    province_Id.forEach((value) => provinceId.push(value.id));
+
+    const cityId = [];
+    city_Id.forEach((value) => cityId.push(value.id));
     const form = {
       id,
       objectId,
@@ -244,7 +268,7 @@ const Territory = () => {
     setIdentifier("");
     setZoneId("");
     setRegionId("");
-    setCityId("");
+    setCity_Id([]);
   };
 
   const deleteProvince = (id) => {
@@ -293,11 +317,47 @@ const Territory = () => {
     fetchTerritory();
   }, [load]);
 
+  const provinceList = [];
+
+  const filterprovince_Id = (res) => {
+    for (let i = 0; i < res.data.results.length; i++) {
+      provinceList.push(res.data.results);
+    }
+    let newList = [];
+    provinceList[0].map((item) => {
+      newList.push(item);
+    });
+    setDropDownProvince(newList);
+  };
+
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
-      .then((res) => {
-        setDropDownProvince(res.data.results);
+      .then(async (res) => {
+        await filterprovince_Id(res);
+      });
+  }, []);
+
+  //cities/getCities
+
+  const cityList = [];
+
+  const filterCityId = (res) => {
+    for (let i = 0; i < res.data.results.length; i++) {
+      cityList.push(res.data.results);
+    }
+    let newList = [];
+    cityList[0].map((item) => {
+      newList.push(item);
+    });
+    setDropDownCity(newList);
+  };
+
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/cities/getCities`)
+      .then(async (res) => {
+        await filterCityId(res);
       });
   }, []);
   return (
@@ -380,6 +440,12 @@ const Territory = () => {
                 </TableCell>
 
                 <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  City
+                </TableCell>
+
+                <TableCell
                   style={{
                     fontWeight: "600",
                     width: "15%",
@@ -405,6 +471,15 @@ const Territory = () => {
             </TableHead>
             <TableBody>
               {emp.map((user, key, index) => {
+                const provinceArr = [];
+                const arr = user.provinceId?.forEach((value) =>
+                  provinceArr.push(value.name + ", ")
+                );
+
+                const cityArr = [];
+                const arr3 = user.cityId?.forEach((value) =>
+                  cityArr.push(value.name + ", ")
+                );
                 return (
                   <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
@@ -420,7 +495,8 @@ const Territory = () => {
 
                     <TableCell>{user.regionId?.name}</TableCell>
 
-                    <TableCell>{user.cityId?.name}</TableCell>
+                    <TableCell>{provinceArr}</TableCell>
+                    <TableCell>{cityArr}</TableCell>
                     {/* <TableCell>
                       <div
                         style={{
@@ -536,26 +612,35 @@ const Territory = () => {
                     />
 
                     <FormControl
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
                       variant="outlined"
-                      style={{ width: "100%", marginTop: "10px" }}
                     >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Province
-                      </InputLabel>
-                      <Select
-                        // value={department}
+                      <Autocomplete
+                        multiple
+                        id="tags-outlined"
+                        options={dropdownProvince}
+                        getOptionLabel={(option) => option.name}
+                        value={province_Id}
+                        filterSelectedOptions
+                        getOptionSelected={(option, value) => {
+                          if (value === "") {
+                            return true;
+                          } else if (value === option) {
+                            return true;
+                          }
+                        }}
                         onChange={handleProvinceChange}
-                        native
-                        value={provinceId}
-                        label="Region"
-                      >
-                        <option aria-label="None" />
-                        {dropdownProvince.map((value, index) => (
-                          <option key={value.id} value={value.id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            label="Province"
+                          />
+                        )}
+                      />
                     </FormControl>
                   </div>
 
@@ -613,26 +698,43 @@ const Territory = () => {
                     </FormControl>
                   </div>
                   <FormControl
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                    }}
                     variant="outlined"
-                    style={{ width: "100%", marginTop: "10px" }}
                   >
-                    <InputLabel htmlFor="outlined-age-native-simple">
-                      City
-                    </InputLabel>
-                    <Select
-                      // value={department}
-                      onChange={(e) => setCityId(e.target.value)}
-                      native
-                      value={cityId}
-                      label="City"
-                    >
-                      <option aria-label="None" />
-                      {dropdownCity.map((value, index) => (
-                        <option key={value.id} value={value.id}>
-                          {value.name}
-                        </option>
-                      ))}
-                    </Select>
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownCity}
+                      getOptionLabel={(option) => option.name}
+                      value={city_Id}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={(e, selectedObject) => {
+                        if (selectedObject !== null) {
+                          let List = [];
+                          for (let i = 0; i < selectedObject.length; i++) {
+                            List.push(selectedObject[i]);
+                          }
+                          setCity_Id(List);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="City"
+                        />
+                      )}
+                    />
                   </FormControl>
                 </div>
 
@@ -724,26 +826,35 @@ const Territory = () => {
                     />
 
                     <FormControl
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
                       variant="outlined"
-                      style={{ width: "100%", marginTop: "10px" }}
                     >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Province
-                      </InputLabel>
-                      <Select
-                        // value={department}
+                      <Autocomplete
+                        multiple
+                        id="tags-outlined"
+                        options={dropdownProvince}
+                        getOptionLabel={(option) => option.name}
+                        value={province_Id}
+                        filterSelectedOptions
+                        getOptionSelected={(option, value) => {
+                          if (value === "") {
+                            return true;
+                          } else if (value === option) {
+                            return true;
+                          }
+                        }}
                         onChange={handleProvinceChange}
-                        native
-                        value={provinceId}
-                        label="Region"
-                      >
-                        <option aria-label="None" />
-                        {dropdownProvince.map((value, index) => (
-                          <option key={value.id} value={value.id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            label="Province"
+                          />
+                        )}
+                      />
                     </FormControl>
                   </div>
 
@@ -801,26 +912,43 @@ const Territory = () => {
                     </FormControl>
                   </div>
                   <FormControl
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                    }}
                     variant="outlined"
-                    style={{ width: "100%", marginTop: "10px" }}
                   >
-                    <InputLabel htmlFor="outlined-age-native-simple">
-                      City
-                    </InputLabel>
-                    <Select
-                      // value={department}
-                      onChange={(e) => setCityId(e.target.value)}
-                      native
-                      value={cityId}
-                      label="City"
-                    >
-                      <option aria-label="None" />
-                      {dropdownCity.map((value, index) => (
-                        <option key={value.id} value={value.id}>
-                          {value.name}
-                        </option>
-                      ))}
-                    </Select>
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownCity}
+                      getOptionLabel={(option) => option.name}
+                      value={city_Id}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={(e, selectedObject) => {
+                        if (selectedObject !== null) {
+                          let List = [];
+                          for (let i = 0; i < selectedObject.length; i++) {
+                            List.push(selectedObject[i]);
+                          }
+                          setCity_Id(List);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="City"
+                        />
+                      )}
+                    />
                   </FormControl>
                 </div>
 

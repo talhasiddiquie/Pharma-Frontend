@@ -108,13 +108,14 @@ const Designation = () => {
   };
 
   const getDesignationById = async (id) => {
+    console.log(id, "=========================IDDDDDDDDDd");
     const form = { id };
     let response = await axios.post(
       `${process.env.REACT_APP_URL}/designations/getDesignation`,
       form
     );
     console.log(response.data);
-    setId(response.data._id);
+    setId(response.data.id);
     setName(response.data.name);
     setObjectId(response.data.objectId);
     setType(response.data.type);
@@ -183,7 +184,7 @@ const Designation = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/designations/getDesignations`)
       .then((response) => {
-        const allRegion = response.data;
+        const allRegion = response.data.results;
         console.log(allRegion);
         setEmp(allRegion);
         setLoad(false);
@@ -291,7 +292,7 @@ const Designation = () => {
                       >
                         <Button
                           onClick={() => {
-                            getDesignationById(user._id);
+                            getDesignationById(user.id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -299,7 +300,7 @@ const Designation = () => {
 
                         <Button
                           onClick={() => {
-                            deleteDesignation(user._id);
+                            deleteDesignation(user.id);
                           }}
                         >
                           <DeleteIcon color="secondary" />

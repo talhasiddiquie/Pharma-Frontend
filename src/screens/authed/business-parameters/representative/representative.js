@@ -104,24 +104,25 @@ const Representative = () => {
   const [name, setName] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [designationId, setDesignationId] = useState("");
-  const [provinceId, setProvinceId] = useState("");
-  const [region_Id, setRegion_Id] = useState([]);
-  const [zone_Id, setZone_Id] = useState([]);
-  const [territory_Id, setTerritory_Id] = useState([]);
+  const [provinceid, setProvinceid] = useState([]);
+  const [regionid, setRegionid] = useState([]);
+  const [zoneid, setZoneid] = useState([]);
+  const [territoryid, setTerritoryid] = useState([]);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [bloodGroupId, setBloodGroupId] = useState("");
-  const [workType, setWorkType] = useState("");
   const [sellingLine, setSellingLine] = useState("");
+  const [workType, setWorkType] = useState("");
   const [isActive, setIsActive] = useState("");
   const [password, setPassword] = useState("");
   const [Id, setId] = useState("");
-  const [dropdownRegion, setDropDownRegion] = useState("");
-  const [dropdownZone, setDropDownZone] = useState("");
-  const [dropdownTerritory, setDropDownTerritory] = useState("");
+  const [dropdownSellingLine, setDropDownSellingLine] = useState([]);
+  const [dropdownRegion, setDropDownRegion] = useState([]);
+  const [dropdownZone, setDropDownZone] = useState([]);
+  const [dropdownTerritory, setDropDownTerritory] = useState([]);
   const [dropdownProvince, setDropDownProvince] = useState([]);
   const [dropDownBloodGroup, setDropDownBloodGroup] = useState([]);
   const [dropDownDesignation, setDropDownDesignation] = useState([]);
@@ -137,7 +138,7 @@ const Representative = () => {
     setName("");
     setIdentifier("");
     setDesignationId("");
-    setProvinceId("");
+    setProvinceid([]);
     setPhone("");
     setEmail("");
     setGender("");
@@ -148,9 +149,9 @@ const Representative = () => {
     setSellingLine("");
     setPassword("");
     setIsActive("");
-    setRegion_Id([]);
-    setZone_Id([]);
-    setTerritory_Id([]);
+    setRegionid([]);
+    setZoneid([]);
+    setTerritoryid([]);
   };
 
   const handleEditOpen = (id) => {
@@ -163,7 +164,7 @@ const Representative = () => {
     setName("");
     setIdentifier("");
     setDesignationId("");
-    setProvinceId("");
+    setProvinceid([]);
     setPhone("");
     setEmail("");
     setGender("");
@@ -174,12 +175,12 @@ const Representative = () => {
     setSellingLine("");
     setPassword("");
     setIsActive("");
-    setRegion_Id([]);
-    setZone_Id([]);
-    setTerritory_Id([]);
+    setRegionid([]);
+    setZoneid([]);
+    setTerritoryid([]);
   };
 
-  const handleGetOpen = (id) => {
+  const handleGetOpen = () => {
     setGetModal(true);
   };
 
@@ -189,7 +190,7 @@ const Representative = () => {
     setName("");
     setIdentifier("");
     setDesignationId("");
-    setProvinceId("");
+    setProvinceid([]);
     setPhone("");
     setEmail("");
     setGender("");
@@ -200,21 +201,90 @@ const Representative = () => {
     setSellingLine("");
     setPassword("");
     setIsActive("");
-    setRegion_Id([]);
-    setZone_Id([]);
-    setTerritory_Id([]);
+    setRegionid([]);
+    setZoneid([]);
+    setTerritoryid([]);
+  };
+
+  const handleProvinceChange = async (e, selectedObject) => {
+    let List = [];
+    if (selectedObject !== null) {
+      for (let i = 0; i < selectedObject.length; i++) {
+        List.push(selectedObject[i]);
+      }
+      setProvinceid(List);
+    }
+    const Arr = [];
+    let a = "";
+    List.map((x) => {
+      Arr.push({ provinceId: x.id });
+      a = a + "provinceId=" + x.id + "&";
+    });
+
+    await axios
+      .get(`${process.env.REACT_APP_URL}/regions/getRegions?${a}`)
+      .then((res) => {
+        setDropDownRegion(res.data.results);
+      });
+  };
+
+  const handleRegionChange = async (e, selectedObject) => {
+    let List = [];
+    if (selectedObject !== null) {
+      for (let i = 0; i < selectedObject.length; i++) {
+        List.push(selectedObject[i]);
+      }
+      setRegionid(List);
+    }
+    const Arr = [];
+    let a = "";
+    List.map((x) => {
+      Arr.push({ regionId: x.id });
+      a = a + "regionId=" + x.id + "&";
+    });
+
+    await axios
+      .get(`${process.env.REACT_APP_URL}/zones/getZones?${a}`)
+      .then((res) => {
+        setDropDownZone(res.data.results);
+      });
+  };
+
+  const handleZoneChange = async (e, selectedObject) => {
+    let List = [];
+    if (selectedObject !== null) {
+      for (let i = 0; i < selectedObject.length; i++) {
+        List.push(selectedObject[i]);
+      }
+      setZoneid(List);
+    }
+    const Arr = [];
+    let a = "";
+    List.map((x) => {
+      Arr.push({ zoneId: x.id });
+      a = a + "zoneId=" + x.id + "&";
+    });
+
+    await axios
+      .get(`${process.env.REACT_APP_URL}/territory/getTerritories?${a}`)
+      .then((res) => {
+        setDropDownTerritory(res.data.results);
+      });
   };
 
   const addRepresentative = async () => {
     //For Region Multi select
+
+    const provinceId = [];
+    provinceid.forEach((value) => provinceId.push(value.id));
     const regionId = [];
-    region_Id.forEach((value) => regionId.push(value._id));
+    regionid.forEach((value) => regionId.push(value.id));
 
     const zoneId = [];
-    zone_Id.forEach((value) => zoneId.push(value._id));
+    zoneid.forEach((value) => zoneId.push(value.id));
 
     const territoryId = [];
-    territory_Id.forEach((value) => territoryId.push(value._id));
+    territoryid.forEach((value) => territoryId.push(value.id));
     const form = {
       objectId,
       name,
@@ -256,7 +326,7 @@ const Representative = () => {
     setName("");
     setIdentifier("");
     setDesignationId("");
-    setProvinceId("");
+    setProvinceid([]);
     setPhone("");
     setEmail("");
     setGender("");
@@ -267,9 +337,9 @@ const Representative = () => {
     setSellingLine("");
     setPassword("");
     setIsActive("");
-    setRegion_Id([]);
-    setZone_Id([]);
-    setTerritory_Id([]);
+    setRegionid([]);
+    setZoneid([]);
+    setTerritoryid([]);
   };
 
   const viewRepresentativeData = async (id) => {
@@ -279,6 +349,12 @@ const Representative = () => {
       form
     );
     const dob = moment(response.data.dateOfBirth).format("DD MMM YYYY");
+
+    const provinceArr = [];
+    const provinceData = response.data.provinceId?.forEach((value) =>
+      provinceArr.push(value.name + ", ")
+    );
+
     const regionArr = [];
     const regionData = response.data.regionId?.forEach((value) =>
       regionArr.push(value.name + ", ")
@@ -296,7 +372,6 @@ const Representative = () => {
     setName(response.data.name);
     setIdentifier(response.data.identifier);
     setDesignationId(response.data.designationId?.name);
-    setProvinceId(response.data.provinceId?.name);
     setPhone(response.data.phone);
     setEmail(response.data.email);
     setGender(response.data.gender);
@@ -304,13 +379,14 @@ const Representative = () => {
     setDateOfBirth(dob);
     setBloodGroupId(response.data.bloodGroupId?.name);
     setWorkType(response.data.workType);
-    setSellingLine(response.data.sellingLine);
+    setSellingLine(response.data.sellingLine?.name);
     setPassword(response.data.password);
     setIsActive(response.data.isActive);
-    setRegion_Id(regionArr);
-    setZone_Id(zoneArr);
-    setTerritory_Id(territoryArr);
-    handleGetOpen(true);
+    setProvinceid(provinceArr);
+    setRegionid(regionArr);
+    setZoneid(zoneArr);
+    setTerritoryid(territoryArr);
+    setGetModal(true);
   };
 
   const getRepresentativeById = async (id) => {
@@ -320,12 +396,12 @@ const Representative = () => {
       form
     );
     const dob = moment(response.data.dateOfBirth).format("YYYY-MM-DD");
-    setId(response.data._id);
+    setId(response.data.id);
     setObjectId(response.data.objectId);
     setName(response.data.name);
     setIdentifier(response.data.identifier);
-    setDesignationId(response.data.designationId?._id);
-    setProvinceId(response.data.provinceId?._id);
+    setDesignationId(response.data.designationId?.id);
+    setProvinceid(response.data.provinceId);
     setPhone(response.data.phone);
     setEmail(response.data.email);
     setGender(response.data.gender);
@@ -333,24 +409,27 @@ const Representative = () => {
     setDateOfBirth(dob);
     setBloodGroupId(response.data.bloodGroupId?._id);
     setWorkType(response.data.workType);
-    setSellingLine(response.data.sellingLine);
+    setSellingLine(response.data.sellingLine._id);
     setPassword(response.data.password);
     setIsActive(response.data.isActive);
-    setRegion_Id(response.data.regionId);
-    setZone_Id(response.data.zoneId);
-    setTerritory_Id(response.data.territoryId);
+    setRegionid(response.data.regionId);
+    setZoneid(response.data.zoneId);
+    setTerritoryid(response.data.territoryId);
+
     setEditModal(true);
   };
 
   const editRepresentative = async (id) => {
+    const provinceId = [];
+    provinceid.forEach((value) => provinceId.push(value.id));
     const regionId = [];
-    region_Id.forEach((value) => regionId.push(value._id));
+    regionid.forEach((value) => regionId.push(value.id));
 
     const zoneId = [];
-    zone_Id.forEach((value) => zoneId.push(value._id));
+    zoneid.forEach((value) => zoneId.push(value.id));
 
     const territoryId = [];
-    territory_Id.forEach((value) => territoryId.push(value._id));
+    territoryid.forEach((value) => territoryId.push(value.id));
     const form = {
       id,
       objectId,
@@ -393,7 +472,7 @@ const Representative = () => {
     setName("");
     setIdentifier("");
     setDesignationId("");
-    setProvinceId("");
+    setProvinceid([]);
     setPhone("");
     setEmail("");
     setGender("");
@@ -404,9 +483,9 @@ const Representative = () => {
     setSellingLine("");
     setPassword("");
     setIsActive("");
-    setRegion_Id([]);
-    setZone_Id([]);
-    setTerritory_Id([]);
+    setRegionid([]);
+    setZoneid([]);
+    setTerritoryid([]);
   };
 
   const deleteRepresentative = (id) => {
@@ -448,7 +527,7 @@ const Representative = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/representative/getRepresentatives`)
       .then((response) => {
-        const allRepresentative = response.data;
+        const allRepresentative = response.data.results;
         console.log(allRepresentative);
         setEmp(allRepresentative);
         setLoad(false);
@@ -456,37 +535,50 @@ const Representative = () => {
       .catch((error) => console.log(`Error: ${error}`));
   };
 
-  const regionList = [];
+  const provinceList = [];
 
-  const filterRegionId = (res) => {
-    for (let i = 0; i < res.data.length; i++) {
-      regionList.push(res.data);
+  const filterprovince_Id = (res) => {
+    for (let i = 0; i < res.data.results.length; i++) {
+      provinceList.push(res.data.results);
     }
     let newList = [];
-    regionList[0].map((item) => {
+    provinceList[0].map((item) => {
       newList.push(item);
     });
-    setDropDownRegion(newList);
+    setDropDownProvince(newList);
   };
 
-  const zoneList = [];
+  // const regionList = [];
 
-  const filterZoneId = (res) => {
-    for (let i = 0; i < res.data.length; i++) {
-      zoneList.push(res.data);
-    }
-    let newList = [];
-    zoneList[0].map((item) => {
-      newList.push(item);
-    });
-    setDropDownZone(newList);
-  };
+  // const filterRegionId = (res) => {
+  //   for (let i = 0; i < res.data.results.length; i++) {
+  //     regionList.push(res.data.results);
+  //   }
+  //   let newList = [];
+  //   regionList[0].map((item) => {
+  //     newList.push(item);
+  //   });
+  //   setDropDownRegion(newList);
+  // };
+
+  // const zoneList = [];
+
+  // const filterZoneId = (res) => {
+  //   for (let i = 0; i < res.data.results.length; i++) {
+  //     zoneList.push(res.data.results);
+  //   }
+  //   let newList = [];
+  //   zoneList[0].map((item) => {
+  //     newList.push(item);
+  //   });
+  //   setDropDownZone(newList);
+  // };
 
   const territoryList = [];
 
   const filterTerritoryId = (res) => {
-    for (let i = 0; i < res.data.length; i++) {
-      territoryList.push(res.data);
+    for (let i = 0; i < res.data.results.length; i++) {
+      territoryList.push(res.data.results);
     }
     let newList = [];
     territoryList[0].map((item) => {
@@ -499,21 +591,37 @@ const Representative = () => {
     fetchRepresentative();
   }, [load]);
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
-      .then(async (res) => {
-        await filterRegionId(res);
-      });
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
+  //     .then(async (res) => {
+  //       await filterRegionId(res);
+  //     });
+  // }, []);
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_URL}/zones/getZones`)
+      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
       .then(async (res) => {
-        await filterZoneId(res);
+        await filterprovince_Id(res);
       });
   }, []);
+
+  // useEffect(() => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
+  //     .then(async (res) => {
+  //       await filterRegionId(res);
+  //     });
+  // }, []);
+
+  // useEffect(() => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_URL}/zones/getZones`)
+  //     .then(async (res) => {
+  //       await filterZoneId(res);
+  //     });
+  // }, []);
 
   useEffect(() => {
     axios
@@ -523,13 +631,13 @@ const Representative = () => {
       });
   }, []);
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
-      .then((res) => {
-        setDropDownProvince(res.data.content);
-      });
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
+  //     .then((res) => {
+  //       setDropDownProvince(res.data.results);
+  //     });
+  // }, []);
 
   useEffect(() => {
     axios
@@ -541,9 +649,17 @@ const Representative = () => {
 
   useEffect(() => {
     axios
+      .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
+      .then((res) => {
+        setDropDownSellingLine(res.data);
+      });
+  }, []);
+
+  useEffect(() => {
+    axios
       .get(`${process.env.REACT_APP_URL}/designations/getDesignations`)
       .then((res) => {
-        setDropDownDesignation(res.data);
+        setDropDownDesignation(res.data.results);
       });
   }, []);
   return (
@@ -653,7 +769,7 @@ const Representative = () => {
             <TableBody>
               {emp.map((user, key, index) => {
                 return (
-                  <TableRow key={user._id}>
+                  <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
                       {user.objectId}
                     </TableCell>
@@ -691,14 +807,14 @@ const Representative = () => {
                       >
                         <Button
                           onClick={() => {
-                            viewRepresentativeData(user._id);
+                            viewRepresentativeData(user.id);
                           }}
                         >
                           <VisibilityIcon color="primary" />
                         </Button>
                         <Button
                           onClick={() => {
-                            getRepresentativeById(user._id);
+                            getRepresentativeById(user.id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -706,7 +822,7 @@ const Representative = () => {
 
                         <Button
                           onClick={() => {
-                            deleteRepresentative(user._id);
+                            deleteRepresentative(user.id);
                           }}
                         >
                           <DeleteIcon color="secondary" />
@@ -780,29 +896,6 @@ const Representative = () => {
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                     />
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Province
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setProvinceId(e.target.value)}
-                        id="abc"
-                        native
-                        value={provinceId}
-                        label="Province"
-                      >
-                        <option aria-label="None" />
-                        {dropdownProvince.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
                   </div>
 
                   <div style={{ display: "flex", width: "100%" }}>
@@ -833,7 +926,7 @@ const Representative = () => {
                       >
                         <option aria-label="None" />
                         {dropDownDesignation.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -981,17 +1074,63 @@ const Representative = () => {
                       </Select>
                     </FormControl>
 
-                    <TextField
+                    <FormControl
+                      variant="outlined"
                       className={classes.textFieldSsid}
                       style={{ marginLeft: "10px" }}
-                      id="abc"
-                      label="Selling Line"
-                      name="sellingline"
-                      variant="outlined"
-                      value={sellingLine}
-                      onChange={(e) => setSellingLine(e.target.value)}
-                    />
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Selling Line
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setSellingLine(e.target.value)}
+                        id="abc"
+                        native
+                        value={sellingLine}
+                        label="Selling Line"
+                      >
+                        <option aria-label="None" />
+                        {dropdownSellingLine.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </div>
+
+                  <FormControl
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                    }}
+                    variant="outlined"
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownProvince}
+                      getOptionLabel={(option) => option.name}
+                      value={provinceid}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={handleProvinceChange}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Province"
+                        />
+                      )}
+                    />
+                  </FormControl>
 
                   <FormControl
                     variant="outlined"
@@ -1002,7 +1141,7 @@ const Representative = () => {
                       id="tags-outlined"
                       options={dropdownRegion}
                       getOptionLabel={(option) => option.name}
-                      value={region_Id}
+                      value={regionid}
                       filterSelectedOptions
                       getOptionSelected={(option, value) => {
                         if (value === "") {
@@ -1011,15 +1150,7 @@ const Representative = () => {
                           return true;
                         }
                       }}
-                      onChange={(e, selectedObject) => {
-                        if (selectedObject !== null) {
-                          let List = [];
-                          for (let i = 0; i < selectedObject.length; i++) {
-                            List.push(selectedObject[i]);
-                          }
-                          setRegion_Id(List);
-                        }
-                      }}
+                      onChange={handleRegionChange}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -1039,7 +1170,7 @@ const Representative = () => {
                       id="tags-outlined"
                       options={dropdownZone}
                       getOptionLabel={(option) => option.name}
-                      value={zone_Id}
+                      value={zoneid}
                       filterSelectedOptions
                       getOptionSelected={(option, value) => {
                         if (value === "") {
@@ -1048,15 +1179,7 @@ const Representative = () => {
                           return true;
                         }
                       }}
-                      onChange={(e, selectedObject) => {
-                        if (selectedObject !== null) {
-                          let List = [];
-                          for (let i = 0; i < selectedObject.length; i++) {
-                            List.push(selectedObject[i]);
-                          }
-                          setZone_Id(List);
-                        }
-                      }}
+                      onChange={handleZoneChange}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -1076,7 +1199,7 @@ const Representative = () => {
                       id="tags-outlined"
                       options={dropdownTerritory}
                       getOptionLabel={(option) => option.name}
-                      value={territory_Id}
+                      value={territoryid}
                       filterSelectedOptions
                       getOptionSelected={(option, value) => {
                         if (value === "") {
@@ -1091,14 +1214,14 @@ const Representative = () => {
                           for (let i = 0; i < selectedObject.length; i++) {
                             List.push(selectedObject[i]);
                           }
-                          setTerritory_Id(List);
+                          setTerritoryid(List);
                         }
                       }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
                           variant="outlined"
-                          label="Region"
+                          label="Territory"
                         />
                       )}
                     />
@@ -1191,29 +1314,6 @@ const Representative = () => {
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
                     />
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Province
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setProvinceId(e.target.value)}
-                        id="abc"
-                        native
-                        value={provinceId}
-                        label="Province"
-                      >
-                        <option aria-label="None" />
-                        {dropdownProvince.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
                   </div>
 
                   <div style={{ display: "flex", width: "100%" }}>
@@ -1244,7 +1344,7 @@ const Representative = () => {
                       >
                         <option aria-label="None" />
                         {dropDownDesignation.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -1392,17 +1492,63 @@ const Representative = () => {
                       </Select>
                     </FormControl>
 
-                    <TextField
+                    <FormControl
+                      variant="outlined"
                       className={classes.textFieldSsid}
                       style={{ marginLeft: "10px" }}
-                      id="abc"
-                      label="Selling Line"
-                      name="sellingline"
-                      variant="outlined"
-                      value={sellingLine}
-                      onChange={(e) => setSellingLine(e.target.value)}
-                    />
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Selling Line
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={(e) => setSellingLine(e.target.value)}
+                        id="abc"
+                        native
+                        value={sellingLine}
+                        label="Selling Line"
+                      >
+                        <option aria-label="None" />
+                        {dropdownSellingLine.map((value, index) => (
+                          <option key={value.id} value={value._id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </div>
+
+                  <FormControl
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                    }}
+                    variant="outlined"
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownProvince}
+                      getOptionLabel={(option) => option.name}
+                      value={provinceid}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={handleProvinceChange}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Province"
+                        />
+                      )}
+                    />
+                  </FormControl>
 
                   <FormControl
                     variant="outlined"
@@ -1413,7 +1559,7 @@ const Representative = () => {
                       id="tags-outlined"
                       options={dropdownRegion}
                       getOptionLabel={(option) => option.name}
-                      value={region_Id}
+                      value={regionid}
                       filterSelectedOptions
                       getOptionSelected={(option, value) => {
                         if (value === "") {
@@ -1422,15 +1568,7 @@ const Representative = () => {
                           return true;
                         }
                       }}
-                      onChange={(e, selectedObject) => {
-                        if (selectedObject !== null) {
-                          let List = [];
-                          for (let i = 0; i < selectedObject.length; i++) {
-                            List.push(selectedObject[i]);
-                          }
-                          setRegion_Id(List);
-                        }
-                      }}
+                      onChange={handleRegionChange}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -1450,7 +1588,7 @@ const Representative = () => {
                       id="tags-outlined"
                       options={dropdownZone}
                       getOptionLabel={(option) => option.name}
-                      value={zone_Id}
+                      value={zoneid}
                       filterSelectedOptions
                       getOptionSelected={(option, value) => {
                         if (value === "") {
@@ -1459,15 +1597,7 @@ const Representative = () => {
                           return true;
                         }
                       }}
-                      onChange={(e, selectedObject) => {
-                        if (selectedObject !== null) {
-                          let List = [];
-                          for (let i = 0; i < selectedObject.length; i++) {
-                            List.push(selectedObject[i]);
-                          }
-                          setZone_Id(List);
-                        }
-                      }}
+                      onChange={handleZoneChange}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -1487,7 +1617,7 @@ const Representative = () => {
                       id="tags-outlined"
                       options={dropdownTerritory}
                       getOptionLabel={(option) => option.name}
-                      value={territory_Id}
+                      value={territoryid}
                       filterSelectedOptions
                       getOptionSelected={(option, value) => {
                         if (value === "") {
@@ -1502,14 +1632,14 @@ const Representative = () => {
                           for (let i = 0; i < selectedObject.length; i++) {
                             List.push(selectedObject[i]);
                           }
-                          setTerritory_Id(List);
+                          setTerritoryid(List);
                         }
                       }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
                           variant="outlined"
-                          label="Region"
+                          label="Territory"
                         />
                       )}
                     />
@@ -1618,7 +1748,7 @@ const Representative = () => {
                     <TableCell
                       style={{ textAlign: "left", borderLeft: "2px solid" }}
                     >
-                      {provinceId}
+                      {provinceid}
                     </TableCell>
                   </TableRow>
                   <TableRow style={{ border: "2px solid" }}>
@@ -1728,7 +1858,7 @@ const Representative = () => {
                     <TableCell
                       style={{ textAlign: "left", borderLeft: "2px solid" }}
                     >
-                      {region_Id}
+                      {regionid}
                     </TableCell>
                   </TableRow>
                   <TableRow style={{ border: "2px solid" }}>
@@ -1738,7 +1868,7 @@ const Representative = () => {
                     <TableCell
                       style={{ textAlign: "left", borderLeft: "2px solid" }}
                     >
-                      {zone_Id}
+                      {zoneid}
                     </TableCell>
                   </TableRow>
                   <TableRow style={{ border: "2px solid" }}>
@@ -1748,7 +1878,7 @@ const Representative = () => {
                     <TableCell
                       style={{ textAlign: "left", borderLeft: "2px solid" }}
                     >
-                      {territory_Id}
+                      {territoryid}
                     </TableCell>
                   </TableRow>
                 </Table>

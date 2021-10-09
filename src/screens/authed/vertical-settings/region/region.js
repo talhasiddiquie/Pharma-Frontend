@@ -125,6 +125,7 @@ const Region = () => {
     setName(response.data.name);
     setObjectId(response.data.objectId);
     setProvince_Id(response.data.provinceId);
+    
     setAbbreviation(response.data.abbreviation);
     setEditModal(true);
   };

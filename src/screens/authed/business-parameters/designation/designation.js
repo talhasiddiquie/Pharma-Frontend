@@ -226,7 +226,7 @@ const Designation = () => {
           style={{ width: "200px", color: "white" }}
           onClick={handleOpen}
         >
-          Add Representative
+          Add Designation
         </Button>
       </div>
       <div>

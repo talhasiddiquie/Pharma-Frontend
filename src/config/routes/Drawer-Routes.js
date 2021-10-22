@@ -148,6 +148,7 @@ function DrawerAndRoutes() {
 
   return user && user.email !== undefined ? (
     // If user is logged in
+
     <div className={classes.root}>
       <CssBaseline />
       <AppBar
@@ -410,7 +411,54 @@ function DrawerAndRoutes() {
                     history.push("/business-parameters/designation");
                   }}
                 >
-                  <ListItemText primary="Add Designation" />
+                  <ListItemText primary="Designation" />
+                </ListItem>
+              ) : null}
+
+              {(user && user.role === "admin") ||
+              user.role === "representative" ||
+              user.role === "National Manager" ||
+              user.role === "Regional Manager" ||
+              user.role === "Zonal Manager" ? (
+                <ListItem
+                  button
+                  className={classes.nested}
+                  onClick={() => {
+                    history.push("/business-parameters/qualification");
+                  }}
+                >
+                  <ListItemText primary="Qualification" />
+                </ListItem>
+              ) : null}
+              {(user && user.role === "admin") ||
+              user.role === "representative" ||
+              user.role === "National Manager" ||
+              user.role === "Regional Manager" ||
+              user.role === "Zonal Manager" ? (
+                <ListItem
+                  button
+                  className={classes.nested}
+                  onClick={() => {
+                    history.push("/business-parameters/speciality");
+                  }}
+                >
+                  <ListItemText primary="Speciality" />
+                </ListItem>
+              ) : null}
+
+              {(user && user.role === "admin") ||
+              user.role === "representative" ||
+              user.role === "National Manager" ||
+              user.role === "Regional Manager" ||
+              user.role === "Zonal Manager" ? (
+                <ListItem
+                  button
+                  className={classes.nested}
+                  onClick={() => {
+                    history.push("/business-parameters/tier");
+                  }}
+                >
+                  <ListItemText primary="Tier" />
                 </ListItem>
               ) : null}
               {(user && user.role === "admin") ||

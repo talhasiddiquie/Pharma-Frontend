@@ -47,6 +47,9 @@ import DoctorMeeting from "../../screens/doctor-meeting-public/doctorMeeting";
 import EmailVerificationCode from "../../screens/auth/emailVerificationCode/EmailVerificationCode";
 import Updatepassword from "../../screens/auth/updatePassword/Updatepassword";
 import Province from "../../screens/authed/vertical-settings/province/province";
+import Qualification from "../../screens/authed/business-parameters/qualification/Qualification";
+import Speciality from "../../screens/authed/business-parameters/speciality/speciality";
+import Tier from "../../screens/authed/business-parameters/tier/tier";
 function Routes() {
   return (
     <Switch>
@@ -169,6 +172,20 @@ function Routes() {
         path="/business-parameters/designation"
         component={Designation}
       />
+
+      <PrivateRoute
+        exact
+        path="/business-parameters/qualification"
+        component={Qualification}
+      />
+
+      <PrivateRoute
+        exact
+        path="/business-parameters/speciality"
+        component={Speciality}
+      />
+
+      <PrivateRoute exact path="/business-parameters/tier" component={Tier} />
       <PrivateRoute
         exact
         path="/business-parameters/representative"

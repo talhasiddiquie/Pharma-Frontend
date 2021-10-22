@@ -53,7 +53,6 @@ const Brick = () => {
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
   const [brickType, setBrickType] = useState("");
@@ -63,6 +62,8 @@ const Brick = () => {
   const [cityId, setCityId] = useState("");
   const [provinceId, setProvinceId] = useState("");
   const [Id, setId] = useState("");
+  const [company, setCompany] = useState("");
+  const [dropdownCompany, setDropDownCompany] = useState([]);
   const [dropDownTerritory, setDropDownTerritory] = useState([]);
   const [dropdownProvince, setDropDownProvince] = useState([]);
   const [dropdownRegion, setDropDownRegion] = useState([]);
@@ -78,13 +79,13 @@ const Brick = () => {
     setOpen(false);
     setAbbreviation("");
     setName("");
-    setObjectId("");
     setBrickType("");
     setTerritoryId("");
     setRegionId("");
     setProvinceId("");
     setZoneId("");
     setCityId("");
+    setCompany("");
   };
 
   const handleEditOpen = (id) => {
@@ -95,40 +96,40 @@ const Brick = () => {
     setEditModal(false);
     setAbbreviation("");
     setName("");
-    setObjectId("");
     setBrickType("");
     setTerritoryId("");
     setRegionId("");
     setProvinceId("");
     setZoneId("");
     setCityId("");
-  };
-
-  const handleProvinceChange = async (e) => {
-    setProvinceId(e.target.value);
-    const id = e.target.value;
-    setRegionId("");
-    setZoneId("");
-    setCityId("");
-    setTerritoryId("");
-    await axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${id}`)
-      .then((res) => {
-        setDropDownRegion(res.data.results);
-      });
+    setCompany("");
   };
 
   const handleRegionChange = async (e) => {
     setRegionId(e.target.value);
     const id = e.target.value;
-    const form = { id };
+    setProvinceId("");
     setZoneId("");
     setCityId("");
     setTerritoryId("");
-    console.log(form);
     await axios
-      .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${id}`)
+      .post(`${process.env.REACT_APP_URL}/regions/getRegion`, { id })
       .then((res) => {
+        setDropDownProvince(res.data.provinceId);
+      });
+  };
+
+  const handleProvinceChange = async (e) => {
+    setProvinceId(e.target.value);
+    console.log(e.target.value);
+    const id = e.target.value;
+    setZoneId("");
+    setCityId("");
+    setTerritoryId("");
+    await axios
+      .get(`${process.env.REACT_APP_URL}/zones/getZones?provinceId=${id}`)
+      .then((res) => {
+        console.log(res.data, "--------------------------------->");
         setDropDownZone(res.data.results);
       });
   };
@@ -164,7 +165,6 @@ const Brick = () => {
 
   const addBrick = () => {
     const form = {
-      objectId,
       name,
       abbreviation,
       brickType,
@@ -173,6 +173,7 @@ const Brick = () => {
       regionId,
       cityId,
       provinceId,
+      company,
     };
     axios
       .post(`${process.env.REACT_APP_URL}/bricks/postBrick`, form)
@@ -188,13 +189,14 @@ const Brick = () => {
       });
     setAbbreviation("");
     setName("");
-    setObjectId("");
+
     setBrickType("");
     setTerritoryId("");
     setRegionId("");
     setProvinceId("");
     setZoneId("");
     setCityId("");
+    setCompany("");
   };
 
   const editProvince = async (id) => {
@@ -206,55 +208,25 @@ const Brick = () => {
     console.log(response.data);
     setId(response.data.id);
     setName(response.data.name);
-    setObjectId(response.data.objectId);
+    setCompany(response.data.company?.id);
     setAbbreviation(response.data.abbreviation);
     setBrickType(response.data.brickType);
+    setRegionId(response.data.regionId?.id);
+    setDropDownProvince([response.data.provinceId]);
     setProvinceId(response.data.provinceId?.id);
-    // setTerritoryId(response.data.territoryId.id);
+    setDropDownZone([response.data.zoneId]);
+    setZoneId(response.data.zoneId?.id);
+    setDropDownCity([response.data.cityId]);
+    setCityId(response.data.cityId?.id);
+    setDropDownTerritory([response.data.territoryId]);
+    setTerritoryId(response.data.territoryId?.id);
 
-    const newid = response.data.provinceId?.id;
-    axios
-      .get(
-        `${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${newid}`
-      )
-      .then((res) => {
-        setDropDownRegion(res.data.results);
-        setRegionId(res.data.results[0].id);
-
-        const newid = response.data.regionId?.id;
-        axios
-          .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${newid}`)
-          .then((res) => {
-            setDropDownZone(res.data.results);
-            setZoneId(res.data.results[0].id);
-
-            const newid = response.data.zoneId?.id;
-            axios
-              .get(
-                `${process.env.REACT_APP_URL}/cities/getCities?zoneId=${newid}`
-              )
-              .then((res) => {
-                setDropDownCity(res.data.results);
-                setCityId(res.data.results[0].id);
-                const newid = res.data.results[0]?.id;
-                axios
-                  .get(
-                    `${process.env.REACT_APP_URL}/territory/getTerritories/?cityId=${newid}`
-                  )
-                  .then((res) => {
-                    setDropDownTerritory(res.data.results);
-                    setTerritoryId(res.data.results[0].id);
-                  });
-              });
-          });
-      });
     setEditModal(true);
   };
 
   const editFormProvince = async (id) => {
     const form = {
       id,
-      objectId,
       name,
       abbreviation,
       brickType,
@@ -263,6 +235,7 @@ const Brick = () => {
       regionId,
       cityId,
       provinceId,
+      company,
     };
     await axios
       .post(`${process.env.REACT_APP_URL}/bricks/updateBrick`, form)
@@ -278,13 +251,14 @@ const Brick = () => {
       });
     setAbbreviation("");
     setName("");
-    setObjectId("");
+
     setBrickType("");
     setTerritoryId("");
     setRegionId("");
     setProvinceId("");
     setZoneId("");
     setCityId("");
+    setCompany("");
   };
 
   const deleteProvince = (id) => {
@@ -324,7 +298,7 @@ const Brick = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/bricks/getBricks`)
       .then((response) => {
-        const allfetchBrick = response.data.results;
+        const allfetchBrick = response.data?.results;
         setEmp(allfetchBrick);
         setLoad(false);
       })
@@ -336,12 +310,19 @@ const Brick = () => {
   }, [load]);
 
   useEffect(() => {
+    axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
+      setDropDownRegion(res.data?.results);
+    });
+  }, []);
+
+  useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
+      .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
       .then((res) => {
-        setDropDownProvince(res.data.results);
+        setDropDownCompany(res.data?.results);
       });
   }, []);
+
   return (
     <div>
       <Breadcrumbs aria-label="breadcrumb">
@@ -391,11 +372,6 @@ const Brick = () => {
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  ID
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
                   Name
                 </TableCell>
                 <TableCell
@@ -433,6 +409,11 @@ const Brick = () => {
                   Province
                 </TableCell>
                 <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Company
+                </TableCell>
+                <TableCell
                   style={{
                     fontWeight: "600",
                     width: "15%",
@@ -449,9 +430,6 @@ const Brick = () => {
                 return (
                   <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
-                      {user.objectId}
-                    </TableCell>
-                    <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
 
@@ -461,6 +439,7 @@ const Brick = () => {
                     <TableCell>{user.zoneId?.name}</TableCell>
                     <TableCell>{user.regionId?.name}</TableCell>
                     <TableCell>{user.cityId?.name}</TableCell>
+                    <TableCell>{user.company?.name}</TableCell>
                     <TableCell>
                       <div
                         style={{
@@ -521,19 +500,6 @@ const Brick = () => {
                 <div style={{ marginTop: "10px", width: "100%" }}>
                   <div style={{ width: "100%", display: "flex" }}>
                     <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                      required
-                      id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
                       style={{ width: "100%", marginTop: "10px" }}
                       required
                       id="outlined-required"
@@ -586,20 +552,22 @@ const Brick = () => {
 
                   <FormControl
                     variant="outlined"
-                    style={{ width: "100%", marginTop: "10px" }}
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                    }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Province
+                      Company
                     </InputLabel>
                     <Select
-                      // value={department}
-                      onChange={handleProvinceChange}
+                      onChange={(e) => setCompany(e.target.value)}
                       native
-                      value={provinceId}
-                      label="Province"
+                      value={company}
+                      label="Company"
                     >
                       <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
+                      {dropdownCompany.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -623,6 +591,29 @@ const Brick = () => {
                     >
                       <option aria-label="None" />
                       {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Province
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={handleProvinceChange}
+                      native
+                      value={provinceId}
+                      label="Province"
+                    >
+                      <option aria-label="None" />
+                      {dropdownProvince.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -749,19 +740,6 @@ const Brick = () => {
                 <div style={{ marginTop: "10px", width: "100%" }}>
                   <div style={{ width: "100%", display: "flex" }}>
                     <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                      required
-                      id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
                       style={{ width: "100%", marginTop: "10px" }}
                       required
                       id="outlined-required"
@@ -814,20 +792,22 @@ const Brick = () => {
 
                   <FormControl
                     variant="outlined"
-                    style={{ width: "100%", marginTop: "10px" }}
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                    }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Province
+                      Company
                     </InputLabel>
                     <Select
-                      // value={department}
-                      onChange={handleProvinceChange}
+                      onChange={(e) => setCompany(e.target.value)}
                       native
-                      value={provinceId}
-                      label="Province"
+                      value={company}
+                      label="Company"
                     >
                       <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
+                      {dropdownCompany.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -851,6 +831,29 @@ const Brick = () => {
                     >
                       <option aria-label="None" />
                       {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Province
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={handleProvinceChange}
+                      native
+                      value={provinceId}
+                      label="Province"
+                    >
+                      <option aria-label="None" />
+                      {dropdownProvince.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>

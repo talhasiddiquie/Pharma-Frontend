@@ -57,7 +57,7 @@ const ClinicHospital = () => {
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
+
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
   const [address, setAddress] = useState("");
@@ -68,6 +68,8 @@ const ClinicHospital = () => {
   const [cityId, setCityId] = useState("");
   const [phone, setPhone] = useState("");
   const [Id, setId] = useState("");
+  const [company, setCompany] = useState("");
+  const [dropdownCompany, setDropDownCompany] = useState([]);
   const [provinceId, setProvinceId] = useState("");
   const [dropdownProvince, setDropDownProvince] = useState([]);
   const [dropDownBrick, setDropDownBrick] = useState([]);
@@ -84,7 +86,7 @@ const ClinicHospital = () => {
   const handleClose = () => {
     setOpen(false);
     setName("");
-    setObjectId("");
+    setCompany("");
     setAbbreviation("");
     setAddress("");
     setPhone("");
@@ -103,7 +105,7 @@ const ClinicHospital = () => {
   const handleEditClose = () => {
     setEditModal(false);
     setName("");
-    setObjectId("");
+    setCompany("");
     setAbbreviation("");
     setAddress("");
     setPhone("");
@@ -115,33 +117,27 @@ const ClinicHospital = () => {
     setZoneId("");
   };
 
-  const handleProvinceChange = async (e) => {
-    setProvinceId(e.target.value);
-    const id = e.target.value;
-    setRegionId("");
-    setZoneId("");
-    setCityId("");
-    setTerritoryId("");
-    setBrickId("");
-    await axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${id}`)
-      .then((res) => {
-        setDropDownRegion(res.data.results);
-      });
-  };
-
   const handleRegionChange = async (e) => {
     setRegionId(e.target.value);
     const id = e.target.value;
-    const form = { id };
+    setProvinceId("");
     setZoneId("");
-    setCityId("");
-    setTerritoryId("");
-    setBrickId("");
-    console.log(form);
     await axios
-      .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${id}`)
+      .post(`${process.env.REACT_APP_URL}/regions/getRegion`, { id })
       .then((res) => {
+        setDropDownProvince(res.data.provinceId);
+      });
+  };
+
+  const handleProvinceChange = async (e) => {
+    setProvinceId(e.target.value);
+    console.log(e.target.value);
+    const id = e.target.value;
+    setZoneId("");
+    await axios
+      .get(`${process.env.REACT_APP_URL}/zones/getZones?provinceId=${id}`)
+      .then((res) => {
+        console.log(res.data, "--------------------------------->");
         setDropDownZone(res.data.results);
       });
   };
@@ -193,7 +189,6 @@ const ClinicHospital = () => {
 
   const addHospital = () => {
     const form = {
-      objectId,
       name,
       address,
       abbreviation,
@@ -204,6 +199,7 @@ const ClinicHospital = () => {
       cityId,
       territoryId,
       provinceId,
+      company,
     };
     axios
       .post(`${process.env.REACT_APP_URL}/hospitals/postHospital`, form)
@@ -221,7 +217,7 @@ const ClinicHospital = () => {
       });
 
     setName("");
-    setObjectId("");
+    setCompany("");
     setAbbreviation("");
     setAddress("");
     setPhone("");
@@ -242,64 +238,30 @@ const ClinicHospital = () => {
     console.log(response.data);
     setId(response.data.id);
     setName(response.data.name);
-    setObjectId(response.data.objectId);
+    setCompany(response.data?.company?.id);
     setAddress(response.data.address);
     setPhone(response.data.phone);
-    setProvinceId(response.data.provinceId?.id);
     setAbbreviation(response.data.abbreviation);
+    setDropDownRegion([response.data.regionId]);
+    setRegionId(response.data.regionId?.id);
+    setDropDownProvince([response.data.provinceId]);
+    setProvinceId(response.data.provinceId?.id);
+    setDropDownZone([response.data.zoneId]);
+    setZoneId(response.data.zoneId?.id);
+    setDropDownCity([response.data.cityId]);
+    setCityId(response.data.cityId?.id);
+    setDropDownTerritory([response.data.territoryId]);
+    setTerritoryId(response.data.territoryId?.id);
+    setDropDownBrick([response.data.brickId]);
+    setBrickId(response.data.brickId?.id);
 
-    const newid = response.data.provinceId?.id;
-    axios
-      .get(
-        `${process.env.REACT_APP_URL}/regions/getRegions?provinceId=${newid}`
-      )
-      .then((res) => {
-        setDropDownRegion(res.data.results);
-        setRegionId(res.data.results[0].id);
-
-        const newid = response.data.regionId?.id;
-        axios
-          .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${newid}`)
-          .then((res) => {
-            setDropDownZone(res.data.results);
-            setZoneId(res.data.results[0].id);
-
-            const newid = response.data.zoneId?.id;
-            axios
-              .get(
-                `${process.env.REACT_APP_URL}/cities/getCities?zoneId=${newid}`
-              )
-              .then((res) => {
-                setDropDownCity(res.data.results);
-                setCityId(res.data.results[0].id);
-                const newid = res.data.results[0]?.id;
-                axios
-                  .get(
-                    `${process.env.REACT_APP_URL}/territory/getTerritories/?cityId==${newid}`
-                  )
-                  .then((res) => {
-                    setDropDownTerritory(res.data.results);
-                    setTerritoryId(res.data.results[0].id);
-                    const newid = res.data.results[0]?.id;
-                    axios
-                      .get(
-                        `${process.env.REACT_APP_URL}/bricks/getBricks/?territoryId=${newid}`
-                      )
-                      .then((res) => {
-                        setDropDownBrick(res.data.results);
-                        setBrickId(res.data.results[0].id);
-                      });
-                  });
-              });
-          });
-      });
     setEditModal(true);
   };
 
   const editFormProvince = async (id) => {
     const form = {
       id,
-      objectId,
+      company,
       name,
       address,
       abbreviation,
@@ -326,7 +288,7 @@ const ClinicHospital = () => {
         console.log(error.response);
       });
     setName("");
-    setObjectId("");
+    setCompany("");
     setAbbreviation("");
     setAddress("");
     setPhone("");
@@ -387,10 +349,16 @@ const ClinicHospital = () => {
   }, [load]);
 
   useEffect(() => {
+    axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
+      setDropDownRegion(res.data.results);
+    });
+  }, []);
+
+  useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
+      .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
       .then((res) => {
-        setDropDownProvince(res.data.results);
+        setDropDownCompany(res.data?.results);
       });
   }, []);
   return (
@@ -439,11 +407,6 @@ const ClinicHospital = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell
-                  style={{ fontWeight: "600", width: "10%", color: "white" }}
-                >
-                  ID
-                </TableCell>
                 <TableCell
                   style={{ fontWeight: "600", width: "10%", color: "white" }}
                 >
@@ -497,6 +460,12 @@ const ClinicHospital = () => {
                 </TableCell>
 
                 <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Company
+                </TableCell>
+
+                <TableCell
                   style={{
                     fontWeight: "600",
                     width: "15%",
@@ -513,9 +482,6 @@ const ClinicHospital = () => {
                 return (
                   <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
-                      {user.objectId}
-                    </TableCell>
-                    <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
                     <TableCell>{user.abbreviation}</TableCell>
@@ -527,6 +493,7 @@ const ClinicHospital = () => {
                     <TableCell>{user.cityId?.name}</TableCell>
                     <TableCell>{user.territoryId?.name}</TableCell>
                     <TableCell>{user.brickId?.name}</TableCell>
+                    <TableCell>{user.company?.name}</TableCell>
                     <TableCell>
                       <div
                         style={{
@@ -587,19 +554,6 @@ const ClinicHospital = () => {
                 <div style={{ marginTop: "10px", width: "100%" }}>
                   <div style={{ display: "flex", width: "100%" }}>
                     <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                      required
-                      id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
                       style={{ width: "100%", marginTop: "10px" }}
                       required
                       id="outlined-required"
@@ -640,20 +594,22 @@ const ClinicHospital = () => {
 
                   <FormControl
                     variant="outlined"
-                    style={{ width: "100%", marginTop: "10px" }}
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                    }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Province
+                      Company
                     </InputLabel>
                     <Select
-                      // value={department}
-                      onChange={handleProvinceChange}
+                      onChange={(e) => setCompany(e.target.value)}
                       native
-                      value={provinceId}
-                      label="Province"
+                      value={company}
+                      label="Company"
                     >
                       <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
+                      {dropdownCompany.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -677,6 +633,29 @@ const ClinicHospital = () => {
                     >
                       <option aria-label="None" />
                       {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Province
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={handleProvinceChange}
+                      native
+                      value={provinceId}
+                      label="Province"
+                    >
+                      <option aria-label="None" />
+                      {dropdownProvince.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -838,19 +817,6 @@ const ClinicHospital = () => {
                 <div style={{ marginTop: "10px", width: "100%" }}>
                   <div style={{ display: "flex", width: "100%" }}>
                     <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                      required
-                      id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
                       style={{ width: "100%", marginTop: "10px" }}
                       required
                       id="outlined-required"
@@ -891,20 +857,22 @@ const ClinicHospital = () => {
 
                   <FormControl
                     variant="outlined"
-                    style={{ width: "100%", marginTop: "10px" }}
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                    }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Province
+                      Company
                     </InputLabel>
                     <Select
-                      // value={department}
-                      onChange={handleProvinceChange}
+                      onChange={(e) => setCompany(e.target.value)}
                       native
-                      value={provinceId}
-                      label="Province"
+                      value={company}
+                      label="Company"
                     >
                       <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
+                      {dropdownCompany.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -928,6 +896,29 @@ const ClinicHospital = () => {
                     >
                       <option aria-label="None" />
                       {dropdownRegion.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    style={{ width: "100%", marginTop: "10px" }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Province
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={handleProvinceChange}
+                      native
+                      value={provinceId}
+                      label="Province"
+                    >
+                      <option aria-label="None" />
+                      {dropdownProvince.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>

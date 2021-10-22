@@ -30,6 +30,7 @@ import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { useSnackbar } from "notistack";
 import { makeStyles } from "@material-ui/core/styles";
 import moment from "moment";
+import { getModalUtilityClass } from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -100,9 +101,9 @@ const Representative = () => {
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [getModal, setGetModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
+  const [role, setRole] = useState("");
   const [name, setName] = useState("");
-  const [identifier, setIdentifier] = useState("");
+  const [employeeCode, setEmployeeCode] = useState("");
   const [designationId, setDesignationId] = useState("");
   const [provinceid, setProvinceid] = useState([]);
   const [regionid, setRegionid] = useState([]);
@@ -113,20 +114,31 @@ const Representative = () => {
   const [gender, setGender] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [bloodGroupId, setBloodGroupId] = useState("");
-  const [sellingLine, setSellingLine] = useState("");
+
+  const [company, setCompany] = useState("");
   const [workType, setWorkType] = useState("");
   const [isActive, setIsActive] = useState("");
   const [password, setPassword] = useState("");
   const [Id, setId] = useState("");
-  const [dropdownSellingLine, setDropDownSellingLine] = useState([]);
+  const [dropdownCompany, setDropDownCompany] = useState([]);
   const [dropdownRegion, setDropDownRegion] = useState([]);
   const [dropdownZone, setDropDownZone] = useState([]);
   const [dropdownTerritory, setDropDownTerritory] = useState([]);
   const [dropdownProvince, setDropDownProvince] = useState([]);
-  const [dropDownBloodGroup, setDropDownBloodGroup] = useState([]);
+
   const [dropDownDesignation, setDropDownDesignation] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
+
+  // const myArr = ["talhasiddquie10@gmail.com", "waji12@gmail.com"];
+  // var result = [];
+  // myArr.forEach(function (v) {
+  //   const arr = v.match(/[-+]?[0-9]*\.?[0-9]+/g);
+  //   result = result.concat(arr);
+  // });
+  // const filtered = result.map(function (x) {
+  //   return parseInt(x, 10);
+  // });
+  // console.log(filtered);
 
   const handleOpen = () => {
     setOpen(true);
@@ -134,9 +146,8 @@ const Representative = () => {
 
   const handleClose = () => {
     setOpen(false);
-    setObjectId("");
+
     setName("");
-    setIdentifier("");
     setDesignationId("");
     setProvinceid([]);
     setPhone("");
@@ -144,14 +155,16 @@ const Representative = () => {
     setGender("");
     setMaritalStatus("");
     setDateOfBirth("");
-    setBloodGroupId("");
+
     setWorkType("");
-    setSellingLine("");
+    setCompany("");
     setPassword("");
     setIsActive("");
     setRegionid([]);
     setZoneid([]);
     setTerritoryid([]);
+    setEmployeeCode("");
+    setRole("");
   };
 
   const handleEditOpen = (id) => {
@@ -160,9 +173,9 @@ const Representative = () => {
 
   const handleEditClose = () => {
     setEditModal(false);
-    setObjectId("");
+
     setName("");
-    setIdentifier("");
+
     setDesignationId("");
     setProvinceid([]);
     setPhone("");
@@ -170,14 +183,16 @@ const Representative = () => {
     setGender("");
     setMaritalStatus("");
     setDateOfBirth("");
-    setBloodGroupId("");
+
     setWorkType("");
-    setSellingLine("");
+    setCompany("");
     setPassword("");
     setIsActive("");
     setRegionid([]);
     setZoneid([]);
     setTerritoryid([]);
+    setEmployeeCode("");
+    setRole("");
   };
 
   const handleGetOpen = () => {
@@ -186,9 +201,8 @@ const Representative = () => {
 
   const handleGetClose = () => {
     setGetModal(false);
-    setObjectId("");
+
     setName("");
-    setIdentifier("");
     setDesignationId("");
     setProvinceid([]);
     setPhone("");
@@ -196,14 +210,34 @@ const Representative = () => {
     setGender("");
     setMaritalStatus("");
     setDateOfBirth("");
-    setBloodGroupId("");
     setWorkType("");
-    setSellingLine("");
+    setCompany("");
     setPassword("");
     setIsActive("");
     setRegionid([]);
     setZoneid([]);
     setTerritoryid([]);
+    setEmployeeCode("");
+    setRole("");
+  };
+
+  const handleRegionChange = async (e, selectedObject) => {
+    let List = [];
+    if (selectedObject !== null) {
+      for (let i = 0; i < selectedObject.length; i++) {
+        List.push(selectedObject[i]);
+      }
+      setRegionid(List);
+    }
+
+    const provinceList = [];
+
+    List.map((value) => {
+      provinceList.push(value.provinceId);
+    });
+    setDropDownProvince(provinceList[0]);
+
+   
   };
 
   const handleProvinceChange = async (e, selectedObject) => {
@@ -219,28 +253,6 @@ const Representative = () => {
     List.map((x) => {
       Arr.push({ provinceId: x.id });
       a = a + "provinceId=" + x.id + "&";
-    });
-
-    await axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions?${a}`)
-      .then((res) => {
-        setDropDownRegion(res.data.results);
-      });
-  };
-
-  const handleRegionChange = async (e, selectedObject) => {
-    let List = [];
-    if (selectedObject !== null) {
-      for (let i = 0; i < selectedObject.length; i++) {
-        List.push(selectedObject[i]);
-      }
-      setRegionid(List);
-    }
-    const Arr = [];
-    let a = "";
-    List.map((x) => {
-      Arr.push({ regionId: x.id });
-      a = a + "regionId=" + x.id + "&";
     });
 
     await axios
@@ -286,9 +298,7 @@ const Representative = () => {
     const territoryId = [];
     territoryid.forEach((value) => territoryId.push(value.id));
     const form = {
-      objectId,
       name,
-      identifier,
       designationId,
       gender,
       provinceId,
@@ -299,11 +309,12 @@ const Representative = () => {
       email,
       maritalStatus,
       dateOfBirth,
-      bloodGroupId,
       workType,
-      sellingLine,
+      company,
       password,
       isActive,
+      employeeCode,
+      role,
     };
     await axios
       .post(
@@ -322,9 +333,8 @@ const Representative = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-    setObjectId("");
+
     setName("");
-    setIdentifier("");
     setDesignationId("");
     setProvinceid([]);
     setPhone("");
@@ -332,14 +342,15 @@ const Representative = () => {
     setGender("");
     setMaritalStatus("");
     setDateOfBirth("");
-    setBloodGroupId("");
     setWorkType("");
-    setSellingLine("");
+    setCompany("");
     setPassword("");
     setIsActive("");
     setRegionid([]);
     setZoneid([]);
     setTerritoryid([]);
+    setRole("");
+    setEmployeeCode("");
   };
 
   const viewRepresentativeData = async (id) => {
@@ -368,24 +379,23 @@ const Representative = () => {
       territoryArr.push(value.name + ", ")
     );
 
-    setObjectId(response.data.objectId);
     setName(response.data.name);
-    setIdentifier(response.data.identifier);
     setDesignationId(response.data.designationId?.name);
     setPhone(response.data.phone);
     setEmail(response.data.email);
     setGender(response.data.gender);
     setMaritalStatus(response.data.maritalStatus);
     setDateOfBirth(dob);
-    setBloodGroupId(response.data.bloodGroupId?.name);
     setWorkType(response.data.workType);
-    setSellingLine(response.data.sellingLine?.name);
+    setCompany(response.data.company?.name);
     setPassword(response.data.password);
     setIsActive(response.data.isActive);
     setProvinceid(provinceArr);
     setRegionid(regionArr);
     setZoneid(zoneArr);
     setTerritoryid(territoryArr);
+    setEmployeeCode(response.data.employeeCode);
+    setRole(response.data.role);
     setGetModal(true);
   };
 
@@ -397,9 +407,7 @@ const Representative = () => {
     );
     const dob = moment(response.data.dateOfBirth).format("YYYY-MM-DD");
     setId(response.data.id);
-    setObjectId(response.data.objectId);
     setName(response.data.name);
-    setIdentifier(response.data.identifier);
     setDesignationId(response.data.designationId?.id);
     setProvinceid(response.data.provinceId);
     setPhone(response.data.phone);
@@ -407,15 +415,15 @@ const Representative = () => {
     setGender(response.data.gender);
     setMaritalStatus(response.data.maritalStatus);
     setDateOfBirth(dob);
-    setBloodGroupId(response.data.bloodGroupId?._id);
     setWorkType(response.data.workType);
-    setSellingLine(response.data.sellingLine._id);
+    setCompany(response.data.company?.id);
     setPassword(response.data.password);
     setIsActive(response.data.isActive);
     setRegionid(response.data.regionId);
     setZoneid(response.data.zoneId);
     setTerritoryid(response.data.territoryId);
-
+    setEmployeeCode(response.data.employeeCode);
+    setRole(response.data.role);
     setEditModal(true);
   };
 
@@ -432,9 +440,7 @@ const Representative = () => {
     territoryid.forEach((value) => territoryId.push(value.id));
     const form = {
       id,
-      objectId,
       name,
-      identifier,
       designationId,
       provinceId,
       zoneId,
@@ -445,11 +451,12 @@ const Representative = () => {
       email,
       maritalStatus,
       dateOfBirth,
-      bloodGroupId,
       workType,
-      sellingLine,
+      company,
       password,
       isActive,
+      role,
+      employeeCode,
     };
     await axios
       .post(
@@ -468,9 +475,8 @@ const Representative = () => {
         enqueueSnackbar(error.response.data.message, { variant: "error" });
         console.log(error.response);
       });
-    setObjectId("");
+
     setName("");
-    setIdentifier("");
     setDesignationId("");
     setProvinceid([]);
     setPhone("");
@@ -478,14 +484,15 @@ const Representative = () => {
     setGender("");
     setMaritalStatus("");
     setDateOfBirth("");
-    setBloodGroupId("");
     setWorkType("");
-    setSellingLine("");
+    setCompany("");
     setPassword("");
     setIsActive("");
     setRegionid([]);
     setZoneid([]);
     setTerritoryid([]);
+    setEmployeeCode("");
+    setRole("");
   };
 
   const deleteRepresentative = (id) => {
@@ -545,34 +552,8 @@ const Representative = () => {
     provinceList[0].map((item) => {
       newList.push(item);
     });
-    setDropDownProvince(newList);
+    setDropDownRegion(newList);
   };
-
-  // const regionList = [];
-
-  // const filterRegionId = (res) => {
-  //   for (let i = 0; i < res.data.results.length; i++) {
-  //     regionList.push(res.data.results);
-  //   }
-  //   let newList = [];
-  //   regionList[0].map((item) => {
-  //     newList.push(item);
-  //   });
-  //   setDropDownRegion(newList);
-  // };
-
-  // const zoneList = [];
-
-  // const filterZoneId = (res) => {
-  //   for (let i = 0; i < res.data.results.length; i++) {
-  //     zoneList.push(res.data.results);
-  //   }
-  //   let newList = [];
-  //   zoneList[0].map((item) => {
-  //     newList.push(item);
-  //   });
-  //   setDropDownZone(newList);
-  // };
 
   const territoryList = [];
 
@@ -591,37 +572,13 @@ const Representative = () => {
     fetchRepresentative();
   }, [load]);
 
-  // useEffect(() => {
-  //   axios
-  //     .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
-  //     .then(async (res) => {
-  //       await filterRegionId(res);
-  //     });
-  // }, []);
-
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
+      .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
       .then(async (res) => {
         await filterprovince_Id(res);
       });
   }, []);
-
-  // useEffect(() => {
-  //   axios
-  //     .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
-  //     .then(async (res) => {
-  //       await filterRegionId(res);
-  //     });
-  // }, []);
-
-  // useEffect(() => {
-  //   axios
-  //     .get(`${process.env.REACT_APP_URL}/zones/getZones`)
-  //     .then(async (res) => {
-  //       await filterZoneId(res);
-  //     });
-  // }, []);
 
   useEffect(() => {
     axios
@@ -631,27 +588,11 @@ const Representative = () => {
       });
   }, []);
 
-  // useEffect(() => {
-  //   axios
-  //     .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
-  //     .then((res) => {
-  //       setDropDownProvince(res.data.results);
-  //     });
-  // }, []);
-
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_URL}/bloodGroup/getBloodGroups`)
-      .then((res) => {
-        setDropDownBloodGroup(res.data);
-      });
-  }, []);
-
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
       .then((res) => {
-        setDropDownSellingLine(res.data);
+        setDropDownCompany(res.data?.results);
       });
   }, []);
 
@@ -712,18 +653,14 @@ const Representative = () => {
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  Object ID
+                  Employee Code
                 </TableCell>
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
                   Name
                 </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  Identifier
-                </TableCell>
+
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
@@ -771,12 +708,12 @@ const Representative = () => {
                 return (
                   <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
-                      {user.objectId}
+                      {user.employeeCode}
                     </TableCell>
                     <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
-                    <TableCell>{user.identifier}</TableCell>
+
                     <TableCell>{user.email} </TableCell>
                     <TableCell>{user.phone}</TableCell>
                     <TableCell>{user.password}</TableCell>
@@ -868,13 +805,12 @@ const Representative = () => {
                       className={classes.textFieldName}
                       style={{ marginRight: "10px" }}
                       id="abc"
-                      label="Object Id"
-                      name="objectid"
+                      label="Employee Code"
+                      name="employeecode"
                       variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
+                      value={employeeCode}
+                      onChange={(e) => setEmployeeCode(e.target.value)}
                     />
-
                     <TextField
                       className={classes.textFieldName}
                       id="abc"
@@ -883,18 +819,6 @@ const Representative = () => {
                       variant="outlined"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                  <div style={{ display: "flex", width: "100%" }}>
-                    <TextField
-                      className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
-                      id="abc"
-                      label="Identifier"
-                      name="identifier"
-                      variant="outlined"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
                     />
                   </div>
 
@@ -909,6 +833,45 @@ const Representative = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
+                    <TextField
+                      className={classes.textFieldSsid}
+                      id="abc"
+                      type="password"
+                      label="Password"
+                      name="password"
+                      variant="outlined"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Role
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setRole(e.target.value)}
+                        id="abc"
+                        value={role}
+                        native
+                        label="Role"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="admin">Admin</option>
+                        <option value="representative">Representative</option>
+                        <option value="National Manager">
+                          National Manager
+                        </option>
+                        <option value="Regional Manager">
+                          Regional Manager
+                        </option>
+                        <option value="Zonal Manager">Zonal Manager</option>
+                      </Select>
+                    </FormControl>
                     <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
@@ -1004,52 +967,6 @@ const Representative = () => {
                     </FormControl>
                   </div>
 
-                  <div style={{ display: "flex" }}>
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Work Type
-                      </InputLabel>
-                      <Select
-                        onChange={(e) => setWorkType(e.target.value)}
-                        id="abc"
-                        value={workType}
-                        native
-                        label="Work Type"
-                      >
-                        <option aria-label="None"> </option>
-                        <option value="Office">Office</option>
-                        <option value="On Field">On Field</option>
-                      </Select>
-                    </FormControl>
-
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                      style={{ marginLeft: "10px" }}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Blood Group
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setBloodGroupId(e.target.value)}
-                        id="abc"
-                        native
-                        value={bloodGroupId}
-                        label="Blood Group"
-                      >
-                        <option aria-label="None" />
-                        {dropDownBloodGroup.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
@@ -1080,25 +997,74 @@ const Representative = () => {
                       style={{ marginLeft: "10px" }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
-                        Selling Line
+                        Company
                       </InputLabel>
                       <Select
                         // value={department}
-                        onChange={(e) => setSellingLine(e.target.value)}
+                        onChange={(e) => setCompany(e.target.value)}
                         id="abc"
                         native
-                        value={sellingLine}
-                        label="Selling Line"
+                        value={company}
+                        label="Company"
                       >
                         <option aria-label="None" />
-                        {dropdownSellingLine.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                        {dropdownCompany?.map((value, index) => (
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
                       </Select>
                     </FormControl>
                   </div>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Work Type
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setWorkType(e.target.value)}
+                      id="abc"
+                      value={workType}
+                      native
+                      label="Work Type"
+                    >
+                      <option aria-label="None"> </option>
+                      <option value="Office">Office</option>
+                      <option value="On Field">On Field</option>
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownRegion}
+                      getOptionLabel={(option) => option.name}
+                      value={regionid}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={handleRegionChange}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Region"
+                        />
+                      )}
+                    />
+                  </FormControl>
 
                   <FormControl
                     style={{
@@ -1127,35 +1093,6 @@ const Representative = () => {
                           {...params}
                           variant="outlined"
                           label="Province"
-                        />
-                      )}
-                    />
-                  </FormControl>
-
-                  <FormControl
-                    variant="outlined"
-                    className={classes.textFieldSsid}
-                  >
-                    <Autocomplete
-                      multiple
-                      id="tags-outlined"
-                      options={dropdownRegion}
-                      getOptionLabel={(option) => option.name}
-                      value={regionid}
-                      filterSelectedOptions
-                      getOptionSelected={(option, value) => {
-                        if (value === "") {
-                          return true;
-                        } else if (value === option) {
-                          return true;
-                        }
-                      }}
-                      onChange={handleRegionChange}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="outlined"
-                          label="Region"
                         />
                       )}
                     />
@@ -1226,17 +1163,6 @@ const Representative = () => {
                       )}
                     />
                   </FormControl>
-
-                  <TextField
-                    className={classes.textFieldSsid}
-                    id="abc"
-                    type="password"
-                    label="Password"
-                    name="password"
-                    variant="outlined"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
 
                   <Button
                     onClick={addRepresentative}
@@ -1286,13 +1212,12 @@ const Representative = () => {
                       className={classes.textFieldName}
                       style={{ marginRight: "10px" }}
                       id="abc"
-                      label="Object Id"
-                      name="objectid"
+                      label="Employee Code"
+                      name="employeecode"
                       variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
+                      value={employeeCode}
+                      onChange={(e) => setEmployeeCode(e.target.value)}
                     />
-
                     <TextField
                       className={classes.textFieldName}
                       id="abc"
@@ -1301,18 +1226,6 @@ const Representative = () => {
                       variant="outlined"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                  <div style={{ display: "flex", width: "100%" }}>
-                    <TextField
-                      className={classes.textFieldSsid}
-                      style={{ marginRight: "10px" }}
-                      id="abc"
-                      label="Identifier"
-                      name="identifier"
-                      variant="outlined"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
                     />
                   </div>
 
@@ -1327,6 +1240,46 @@ const Representative = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
+                    <TextField
+                      className={classes.textFieldSsid}
+                      id="abc"
+                      type="password"
+                      label="Password"
+                      name="password"
+                      variant="outlined"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <FormControl
+                      variant="outlined"
+                      className={classes.textFieldSsid}
+                      style={{ marginRight: "10px" }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Role
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setRole(e.target.value)}
+                        id="abc"
+                        value={role}
+                        native
+                        label="Role"
+                      >
+                        <option aria-label="None"> </option>
+                        <option value="admin">Admin</option>
+                        <option value="representative">Representative</option>
+                        <option value="National Manager">
+                          National Manager
+                        </option>
+                        <option value="Regional Manager">
+                          Regional Manager
+                        </option>
+                        <option value="Zonal Manager">Zonal Manager</option>
+                      </Select>
+                    </FormControl>
+
                     <FormControl
                       variant="outlined"
                       className={classes.textFieldSsid}
@@ -1422,52 +1375,6 @@ const Representative = () => {
                     </FormControl>
                   </div>
 
-                  <div style={{ display: "flex" }}>
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Work Type
-                      </InputLabel>
-                      <Select
-                        onChange={(e) => setWorkType(e.target.value)}
-                        id="abc"
-                        value={workType}
-                        native
-                        label="Work Type"
-                      >
-                        <option aria-label="None"> </option>
-                        <option value="Office">Office</option>
-                        <option value="On Field">On Field</option>
-                      </Select>
-                    </FormControl>
-
-                    <FormControl
-                      variant="outlined"
-                      className={classes.textFieldSsid}
-                      style={{ marginLeft: "10px" }}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Blood Group
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setBloodGroupId(e.target.value)}
-                        id="abc"
-                        native
-                        value={bloodGroupId}
-                        label="Blood Group"
-                      >
-                        <option aria-label="None" />
-                        {dropDownBloodGroup.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
                   <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
                       variant="outlined"
@@ -1498,25 +1405,74 @@ const Representative = () => {
                       style={{ marginLeft: "10px" }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
-                        Selling Line
+                        Company
                       </InputLabel>
                       <Select
                         // value={department}
-                        onChange={(e) => setSellingLine(e.target.value)}
+                        onChange={(e) => setCompany(e.target.value)}
                         id="abc"
                         native
-                        value={sellingLine}
-                        label="Selling Line"
+                        value={company}
+                        label="Company"
                       >
                         <option aria-label="None" />
-                        {dropdownSellingLine.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                        {dropdownCompany.map((value, index) => (
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
                       </Select>
                     </FormControl>
                   </div>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Work Type
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setWorkType(e.target.value)}
+                      id="abc"
+                      value={workType}
+                      native
+                      label="Work Type"
+                    >
+                      <option aria-label="None"> </option>
+                      <option value="Office">Office</option>
+                      <option value="On Field">On Field</option>
+                    </Select>
+                  </FormControl>
+
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={dropdownRegion}
+                      getOptionLabel={(option) => option.name}
+                      value={regionid}
+                      filterSelectedOptions
+                      getOptionSelected={(option, value) => {
+                        if (value === "") {
+                          return true;
+                        } else if (value === option) {
+                          return true;
+                        }
+                      }}
+                      onChange={handleRegionChange}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Region"
+                        />
+                      )}
+                    />
+                  </FormControl>
 
                   <FormControl
                     style={{
@@ -1545,35 +1501,6 @@ const Representative = () => {
                           {...params}
                           variant="outlined"
                           label="Province"
-                        />
-                      )}
-                    />
-                  </FormControl>
-
-                  <FormControl
-                    variant="outlined"
-                    className={classes.textFieldSsid}
-                  >
-                    <Autocomplete
-                      multiple
-                      id="tags-outlined"
-                      options={dropdownRegion}
-                      getOptionLabel={(option) => option.name}
-                      value={regionid}
-                      filterSelectedOptions
-                      getOptionSelected={(option, value) => {
-                        if (value === "") {
-                          return true;
-                        } else if (value === option) {
-                          return true;
-                        }
-                      }}
-                      onChange={handleRegionChange}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="outlined"
-                          label="Region"
                         />
                       )}
                     />
@@ -1645,17 +1572,6 @@ const Representative = () => {
                     />
                   </FormControl>
 
-                  <TextField
-                    className={classes.textFieldSsid}
-                    id="abc"
-                    type="password"
-                    label="Password"
-                    name="password"
-                    variant="outlined"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-
                   <Button
                     onClick={() => {
                       editRepresentative(Id);
@@ -1703,12 +1619,12 @@ const Representative = () => {
                 <Table style={{ border: "2px solid" }}>
                   <TableRow style={{ border: "2px solid" }}>
                     <TableCell className={classes.styleTableHead}>
-                      ObjectId
+                      Employee Code
                     </TableCell>
                     <TableCell
                       style={{ textAlign: "left", borderLeft: "2px solid" }}
                     >
-                      {objectId}
+                      {employeeCode}
                     </TableCell>
                   </TableRow>
                   <TableRow style={{ border: "2px solid" }}>
@@ -1721,16 +1637,18 @@ const Representative = () => {
                       {name}
                     </TableCell>
                   </TableRow>
+
                   <TableRow style={{ border: "2px solid" }}>
                     <TableCell className={classes.styleTableHead}>
-                      Identifier
+                      Role
                     </TableCell>
                     <TableCell
                       style={{ textAlign: "left", borderLeft: "2px solid" }}
                     >
-                      {identifier}
+                      {role}
                     </TableCell>
                   </TableRow>
+
                   <TableRow style={{ border: "2px solid" }}>
                     <TableCell className={classes.styleTableHead}>
                       Designation
@@ -1801,16 +1719,7 @@ const Representative = () => {
                       {dateOfBirth}
                     </TableCell>
                   </TableRow>
-                  <TableRow style={{ border: "2px solid" }}>
-                    <TableCell className={classes.styleTableHead}>
-                      Blood Group
-                    </TableCell>
-                    <TableCell
-                      style={{ textAlign: "left", borderLeft: "2px solid" }}
-                    >
-                      {bloodGroupId}
-                    </TableCell>
-                  </TableRow>
+
                   <TableRow style={{ border: "2px solid" }}>
                     <TableCell className={classes.styleTableHead}>
                       Work Type
@@ -1823,12 +1732,12 @@ const Representative = () => {
                   </TableRow>
                   <TableRow style={{ border: "2px solid" }}>
                     <TableCell className={classes.styleTableHead}>
-                      Selling Line
+                      Company
                     </TableCell>
                     <TableCell
                       style={{ textAlign: "left", borderLeft: "2px solid" }}
                     >
-                      {sellingLine}
+                      {company}
                     </TableCell>
                   </TableRow>
                   <TableRow style={{ border: "2px solid" }}>

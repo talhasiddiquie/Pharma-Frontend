@@ -59,7 +59,6 @@ const Product = () => {
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
   const [molecule, setMolecule] = useState("");
@@ -88,13 +87,22 @@ const Product = () => {
     setEditModal(true);
   };
 
+  const uploadImages = (e) => {
+    const images = [];
+    for (let i = 0; i < e.target.files.length; i++) {
+      images.push(e.target.files[i]);
+    }
+    console.log(images, "----------=======--------Files");
+    setFiles(images);
+  };
+
   const handleEditClose = () => {
     setEditModal(false);
   };
 
   const addProduct = () => {
     const form = new FormData();
-    form.append("objectId", objectId);
+
     form.append("name", name);
     form.append("abbreviation", abbreviation);
     form.append("sellingLine", sellingLine);
@@ -106,9 +114,9 @@ const Product = () => {
     form.append("sellingMessage", keySellingMessage);
     form.append("discount", discount);
     form.append("additionalInfo", additionalInfo);
-    form.append("files", files);
+    //For send multiple images append data
+    files.forEach((value) => form.append("files", value));
 
-    console.log(form);
     axios
       .post(`${process.env.REACT_APP_URL}/products/postProduct`, form, {
         headers: {
@@ -138,7 +146,7 @@ const Product = () => {
     console.log(response.data);
     setId(response.data._id);
     setName(response.data.name);
-    setObjectId(response.data.objectId);
+
     setAbbreviation(response.data.abbreviation);
     setMolecule(response.data.molecule);
     setCompany(response.data.company);
@@ -154,10 +162,9 @@ const Product = () => {
   };
 
   const editFormProvince = async (id) => {
-    console.log(id, "-----------------------.");
+   
     const form = new FormData();
     form.append("id", id);
-    form.append("objectId", objectId);
     form.append("name", name);
     form.append("abbreviation", abbreviation);
     form.append("sellingLine", sellingLine);
@@ -169,9 +176,8 @@ const Product = () => {
     form.append("sellingMessage", keySellingMessage);
     form.append("discount", discount);
     form.append("additionalInfo", additionalInfo);
-    form.append("files", files);
-
-    console.log(form);
+    files.forEach((value) => form.append("files", value));
+   
     await axios
       .post(`${process.env.REACT_APP_URL}/products/updateProduct`, form, {
         headers: {
@@ -239,7 +245,7 @@ const Product = () => {
     axios
       .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
       .then((res) => {
-        setDropDownSellingLine(res.data);
+        setDropDownSellingLine(res.data?.results);
       });
   }, []);
   return (
@@ -288,11 +294,6 @@ const Product = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  ID
-                </TableCell>
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
@@ -376,10 +377,6 @@ const Product = () => {
               {emp.map((user, key, index) => {
                 return (
                   <TableRow key={user._id}>
-                    <TableCell component="th" scope="row">
-                      {user.objectId}
-                    </TableCell>
-
                     <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
@@ -481,19 +478,6 @@ const Product = () => {
                 <div style={{ marginTop: "10px", width: "100%" }}>
                   <div style={{ display: "flex", width: "100%" }}>
                     <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                      required
-                      id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
                       style={{ width: "100%", marginTop: "10px" }}
                       required
                       id="outlined-required"
@@ -563,7 +547,7 @@ const Product = () => {
                       >
                         <option aria-label="None" />
                         {dropdownSellingLine.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -644,7 +628,7 @@ const Product = () => {
                       name="flies"
                       type="file"
                       multiple
-                      onChange={(e) => setFiles(e.target.files[0])}
+                      onChange={uploadImages}
                       hidden
                     />
                   </Button>
@@ -699,19 +683,6 @@ const Product = () => {
                 <div style={{ marginTop: "10px", width: "100%" }}>
                   <div style={{ display: "flex", width: "100%" }}>
                     <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                      required
-                      id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
                       style={{ width: "100%", marginTop: "10px" }}
                       required
                       id="outlined-required"
@@ -781,7 +752,7 @@ const Product = () => {
                       >
                         <option aria-label="None" />
                         {dropdownSellingLine.map((value, index) => (
-                          <option key={value.id} value={value._id}>
+                          <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
                         ))}
@@ -862,7 +833,7 @@ const Product = () => {
                       name="flies"
                       type="file"
                       multiple
-                      onChange={(e) => setFiles(e.target.files[0])}
+                      onChange={uploadImages}
                       hidden
                     />
                   </Button>

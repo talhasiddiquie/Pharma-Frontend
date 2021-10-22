@@ -58,15 +58,15 @@ const Territory = () => {
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
+  const [abberivation, setAbberivation] = useState("");
   const [name, setName] = useState("");
-  const [identifier, setIdentifier] = useState("");
   const [province_Id, setProvince_Id] = useState([]);
   const [zoneId, setZoneId] = useState("");
   const [regionId, setRegionId] = useState("");
   const [city_Id, setCity_Id] = useState([]);
-  const [isActive, setIsActive] = useState("");
   const [Id, setId] = useState("");
+  const [company, setCompany] = useState("");
+  const [dropdownCompany, setDropDownCompany] = useState([]);
   const [dropdownProvince, setDropDownProvince] = useState([]);
   const [dropdownRegion, setDropDownRegion] = useState([]);
   const [dropdownZone, setDropDownZone] = useState([]);
@@ -80,11 +80,12 @@ const Territory = () => {
   const handleClose = () => {
     setOpen(false);
     setName("");
-    setObjectId("");
-    setIdentifier("");
+    setAbberivation("");
     setZoneId("");
     setRegionId("");
     setCity_Id([]);
+    setProvince_Id([]);
+    setCompany("");
   };
 
   const handleEditOpen = (id) => {
@@ -94,11 +95,27 @@ const Territory = () => {
   const handleEditClose = () => {
     setEditModal(false);
     setName("");
-    setObjectId("");
-    setIdentifier("");
+    setAbberivation("");
     setZoneId("");
     setRegionId("");
     setCity_Id([]);
+    setProvince_Id([]);
+    setCompany("");
+  };
+
+  const handleRegionChange = async (e) => {
+    setRegionId(e.target.value);
+    const id = e.target.value;
+    const form = { id };
+    setProvince_Id([]);
+    setZoneId("");
+    setCity_Id([]);
+    console.log(form);
+    await axios
+      .post(`${process.env.REACT_APP_URL}/regions/getRegion`, form)
+      .then((res) => {
+        setDropDownProvince(res.data.provinceId);
+      });
   };
 
   const handleProvinceChange = async (e, selectedObject) => {
@@ -109,9 +126,8 @@ const Territory = () => {
       }
       setProvince_Id(List);
     }
-
-    console.log(List);
-
+    setZoneId("");
+    setCity_Id([]);
     const Arr = [];
     let a = "";
     List.map((x) => {
@@ -120,20 +136,7 @@ const Territory = () => {
     });
 
     await axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions?${a}`)
-      .then((res) => {
-        setDropDownRegion(res.data.results);
-      });
-  };
-
-  const handleRegionChange = async (e) => {
-    setRegionId(e.target.value);
-    const id = e.target.value;
-    const form = { id };
-
-    console.log(form);
-    await axios
-      .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${id}`)
+      .get(`${process.env.REACT_APP_URL}/zones/getZones?${a}`)
       .then((res) => {
         setDropDownZone(res.data.results);
       });
@@ -143,8 +146,8 @@ const Territory = () => {
     setZoneId(e.target.value);
     const id = e.target.value;
     const form = { id };
-    console.log(form);
 
+    setCity_Id([]);
     await axios
       .get(`${process.env.REACT_APP_URL}/cities/getCities?zoneId=${id}`)
       .then((res) => {
@@ -159,13 +162,13 @@ const Territory = () => {
     const cityId = [];
     city_Id.forEach((value) => cityId.push(value.id));
     const form = {
-      objectId,
       name,
-      identifier,
+      abbreviation: abberivation,
       zoneId,
       regionId,
       cityId,
       provinceId,
+      company,
     };
     axios
       .post(`${process.env.REACT_APP_URL}/territory/postTerritory`, form)
@@ -181,11 +184,12 @@ const Territory = () => {
       });
 
     setName("");
-    setObjectId("");
-    setIdentifier("");
+    setAbberivation("");
     setZoneId("");
     setRegionId("");
     setCity_Id([]);
+    setProvince_Id([]);
+    setCompany("");
   };
 
   const editProvince = async (id) => {
@@ -197,40 +201,17 @@ const Territory = () => {
 
     setId(response.data.id);
     setName(response.data.name);
-    setObjectId(response.data.objectId);
-    setProvince_Id(response.data.provinceId);
-    console.log(response.data.provinceId, "provinceeeeeeeeeeeeeeeeeee");
-    setIdentifier(response.data.identifier);
-    const Arr = [];
-    let a = "";
-    response.data.provinceId.map((x) => {
-      Arr.push({ province_Id: x.id });
-      a = a + "provinceId=" + x.id + "&";
+    setAbberivation(response.data.abbreviation);
+    setCompany(response.data.company?.id);
+    setRegionId(response.data.regionId.id);
+    setProvince_Id([response.data.provinceId]);
+    setDropDownZone([response.data.zoneId]);
+    setZoneId(response.data.zoneId?.id);
+    setDropDownCity([response.data.cityId]);
+    response.data.cityId.map((value) => {
+      setCity_Id([value]);
     });
-
-    axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions?${a}`)
-      .then((res) => {
-        setDropDownRegion(res.data.results);
-        setRegionId(res.data.results[0].id);
-        const newid = response.data.regionId?.id;
-        axios
-          .get(`${process.env.REACT_APP_URL}/zones/getZones?regionId=${newid}`)
-          .then((res) => {
-            setDropDownZone(res.data.results);
-            setZoneId(res.data.results[0].id);
-
-            const newid = response.data.zoneId?.id;
-            axios
-              .get(
-                `${process.env.REACT_APP_URL}/cities/getCities?zoneId=${newid}`
-              )
-              .then((res) => {
-                setDropDownCity(res.data.results);
-                // setCity_Id(res.data.results[0]);
-              });
-          });
-      });
+   
 
     setEditModal(true);
   };
@@ -243,13 +224,13 @@ const Territory = () => {
     city_Id.forEach((value) => cityId.push(value.id));
     const form = {
       id,
-      objectId,
       name,
-      identifier,
+      abbreviation: abberivation,
       zoneId,
       regionId,
       cityId,
       provinceId,
+      company,
     };
     await axios
       .post(`${process.env.REACT_APP_URL}/territory/updateTerritory`, form)
@@ -264,11 +245,12 @@ const Territory = () => {
         console.log(error.response);
       });
     setName("");
-    setObjectId("");
-    setIdentifier("");
+    setAbberivation("");
     setZoneId("");
     setRegionId("");
     setCity_Id([]);
+    setProvince_Id([]);
+    setCompany("");
   };
 
   const deleteProvince = (id) => {
@@ -352,14 +334,20 @@ const Territory = () => {
     });
     setDropDownCity(newList);
   };
+  useEffect(() => {
+    axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
+      setDropDownRegion(res.data.results);
+    });
+  }, []);
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_URL}/cities/getCities`)
-      .then(async (res) => {
-        await filterCityId(res);
+      .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
+      .then((res) => {
+        setDropDownCompany(res.data?.results);
       });
   }, []);
+
   return (
     <div>
       <Breadcrumbs aria-label="breadcrumb">
@@ -409,17 +397,12 @@ const Territory = () => {
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  ID
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
                   Name
                 </TableCell>
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  Identifier
+                  Abberivation
                 </TableCell>
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
@@ -443,6 +426,12 @@ const Territory = () => {
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
                   City
+                </TableCell>
+
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Company
                 </TableCell>
 
                 <TableCell
@@ -471,10 +460,10 @@ const Territory = () => {
             </TableHead>
             <TableBody>
               {emp.map((user, key, index) => {
-                const provinceArr = [];
-                const arr = user.provinceId?.forEach((value) =>
-                  provinceArr.push(value.name + ", ")
-                );
+                // const provinceArr = [];
+                // const arr = user.provinceId?.forEach((value) =>
+                //   provinceArr.push(value.name + ", ")
+                // );
 
                 const cityArr = [];
                 const arr3 = user.cityId?.forEach((value) =>
@@ -483,20 +472,18 @@ const Territory = () => {
                 return (
                   <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
-                      {user.objectId}
-                    </TableCell>
-                    <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
 
-                    <TableCell>{user.identifier}</TableCell>
+                    <TableCell>{user.abbreviation}</TableCell>
 
                     <TableCell>{user.zoneId?.name}</TableCell>
 
                     <TableCell>{user.regionId?.name}</TableCell>
 
-                    <TableCell>{provinceArr}</TableCell>
+                    <TableCell>{user.provinceId?.name}</TableCell>
                     <TableCell>{cityArr}</TableCell>
+                    <TableCell>{user.company?.name}</TableCell>
                     {/* <TableCell>
                       <div
                         style={{
@@ -571,22 +558,13 @@ const Territory = () => {
               >
                 <h2 id="transition-modal-title">Add Territory</h2>
                 <div style={{ marginTop: "10px", width: "100%" }}>
-                  <div style={{ display: "flex", width: "100%" }}>
+                  <div style={{ display: "flex" }}>
                     <TextField
                       style={{
                         width: "100%",
                         marginTop: "10px",
                         marginRight: "10px",
                       }}
-                      required
-                      id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
-                      style={{ width: "100%", marginTop: "10px" }}
                       required
                       id="outlined-required"
                       label="Name"
@@ -594,26 +572,76 @@ const Territory = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
+
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abberivation"
+                      variant="outlined"
+                      value={abberivation}
+                      onChange={(e) => setAbberivation(e.target.value)}
+                    />
                   </div>
+                  <FormControl
+                    variant="outlined"
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                    }}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Company
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setCompany(e.target.value)}
+                      native
+                      value={company}
+                      label="Company"
+                    >
+                      <option aria-label="None" />
+                      {dropdownCompany.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
 
                   <div style={{ display: "flex", width: "100%" }}>
-                    <TextField
+                    <FormControl
+                      variant="outlined"
                       style={{
                         width: "100%",
                         marginTop: "10px",
                         marginRight: "10px",
                       }}
-                      required
-                      id="outlined-required"
-                      label="Identifier"
-                      variant="outlined"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                    />
-
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Region
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleRegionChange}
+                        native
+                        value={regionId}
+                        label="Region"
+                      >
+                        <option aria-label="None" />
+                        {dropdownRegion.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
                     <FormControl
                       style={{
                         width: "100%",
+
                         marginTop: "10px",
                       }}
                       variant="outlined"
@@ -654,6 +682,148 @@ const Territory = () => {
                       }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">
+                        Zone
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleZoneChange}
+                        native
+                        value={zoneId}
+                        label="Zone"
+                      >
+                        <option aria-label="None" />
+                        {dropdownZone.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                      variant="outlined"
+                    >
+                      <Autocomplete
+                        multiple
+                        id="tags-outlined"
+                        options={dropdownCity}
+                        getOptionLabel={(option) => option.name}
+                        value={city_Id}
+                        filterSelectedOptions
+                        getOptionSelected={(option, value) => {
+                          if (value === "") {
+                            return true;
+                          } else if (value === option) {
+                            return true;
+                          }
+                        }}
+                        onChange={(e, selectedObject) => {
+                          if (selectedObject !== null) {
+                            let List = [];
+                            for (let i = 0; i < selectedObject.length; i++) {
+                              List.push(selectedObject[i]);
+                            }
+                            setCity_Id(List);
+                          }
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            label="City"
+                          />
+                        )}
+                      />
+                    </FormControl>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    marginTop: "15px",
+                  }}
+                >
+                  <Button
+                    style={{ width: "100%", color: "white" }}
+                    variant="contained"
+                    color="primary"
+                    onClick={addTerritory}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Fade>
+        </Modal>
+      </div>
+      <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={editModal}
+          onClose={handleEditClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={editModal}>
+            <div className={classes.paper}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <h2 id="transition-modal-title">Edit Territory</h2>
+                <div style={{ marginTop: "10px", width: "100%" }}>
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{ width: "100%", marginTop: "10px" }}
+                      required
+                      id="outlined-required"
+                      label="Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <TextField
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      required
+                      id="outlined-required"
+                      label="Abberivation"
+                      variant="outlined"
+                      value={abberivation}
+                      onChange={(e) => setAbberivation(e.target.value)}
+                    />
+
+                    <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
                         Region
                       </InputLabel>
                       <Select
@@ -670,6 +840,41 @@ const Territory = () => {
                           </option>
                         ))}
                       </Select>
+                    </FormControl>
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
+                    <FormControl
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                      variant="outlined"
+                    >
+                      <Autocomplete
+                        multiple
+                        id="tags-outlined"
+                        options={dropdownProvince}
+                        getOptionLabel={(option) => option.name}
+                        value={province_Id}
+                        filterSelectedOptions
+                        getOptionSelected={(option, value) => {
+                          if (value === "") {
+                            return true;
+                          } else if (value === option) {
+                            return true;
+                          }
+                        }}
+                        onChange={handleProvinceChange}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            label="Province"
+                          />
+                        )}
+                      />
                     </FormControl>
                     <FormControl
                       variant="outlined"
@@ -736,219 +941,30 @@ const Territory = () => {
                       )}
                     />
                   </FormControl>
-                </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    width: "100%",
-                    marginTop: "15px",
-                  }}
-                >
-                  <Button
-                    style={{ width: "100%", color: "white" }}
-                    variant="contained"
-                    color="primary"
-                    onClick={addTerritory}
-                  >
-                    Submit
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </Fade>
-        </Modal>
-      </div>
-      <div>
-        <Modal
-          aria-labelledby="transition-modal-title"
-          aria-describedby="transition-modal-description"
-          className={classes.modal}
-          open={editModal}
-          onClose={handleEditClose}
-          closeAfterTransition
-          BackdropComponent={Backdrop}
-          BackdropProps={{
-            timeout: 500,
-          }}
-        >
-          <Fade in={editModal}>
-            <div className={classes.paper}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <h2 id="transition-modal-title">Edit Territory</h2>
-                <div style={{ marginTop: "10px", width: "100%" }}>
-                  <div style={{ display: "flex", width: "100%" }}>
-                    <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                      required
-                      id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
-                      style={{ width: "100%", marginTop: "10px" }}
-                      required
-                      id="outlined-required"
-                      label="Name"
-                      variant="outlined"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-
-                  <div style={{ display: "flex", width: "100%" }}>
-                    <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                      required
-                      id="outlined-required"
-                      label="Identifier"
-                      variant="outlined"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                    />
-
-                    <FormControl
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                      }}
-                      variant="outlined"
-                    >
-                      <Autocomplete
-                        multiple
-                        id="tags-outlined"
-                        options={dropdownProvince}
-                        getOptionLabel={(option) => option.name}
-                        value={province_Id}
-                        filterSelectedOptions
-                        getOptionSelected={(option, value) => {
-                          if (value === "") {
-                            return true;
-                          } else if (value === option) {
-                            return true;
-                          }
-                        }}
-                        onChange={handleProvinceChange}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="outlined"
-                            label="Province"
-                          />
-                        )}
-                      />
-                    </FormControl>
-                  </div>
-
-                  <div style={{ display: "flex", width: "100%" }}>
-                    <FormControl
-                      variant="outlined"
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Region
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={handleRegionChange}
-                        native
-                        value={regionId}
-                        label="Region"
-                      >
-                        <option aria-label="None" />
-                        {dropdownRegion.map((value, index) => (
-                          <option key={value.id} value={value.id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <FormControl
-                      variant="outlined"
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                      }}
-                    >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Zone
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={handleZoneChange}
-                        native
-                        value={zoneId}
-                        label="Zone"
-                      >
-                        <option aria-label="None" />
-                        {dropdownZone.map((value, index) => (
-                          <option key={value.id} value={value.id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
                   <FormControl
+                    variant="outlined"
                     style={{
                       width: "100%",
                       marginTop: "10px",
                     }}
-                    variant="outlined"
                   >
-                    <Autocomplete
-                      multiple
-                      id="tags-outlined"
-                      options={dropdownCity}
-                      getOptionLabel={(option) => option.name}
-                      value={city_Id}
-                      filterSelectedOptions
-                      getOptionSelected={(option, value) => {
-                        if (value === "") {
-                          return true;
-                        } else if (value === option) {
-                          return true;
-                        }
-                      }}
-                      onChange={(e, selectedObject) => {
-                        if (selectedObject !== null) {
-                          let List = [];
-                          for (let i = 0; i < selectedObject.length; i++) {
-                            List.push(selectedObject[i]);
-                          }
-                          setCity_Id(List);
-                        }
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="outlined"
-                          label="City"
-                        />
-                      )}
-                    />
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      Company
+                    </InputLabel>
+                    <Select
+                      onChange={(e) => setCompany(e.target.value)}
+                      native
+                      value={company}
+                      label="Company"
+                    >
+                      <option aria-label="None" />
+                      {dropdownCompany.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
                   </FormControl>
                 </div>
 

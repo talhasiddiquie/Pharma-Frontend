@@ -59,10 +59,8 @@ const VerticalGroupCompany = () => {
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
-  const [identifier, setIdentifier] = useState("");
   const [address, setAddress] = useState("");
   const [contactPerson, setContactPerson] = useState("");
   const [contactNumber, setContactNumber] = useState("");
@@ -89,10 +87,8 @@ const VerticalGroupCompany = () => {
 
   const addCompany = () => {
     const form = new FormData();
-    form.append("objectId", objectId);
     form.append("name", name);
     form.append("abbreviation", abbreviation);
-    form.append("identifier", identifier);
     form.append("address", address);
     form.append("contactPerson", contactPerson);
     form.append("contactNumber", contactNumber);
@@ -127,9 +123,7 @@ const VerticalGroupCompany = () => {
     console.log(response.data);
     setId(response.data._id);
     setName(response.data.name);
-    setObjectId(response.data.objectId);
     setAbbreviation(response.data.abbreviation);
-    setIdentifier(response.data.identifier);
     setAddress(response.data.address);
     setContactPerson(response.data.contactPerson);
     setContactNumber(response.data.contactNumber);
@@ -141,16 +135,15 @@ const VerticalGroupCompany = () => {
     console.log(id, "-----------------------.");
     const form = new FormData();
     form.append("id", id);
-    form.append("objectId", objectId);
     form.append("name", name);
     form.append("abbreviation", abbreviation);
-    form.append("identifier", identifier);
+
     form.append("address", address);
     form.append("contactPerson", contactPerson);
     form.append("contactNumber", contactNumber);
     form.append("contactDetail", contactDetail);
     form.append("companyLogo", CompanyLogo);
-    console.log(form);
+
     await axios
       .post(`${process.env.REACT_APP_URL}/companies/updateCompany`, form, {
         headers: {
@@ -205,7 +198,7 @@ const VerticalGroupCompany = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
       .then((response) => {
-        const allCompany = response.data;
+        const allCompany = response.data?.results;
         console.log(allCompany);
         setEmp(allCompany);
         setLoad(false);
@@ -266,11 +259,6 @@ const VerticalGroupCompany = () => {
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  ID
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
                   Logo
                 </TableCell>
                 <TableCell
@@ -283,11 +271,7 @@ const VerticalGroupCompany = () => {
                 >
                   Abbreviation
                 </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  Identifier
-                </TableCell>
+
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
@@ -328,9 +312,6 @@ const VerticalGroupCompany = () => {
                 return (
                   <TableRow key={user._id}>
                     <TableCell component="th" scope="row">
-                      {user.objectId}
-                    </TableCell>
-                    <TableCell component="th" scope="row">
                       <img
                         style={{ width: "100px" }}
                         src={`${process.env.REACT_APP_URL_IMAGE_URL}/${user.logoImg}`}
@@ -340,7 +321,7 @@ const VerticalGroupCompany = () => {
                       {user.name}
                     </TableCell>
                     <TableCell>{user.abbreviation}</TableCell>
-                    <TableCell>{user.identifier}</TableCell>
+                    
                     <TableCell>{user.address}</TableCell>
                     <TableCell>{user.contactPerson}</TableCell>
                     <TableCell>{user.contactNumber}</TableCell>
@@ -413,28 +394,16 @@ const VerticalGroupCompany = () => {
                       }}
                       required
                       id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
-                      style={{ width: "100%", marginTop: "10px" }}
-                      required
-                      id="outlined-required"
                       label="Name"
                       variant="outlined"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
-                  </div>
 
-                  <div style={{ display: "flex", width: "100%" }}>
                     <TextField
                       style={{
                         width: "100%",
                         marginTop: "10px",
-                        marginRight: "10px",
                       }}
                       required
                       id="outlined-required"
@@ -442,16 +411,6 @@ const VerticalGroupCompany = () => {
                       variant="outlined"
                       value={abbreviation}
                       onChange={(e) => setAbbreviation(e.target.value)}
-                    />
-
-                    <TextField
-                      style={{ width: "100%", marginTop: "10px" }}
-                      required
-                      id="outlined-required"
-                      label="Identifier"
-                      variant="outlined"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
                     />
                   </div>
 
@@ -569,19 +528,6 @@ const VerticalGroupCompany = () => {
                 <div style={{ marginTop: "10px", width: "100%" }}>
                   <div style={{ display: "flex", width: "100%" }}>
                     <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                        marginRight: "10px",
-                      }}
-                      required
-                      id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
                       style={{ width: "100%", marginTop: "10px" }}
                       required
                       id="outlined-required"
@@ -605,16 +551,6 @@ const VerticalGroupCompany = () => {
                       variant="outlined"
                       value={abbreviation}
                       onChange={(e) => setAbbreviation(e.target.value)}
-                    />
-
-                    <TextField
-                      style={{ width: "100%", marginTop: "10px" }}
-                      required
-                      id="outlined-required"
-                      label="Identifier"
-                      variant="outlined"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
                     />
                   </div>
 

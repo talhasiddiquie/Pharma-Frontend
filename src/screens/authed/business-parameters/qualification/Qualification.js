@@ -42,33 +42,33 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
     padding: "20px",
     width: "25%",
-    inHeight: "35%",
+    inHeight: "50%",
     [theme.breakpoints.down("sm")]: {
       width: "70%",
-      inHeight: "40%",
+      inHeight: "55%",
     },
   },
 }));
 
-const Province = () => {
+const Qualification = () => {
   const classes = useStyles();
   const history = useHistory();
   const [emp, setEmp] = useState([]);
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
-
   const [name, setName] = useState("");
-  const [isActive, setIsActive] = useState("");
   const [Id, setId] = useState("");
   const { enqueueSnackbar } = useSnackbar();
+
   const handleOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+
+    setName("");
   };
 
   const handleEditOpen = (id) => {
@@ -77,28 +77,66 @@ const Province = () => {
 
   const handleEditClose = () => {
     setEditModal(false);
+    setName("");
   };
 
-  const addProvince = () => {
+  const addQualification = () => {
     const form = { name };
     axios
-      .post(`${process.env.REACT_APP_URL}/provinces/createProvince`, form)
+      .post(
+        `${process.env.REACT_APP_URL}/qualifications/postQualification`,
+        form
+      )
       .then((res) => {
         console.log(res.data);
-        enqueueSnackbar("Province Add Successfully", { variant: "success" });
+        enqueueSnackbar("Designation Add Successfully", { variant: "success" });
         setOpen(false);
-        fetchProvince();
+        fetchQualification();
       })
       .catch(function (error) {
-        // enqueueSnackbar(error, { variant: "error" });
-        console.log(error.message);
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
       });
 
     setName("");
-    setObjectId("");
   };
 
-  const deleteProvince = (id) => {
+  const getQualificationById = async (id) => {
+    const form = { id };
+    let response = await axios.post(
+      `${process.env.REACT_APP_URL}/qualifications/getQualification`,
+      form
+    );
+    console.log(response.data);
+    setId(response.data._id);
+    setName(response.data.name);
+    setEditModal(true);
+  };
+
+  const editQualification = async (id) => {
+    const form = { id, name };
+    await axios
+      .post(
+        `${process.env.REACT_APP_URL}/qualifications/updateQualification`,
+        form
+      )
+      .then((res) => {
+        console.log(res.data);
+        setEditModal(false);
+        enqueueSnackbar("Qualfication Edit Successfully", {
+          variant: "success",
+        });
+        fetchQualification();
+      })
+      .catch(function (error) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        console.log(error.response);
+      });
+
+    setName("");
+  };
+
+  const deleteQualification = (id) => {
     const form = { id };
     confirmAlert({
       title: "Confirm to Delete",
@@ -109,12 +147,15 @@ const Province = () => {
           onClick: () => {
             axios
               .post(
-                `${process.env.REACT_APP_URL}/provinces/deleteProvince`,
+                `${process.env.REACT_APP_URL}/qualifications/deleteQualification`,
                 form
               )
               .then((res) => {
                 console.log(res.data);
-                fetchProvince();
+                enqueueSnackbar("Qulification Deleted Successfully", {
+                  variant: "success",
+                });
+                fetchQualification();
               })
               .catch(function (error) {
                 console.log(error.response);
@@ -129,56 +170,23 @@ const Province = () => {
     });
   };
 
-  const editFormProvince = async (id) => {
-    const form = { id, name };
+  //Get Region
+
+  const fetchQualification = async () => {
     await axios
-      .post(`${process.env.REACT_APP_URL}/provinces/updateProvince`, form)
-      .then((res) => {
-        console.log(res.data);
-        setEditModal(false);
-        enqueueSnackbar("Province Edit Successfully", { variant: "success" });
-        fetchProvince();
-      })
-      .catch(function (error) {
-        enqueueSnackbar(error.response.data.message, { variant: "error" });
-        console.log(error.response);
-      });
-    setIsActive("");
-    setName("");
-    setObjectId("");
-  };
-
-  const editProvince = async (id) => {
-    const newId = id;
-    const form = {
-      id: newId,
-    };
-    console.log(newId);
-    let response = await axios.post(
-      `${process.env.REACT_APP_URL}/provinces/getProvince`,
-      form
-    );
-
-    setId(response.data.id);
-    setName(response.data.name);
-
-    setEditModal(true);
-  };
-
-  const fetchProvince = async () => {
-    await axios
-      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
+      .get(`${process.env.REACT_APP_URL}/qualifications/getQualifications`)
       .then((response) => {
-        const allProvince = response.data.results;
-        setEmp(allProvince);
+        const allQualification = response.data;
+        setEmp(allQualification);
         setLoad(false);
       })
       .catch((error) => console.log(`Error: ${error}`));
   };
 
   useEffect(() => {
-    fetchProvince();
+    fetchQualification();
   }, [load]);
+
   return (
     <div>
       <Breadcrumbs aria-label="breadcrumb">
@@ -191,8 +199,8 @@ const Province = () => {
         >
           Home
         </Link>
-        <Typography color="textPrimary">Vertical-Settings</Typography>
-        <Typography color="textPrimary">Province</Typography>
+        <Typography color="textPrimary">Business-Parameters</Typography>
+        <Typography color="textPrimary">Designation</Typography>
       </Breadcrumbs>
       <div
         style={{
@@ -209,13 +217,13 @@ const Province = () => {
           style={{ width: "200px", color: "white" }}
           onClick={handleOpen}
         >
-          Add Province
+          Add Desigantion
         </Button>
       </div>
       <div>
         <TableContainer
           style={{
-            borderRadius: "10px",
+            borderRadius: "4px",
             width: "100%",
             overflow: "auto",
             minWidth: "450px",
@@ -225,19 +233,18 @@ const Province = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell style={{ fontWeight: "600", color: "white" }}>
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
                   Name
                 </TableCell>
 
-                {/* <TableCell style={{ fontWeight: "600", width: "20%" }}>
-                  isActive
-                </TableCell> */}
                 <TableCell
                   style={{
                     fontWeight: "600",
-
-                    color: "white",
+                    width: "15%",
                     textAlign: "center",
+                    color: "white",
                   }}
                 >
                   Actions
@@ -252,22 +259,6 @@ const Province = () => {
                       {user.name}
                     </TableCell>
 
-                    {/* <TableCell>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          flexWrap: "nowrap",
-                          width: "130px",
-                        }}
-                      >
-                        {user.isActive === true ? (
-                          <SuccessIcon />
-                        ) : (
-                          <PendingIcon />
-                        )}
-                      </div>
-                    </TableCell> */}
                     <TableCell>
                       <div
                         style={{
@@ -278,7 +269,7 @@ const Province = () => {
                       >
                         <Button
                           onClick={() => {
-                            editProvince(user.id);
+                            getQualificationById(user._id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -286,7 +277,7 @@ const Province = () => {
 
                         <Button
                           onClick={() => {
-                            deleteProvince(user.id);
+                            deleteQualification(user._id);
                           }}
                         >
                           <DeleteIcon color="secondary" />
@@ -324,7 +315,7 @@ const Province = () => {
                   alignItems: "center",
                 }}
               >
-                <h2 id="transition-modal-title">Add Province</h2>
+                <h2 id="transition-modal-title">Add Qualification</h2>
                 <div style={{ marginTop: "10px", width: "80%" }}>
                   <TextField
                     style={{ width: "100%", marginTop: "10px" }}
@@ -349,7 +340,7 @@ const Province = () => {
                     style={{ width: "45%" }}
                     variant="contained"
                     color="primary"
-                    onClick={addProvince}
+                    onClick={addQualification}
                   >
                     Submit
                   </Button>
@@ -382,7 +373,7 @@ const Province = () => {
                   alignItems: "center",
                 }}
               >
-                <h2 id="transition-modal-title">Edit Province</h2>
+                <h2 id="transition-modal-title">Edit Qualification</h2>
                 <div style={{ marginTop: "10px", width: "80%" }}>
                   <TextField
                     style={{ width: "100%", marginTop: "10px" }}
@@ -407,7 +398,7 @@ const Province = () => {
                     style={{ width: "45%" }}
                     variant="contained"
                     color="primary"
-                    onClick={() => editFormProvince(Id)}
+                    onClick={() => editQualification(Id)}
                   >
                     Submit
                   </Button>
@@ -421,4 +412,4 @@ const Province = () => {
   );
 };
 
-export default Province;
+export default Qualification;

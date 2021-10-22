@@ -29,6 +29,7 @@ import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { useSnackbar } from "notistack";
 import { makeStyles } from "@material-ui/core/styles";
+import { handleBreakpoints } from "@mui/system";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -58,13 +59,13 @@ const Zone = () => {
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
   const [regionId, setRegionId] = useState("");
-  const [province_Id, setprovince_Id] = useState([]);
-  const [isActive, setIsActive] = useState("");
+  const [province_Id, setprovince_Id] = useState("");
   const [Id, setId] = useState("");
+  const [company, setCompany] = useState("");
+  const [dropdownCompany, setDropDownCompany] = useState([]);
   const [dropdownRegion, setDropDownRegion] = useState([]);
   const [dropdownProvince, setDropDownProvince] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
@@ -75,10 +76,12 @@ const Zone = () => {
 
   const handleClose = () => {
     setOpen(false);
+
     setName("");
-    setObjectId("");
     setAbbreviation("");
     setRegionId("");
+    setprovince_Id("");
+    setCompany("");
   };
 
   const handleEditOpen = (id) => {
@@ -87,50 +90,36 @@ const Zone = () => {
 
   const handleEditClose = () => {
     setEditModal(false);
+
     setName("");
-    setObjectId("");
     setAbbreviation("");
     setRegionId("");
+    setprovince_Id("");
+    setCompany("");
   };
 
-  const handleProvinceChange = async (e, selectedObject) => {
-    let List = [];
-    if (selectedObject !== null) {
-      for (let i = 0; i < selectedObject.length; i++) {
-        List.push(selectedObject[i]);
-      }
-      setprovince_Id(List);
-    }
+  const handleRegionChange = async (e) => {
+    setRegionId(e.target.value);
 
-    console.log(List);
-
-    const Arr = [];
-    let a = "";
-    List.map((x) => {
-      Arr.push({ province_Id: x.id });
-      a = a + "provinceId=" + x.id + "&";
-    });
-
-    console.log(a);
-
-    // const provinceArr = [];
-    // const regionData = List.forEach((value) => provinceArr.push(value.id));
+    const id = e.target.value;
+    setprovince_Id("");
+    console.log(id);
     await axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions?${a}`)
+      .post(`${process.env.REACT_APP_URL}/regions/getRegion`, { id })
       .then((res) => {
-        setDropDownRegion(res.data.results);
+        setDropDownProvince(res.data.provinceId);
       });
   };
 
   const addZone = () => {
-    const provinceId = [];
-    province_Id.forEach((value) => provinceId.push(value.id));
+    // const provinceId = [];
+    // province_Id.forEach((value) => provinceId.push(value.id));
     const form = {
-      objectId,
       name,
       abbreviation,
       regionId,
-      provinceId,
+      provinceId: province_Id,
+      company,
     };
     console.log(form);
     axios
@@ -147,9 +136,10 @@ const Zone = () => {
       });
 
     setName("");
-    setObjectId("");
     setAbbreviation("");
     setRegionId("");
+    setprovince_Id("");
+    setCompany("");
   };
 
   const editProvince = async (id) => {
@@ -161,38 +151,24 @@ const Zone = () => {
 
     setId(response.data.id);
     setName(response.data.name);
-    setObjectId(response.data.objectId);
-    setprovince_Id(response.data.provinceId);
     setAbbreviation(response.data.abbreviation);
-
-    const Arr = [];
-    let a = "";
-    response.data.provinceId.map((x) => {
-      Arr.push({ province_Id: x.id });
-      a = a + "provinceId=" + x.id + "&";
-    });
-    console.log(a);
-    axios
-      .get(`${process.env.REACT_APP_URL}/regions/getRegions?${a}`)
-      .then((res) => {
-        setDropDownRegion(res.data.results);
-        console.log(res.data.results, "===============>");
-        setRegionId(res.data.results[0].id);
-      });
+    setCompany(response.data.company?.id);
+    setRegionId(response.data.regionId?.id);
+    setDropDownProvince([response.data.provinceId]);
+    setprovince_Id(response.data.provinceId?.id);
+    
 
     setEditModal(true);
   };
 
   const editFormProvince = async (id) => {
-    const provinceId = [];
-    province_Id.forEach((value) => provinceId.push(value.id));
     const form = {
       id,
-      objectId,
       name,
       abbreviation,
       regionId,
-      provinceId,
+      provinceId: province_Id,
+      company,
     };
     await axios
       .post(`${process.env.REACT_APP_URL}/zones/updateZone`, form)
@@ -208,9 +184,10 @@ const Zone = () => {
       });
 
     setName("");
-    setObjectId("");
     setAbbreviation("");
     setRegionId("");
+    setprovince_Id("");
+    setCompany("");
   };
 
   const deleteProvince = (id) => {
@@ -258,24 +235,17 @@ const Zone = () => {
     fetchZone();
   }, [load]);
 
-  const provinceList = [];
-
-  const filterprovince_Id = (res) => {
-    for (let i = 0; i < res.data.results.length; i++) {
-      provinceList.push(res.data.results);
-    }
-    let newList = [];
-    provinceList[0].map((item) => {
-      newList.push(item);
+  useEffect(() => {
+    axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
+      setDropDownRegion(res.data.results);
     });
-    setDropDownProvince(newList);
-  };
+  }, []);
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_URL}/provinces/getProvinces`)
-      .then(async (res) => {
-        await filterprovince_Id(res);
+      .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
+      .then((res) => {
+        setDropDownCompany(res.data?.results);
       });
   }, []);
 
@@ -328,11 +298,6 @@ const Zone = () => {
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  ID
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
                   Name
                 </TableCell>
                 <TableCell
@@ -353,9 +318,12 @@ const Zone = () => {
                   Region
                 </TableCell>
 
-                {/* <TableCell style={{ fontWeight: "600", width: "15%" }}>
-                  isActive
-                </TableCell> */}
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Company
+                </TableCell>
+
                 <TableCell
                   style={{
                     fontWeight: "600",
@@ -366,54 +334,19 @@ const Zone = () => {
                 >
                   Actions
                 </TableCell>
-                {/* <TableCell
-                  style={{ fontWeight: "600", width: "15%" }}
-                  align="right"
-                >
-                  <Button
-                    style={{ width: "150px" }}
-                    variant="outlined"
-                    onClick={handleOpen}
-                  >
-                    Add Zone
-                  </Button>
-                </TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
               {emp.map((user, key, index) => {
-                const provinceArr = [];
-                const regionData = user.provinceId?.forEach((value) =>
-                  provinceArr.push(value.name + ", ")
-                );
                 return (
                   <TableRow key={user.id}>
-                    <TableCell component="th" scope="row">
-                      {user.objectId}
-                    </TableCell>
                     <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
                     <TableCell>{user.abbreviation}</TableCell>
-                    <TableCell>{provinceArr}</TableCell>
+                    <TableCell>{user.provinceId?.name}</TableCell>
                     <TableCell>{user.regionId?.name}</TableCell>
-
-                    {/* <TableCell>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          flexWrap: "nowrap",
-                          width: "130px",
-                        }}
-                      >
-                        {user.isActive === true ? (
-                          <SuccessIcon />
-                        ) : (
-                          <PendingIcon />
-                        )}
-                      </div>
-                    </TableCell> */}
+                    <TableCell>{user.company?.name}</TableCell>
                     <TableCell>
                       <div
                         style={{
@@ -481,28 +414,16 @@ const Zone = () => {
                       }}
                       required
                       id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
-                      style={{ width: "100%", marginTop: "10px" }}
-                      required
-                      id="outlined-required"
                       label="Name"
                       variant="outlined"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
-                  </div>
 
-                  <div style={{ display: "flex", width: "100%" }}>
                     <TextField
                       style={{
                         width: "100%",
                         marginTop: "10px",
-                        marginRight: "10px",
                       }}
                       required
                       id="outlined-required"
@@ -511,36 +432,59 @@ const Zone = () => {
                       value={abbreviation}
                       onChange={(e) => setAbbreviation(e.target.value)}
                     />
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Company
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setCompany(e.target.value)}
+                        native
+                        value={company}
+                        label="Company"
+                      >
+                        <option aria-label="None" />
+                        {dropdownCompany.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
                       style={{
                         width: "100%",
                         marginTop: "10px",
                       }}
-                      variant="outlined"
                     >
-                      <Autocomplete
-                        multiple
-                        id="tags-outlined"
-                        options={dropdownProvince}
-                        getOptionLabel={(option) => option.name}
-                        value={province_Id}
-                        filterSelectedOptions
-                        getOptionSelected={(option, value) => {
-                          if (value === "") {
-                            return true;
-                          } else if (value === option) {
-                            return true;
-                          }
-                        }}
-                        onChange={handleProvinceChange}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="outlined"
-                            label="Province"
-                          />
-                        )}
-                      />
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Region
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleRegionChange}
+                        native
+                        value={regionId}
+                        label="Region"
+                      >
+                        <option aria-label="None" />
+                        {dropdownRegion.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
                     </FormControl>
                   </div>
 
@@ -549,17 +493,16 @@ const Zone = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Region
+                      Province
                     </InputLabel>
                     <Select
-                      // value={department}
-                      onChange={(e) => setRegionId(e.target.value)}
+                      onChange={(e) => setprovince_Id(e.target.value)}
                       native
-                      value={regionId}
-                      label="Region"
+                      value={province_Id}
+                      label="Province"
                     >
                       <option aria-label="None" />
-                      {dropdownRegion.map((value, index) => (
+                      {dropdownProvince.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -624,28 +567,16 @@ const Zone = () => {
                       }}
                       required
                       id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
-                      style={{ width: "100%", marginTop: "10px" }}
-                      required
-                      id="outlined-required"
                       label="Name"
                       variant="outlined"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
-                  </div>
 
-                  <div style={{ display: "flex", width: "100%" }}>
                     <TextField
                       style={{
                         width: "100%",
                         marginTop: "10px",
-                        marginRight: "10px",
                       }}
                       required
                       id="outlined-required"
@@ -654,36 +585,59 @@ const Zone = () => {
                       value={abbreviation}
                       onChange={(e) => setAbbreviation(e.target.value)}
                     />
+                  </div>
+
+                  <div style={{ display: "flex", width: "100%" }}>
                     <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                        marginRight: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Company
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setCompany(e.target.value)}
+                        native
+                        value={company}
+                        label="Company"
+                      >
+                        <option aria-label="None" />
+                        {dropdownCompany.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      variant="outlined"
                       style={{
                         width: "100%",
                         marginTop: "10px",
                       }}
-                      variant="outlined"
                     >
-                      <Autocomplete
-                        multiple
-                        id="tags-outlined"
-                        options={dropdownProvince}
-                        getOptionLabel={(option) => option.name}
-                        value={province_Id}
-                        filterSelectedOptions
-                        getOptionSelected={(option, value) => {
-                          if (value === "") {
-                            return true;
-                          } else if (value === option) {
-                            return true;
-                          }
-                        }}
-                        onChange={handleProvinceChange}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="outlined"
-                            label="Province"
-                          />
-                        )}
-                      />
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Region
+                      </InputLabel>
+                      <Select
+                        // value={department}
+                        onChange={handleRegionChange}
+                        native
+                        value={regionId}
+                        label="Region"
+                      >
+                        <option aria-label="None" />
+                        {dropdownRegion.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
                     </FormControl>
                   </div>
 
@@ -692,17 +646,16 @@ const Zone = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      Region
+                      Province
                     </InputLabel>
                     <Select
-                      // value={department}
-                      onChange={(e) => setRegionId(e.target.value)}
+                      onChange={(e) => setprovince_Id(e.target.value)}
                       native
-                      value={regionId}
-                      label="Region"
+                      value={province_Id}
+                      label="Province"
                     >
                       <option aria-label="None" />
-                      {dropdownRegion.map((value, index) => (
+                      {dropdownProvince.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>

@@ -57,7 +57,7 @@ const Designation = () => {
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
+
   const [name, setName] = useState("");
   const [type, setType] = useState("");
   const [Id, setId] = useState("");
@@ -71,7 +71,7 @@ const Designation = () => {
     setOpen(false);
 
     setName("");
-    setObjectId("");
+
     setType("");
   };
 
@@ -83,12 +83,12 @@ const Designation = () => {
     setEditModal(false);
 
     setName("");
-    setObjectId("");
+
     setType("");
   };
 
   const addDesigantion = () => {
-    const form = { objectId, name, type };
+    const form = { name, type };
     axios
       .post(`${process.env.REACT_APP_URL}/designations/postDesignation`, form)
       .then((res) => {
@@ -103,7 +103,7 @@ const Designation = () => {
       });
 
     setName("");
-    setObjectId("");
+
     setType("");
   };
 
@@ -117,13 +117,13 @@ const Designation = () => {
     console.log(response.data);
     setId(response.data.id);
     setName(response.data.name);
-    setObjectId(response.data.objectId);
+
     setType(response.data.type);
     setEditModal(true);
   };
 
   const editDesignation = async (id) => {
-    const form = { id, objectId, name, type };
+    const form = { id, name, type };
     await axios
       .post(`${process.env.REACT_APP_URL}/designations/updateDesignation`, form)
       .then((res) => {
@@ -140,7 +140,7 @@ const Designation = () => {
       });
 
     setName("");
-    setObjectId("");
+
     setType("");
   };
 
@@ -226,7 +226,7 @@ const Designation = () => {
           style={{ width: "200px", color: "white" }}
           onClick={handleOpen}
         >
-          Add Designation
+          Add Desigantion
         </Button>
       </div>
       <div>
@@ -242,11 +242,6 @@ const Designation = () => {
           <Table>
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
-                  Object ID
-                </TableCell>
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
@@ -274,9 +269,6 @@ const Designation = () => {
               {emp.map((user, key, index) => {
                 return (
                   <TableRow key={user.id}>
-                    <TableCell component="th" scope="row">
-                      {user.objectId}
-                    </TableCell>
                     <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
@@ -344,48 +336,30 @@ const Designation = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
                     label="Name"
                     variant="outlined"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Type"
-                    variant="outlined"
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                  />
-                  {/* <FormControl
+                  <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      isActive
+                      Type
                     </InputLabel>
                     <Select
                       native
-                      label="isActive"
-                      value={isActive}
-                      onChange={(e) => setIsActive(e.target.value)}
+                      label="Type"
+                      value={type}
+                      onChange={(e) => setType(e.target.value)}
                     >
                       <option aria-label="None"> </option>
-                      <option value="true">True</option>
-                      <option value="false">False</option>
+                      <option value="doctor">Doctor</option>
+                      <option value="representative">Representative</option>
                     </Select>
-                  </FormControl> */}
+                  </FormControl>
                 </div>
 
                 <div
@@ -439,48 +413,30 @@ const Designation = () => {
                     style={{ width: "100%", marginTop: "10px" }}
                     required
                     id="outlined-required"
-                    label="Object ID"
-                    variant="outlined"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                  />
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
                     label="Name"
                     variant="outlined"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
 
-                  <TextField
-                    style={{ width: "100%", marginTop: "10px" }}
-                    required
-                    id="outlined-required"
-                    label="Type"
-                    variant="outlined"
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                  />
-                  {/* <FormControl
+                  <FormControl
                     style={{ width: "100%", marginTop: "10px" }}
                     variant="outlined"
                   >
                     <InputLabel htmlFor="outlined-age-native-simple">
-                      isActive
+                      Type
                     </InputLabel>
                     <Select
                       native
-                      label="isActive"
-                      value={isActive}
-                      onChange={(e) => setIsActive(e.target.value)}
+                      label="Type"
+                      value={type}
+                      onChange={(e) => setType(e.target.value)}
                     >
                       <option aria-label="None"> </option>
-                      <option value="true">True</option>
-                      <option value="false">False</option>
+                      <option value="doctor">Doctor</option>
+                      <option value="representative">Representative</option>
                     </Select>
-                  </FormControl> */}
+                  </FormControl>
                 </div>
 
                 <div

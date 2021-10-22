@@ -12,24 +12,20 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import axios from "axios";
 import { Button, TextField } from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
 import Autocomplete from "@mui/material/Autocomplete";
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
-import Card from "@material-ui/core/Card";
-import Select from "@material-ui/core/Select";
 import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
-import SuccessIcon from "../../../components/Success&PendingIcon/SuccessIcon";
-import PendingIcon from "../../../components/Success&PendingIcon/PendingIcon";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { useSnackbar } from "notistack";
 import { makeStyles } from "@material-ui/core/styles";
-
+import "./style.css";
+import Select from "@material-ui/core/Select";
+import InputLabel from "@material-ui/core/InputLabel";
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
@@ -58,14 +54,13 @@ const Region = () => {
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [objectId, setObjectId] = useState("");
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
   const [province_Id, setProvince_Id] = useState([]);
-
   const [Id, setId] = useState("");
+  const [company, setCompany] = useState("");
+  const [dropdownCompany, setDropDownCompany] = useState([]);
   const [dropdownProvince, setDropDownProvince] = useState([]);
-
   const { enqueueSnackbar } = useSnackbar();
 
   const handleOpen = () => {
@@ -75,9 +70,9 @@ const Region = () => {
   const handleClose = () => {
     setOpen(false);
     setName("");
-    setObjectId("");
     setAbbreviation("");
     setProvince_Id([]);
+    setCompany("");
   };
 
   const handleEditOpen = (id) => {
@@ -87,15 +82,15 @@ const Region = () => {
   const handleEditClose = () => {
     setEditModal(false);
     setName("");
-    setObjectId("");
     setAbbreviation("");
     setProvince_Id([]);
+    setCompany("");
   };
 
   const addRegion = () => {
     const provinceId = [];
     province_Id.forEach((value) => provinceId.push(value.id));
-    const form = { objectId, name, abbreviation, provinceId };
+    const form = { name, abbreviation, provinceId, company };
     axios
       .post(`${process.env.REACT_APP_URL}/regions/postRegion`, form)
       .then((res) => {
@@ -109,9 +104,9 @@ const Region = () => {
         console.log(error.response);
       });
     setName("");
-    setObjectId("");
     setAbbreviation("");
     setProvince_Id([]);
+    setCompany("");
   };
 
   const editRegion = async (id) => {
@@ -123,10 +118,9 @@ const Region = () => {
     console.log(response.data);
     setId(response.data.id);
     setName(response.data.name);
-    setObjectId(response.data.objectId);
     setProvince_Id(response.data.provinceId);
-    
     setAbbreviation(response.data.abbreviation);
+    setCompany(response.data.company?.id);
     setEditModal(true);
   };
 
@@ -134,7 +128,7 @@ const Region = () => {
     const provinceId = [];
     province_Id.forEach((value) => provinceId.push(value.id));
     console.log(provinceId, "---------------->");
-    const form = { id, objectId, name, abbreviation, provinceId };
+    const form = { id, name, abbreviation, provinceId, company };
     await axios
       .post(`${process.env.REACT_APP_URL}/regions/updateRegion`, form)
       .then((res) => {
@@ -149,9 +143,9 @@ const Region = () => {
       });
 
     setName("");
-    setObjectId("");
     setAbbreviation("");
     setProvince_Id([]);
+    setCompany("");
   };
 
   const deleteProvince = (id) => {
@@ -218,6 +212,14 @@ const Region = () => {
         await filterProvinceId(res);
       });
   }, []);
+
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
+      .then((res) => {
+        setDropDownCompany(res.data?.results);
+      });
+  }, []);
   return (
     <div>
       <Breadcrumbs aria-label="breadcrumb">
@@ -267,11 +269,6 @@ const Region = () => {
                 <TableCell
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
-                  ID
-                </TableCell>
-                <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
-                >
                   Name
                 </TableCell>
                 <TableCell
@@ -283,6 +280,12 @@ const Region = () => {
                   style={{ fontWeight: "600", width: "15%", color: "white" }}
                 >
                   Province Name
+                </TableCell>
+
+                <TableCell
+                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                >
+                  Company
                 </TableCell>
 
                 <TableCell
@@ -307,14 +310,11 @@ const Region = () => {
                 return (
                   <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
-                      {user.objectId}
+                      {user?.name}
                     </TableCell>
-                    <TableCell component="th" scope="row">
-                      {user.name}
-                    </TableCell>
-                    <TableCell>{user.abbreviation}</TableCell>
+                    <TableCell>{user?.abbreviation}</TableCell>
                     <TableCell>{provinceArr}</TableCell>
-
+                    <TableCell>{user?.company?.name}</TableCell>
                     {/* <TableCell>
                       <div
                         style={{
@@ -398,23 +398,36 @@ const Region = () => {
                       }}
                       required
                       id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                      }}
-                      required
-                      id="outlined-required"
                       label="Name"
                       variant="outlined"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
+
+                    <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Company
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setCompany(e.target.value)}
+                        native
+                        value={company}
+                        label="Company"
+                      >
+                        <option aria-label="None" />
+                        {dropdownCompany.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </div>
                   <div style={{ display: "flex", width: "100%" }}>
                     <TextField
@@ -439,6 +452,7 @@ const Region = () => {
                       variant="outlined"
                     >
                       <Autocomplete
+                        id="abc"
                         multiple
                         id="tags-outlined"
                         options={dropdownProvince}
@@ -529,23 +543,35 @@ const Region = () => {
                       }}
                       required
                       id="outlined-required"
-                      label="ID"
-                      variant="outlined"
-                      value={objectId}
-                      onChange={(e) => setObjectId(e.target.value)}
-                    />
-                    <TextField
-                      style={{
-                        width: "100%",
-                        marginTop: "10px",
-                      }}
-                      required
-                      id="outlined-required"
                       label="Name"
                       variant="outlined"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
+                    <FormControl
+                      variant="outlined"
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <InputLabel htmlFor="outlined-age-native-simple">
+                        Company
+                      </InputLabel>
+                      <Select
+                        onChange={(e) => setCompany(e.target.value)}
+                        native
+                        value={company}
+                        label="Company"
+                      >
+                        <option aria-label="None" />
+                        {dropdownCompany?.map((value, index) => (
+                          <option key={value.id} value={value.id}>
+                            {value.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </div>
                   <div style={{ display: "flex", width: "100%" }}>
                     <TextField

@@ -29,8 +29,8 @@ import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { useSnackbar } from "notistack";
 import { makeStyles } from "@material-ui/core/styles";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import { object } from "joi";
-
+import Pagination from "@mui/material/Pagination";
+import "./product.css";
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
@@ -74,7 +74,9 @@ const Product = () => {
   const [dropdownSellingLine, setDropDownSellingLine] = useState([]);
   const [files, setFiles] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
-
+  const [renderfilter, setRenderFilter] = useState(false);
+  const [totalPages, setTotalPages] = useState(0);
+  const [page, setPage] = useState(0);
   const handleOpen = () => {
     setOpen(true);
   };
@@ -87,8 +89,33 @@ const Product = () => {
     setEditModal(true);
   };
 
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    setLoad(true);
+  };
+
+  const searchFilterByName = async (e) => {
+    if (e.target.value == "") {
+      setRenderFilter(!renderfilter);
+    } else {
+      const filter = e.target.value;
+      await axios
+        .get(`${process.env.REACT_APP_URL}/products/getProducts?name=${filter}`)
+        .then((response) => {
+          const allDoctor = response.data.results;
+          console.log(allDoctor);
+          setEmp(allDoctor);
+          setTotalPages(response.data.totalPages);
+          setPage(response.data.page);
+          setLoad(false);
+        })
+        .catch((error) => console.log(`Error: ${error}`));
+    }
+  };
+
   const uploadImages = (e) => {
     const images = [];
+
     for (let i = 0; i < e.target.files.length; i++) {
       images.push(e.target.files[i]);
     }
@@ -150,7 +177,7 @@ const Product = () => {
     setAbbreviation(response.data.abbreviation);
     setMolecule(response.data.molecule);
     setCompany(response.data.company);
-    setSellingLine(response.data.sellingLine?._id);
+    setSellingLine(response.data.sellingLine?.id);
     setApprovedIndication(response.data.approvedIndication);
     setMrp(response.data.mrp);
     setTp(response.data.tp);
@@ -162,7 +189,6 @@ const Product = () => {
   };
 
   const editFormProvince = async (id) => {
-   
     const form = new FormData();
     form.append("id", id);
     form.append("name", name);
@@ -177,7 +203,7 @@ const Product = () => {
     form.append("discount", discount);
     form.append("additionalInfo", additionalInfo);
     files.forEach((value) => form.append("files", value));
-   
+
     await axios
       .post(`${process.env.REACT_APP_URL}/products/updateProduct`, form, {
         headers: {
@@ -226,12 +252,19 @@ const Product = () => {
   };
 
   const fetchProduct = async () => {
+    let filter = { page };
+    filter.status = false;
+    filter.limit = 10;
     await axios
-      .get(`${process.env.REACT_APP_URL}/products/getProducts`)
+      .get(`${process.env.REACT_APP_URL}/products/getProducts`, {
+        params: filter,
+      })
       .then((response) => {
-        const allProduct = response.data;
+        const allProduct = response?.data?.results;
         console.log(allProduct);
         setEmp(allProduct);
+        setTotalPages(response.data.totalPages);
+        setPage(response.data.page);
         setLoad(false);
       })
       .catch((error) => console.log(`Error: ${error}`));
@@ -240,6 +273,10 @@ const Product = () => {
   useEffect(() => {
     fetchProduct();
   }, [load]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [renderfilter]);
 
   useEffect(() => {
     axios
@@ -267,19 +304,43 @@ const Product = () => {
         style={{
           display: "flex",
           width: "100%",
-          justifyContent: "flex-end",
+          justifyContent: "center",
           marginBottom: "10px",
         }}
       >
-        <Button
-          style={{ width: "150px" }}
-          variant="contained"
-          color="primary"
-          style={{ width: "200px", color: "white" }}
-          onClick={handleOpen}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
         >
-          Add Product
-        </Button>
+          <TextField
+            style={{ marginRight: "10px" }}
+            id="outlined-basic"
+            label="Name"
+            variant="outlined"
+            onChange={searchFilterByName}
+          />
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            width: "15%",
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ width: "200px", color: "white", height: "50px" }}
+            onClick={handleOpen}
+          >
+            Add Product
+          </Button>
+        </div>
       </div>
       <div>
         <TableContainer
@@ -374,9 +435,9 @@ const Product = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {emp.map((user, key, index) => {
+              {emp?.map((user, key, index) => {
                 return (
-                  <TableRow key={user._id}>
+                  <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
@@ -428,7 +489,7 @@ const Product = () => {
                       >
                         <Button
                           onClick={() => {
-                            getCompanyById(user._id);
+                            getCompanyById(user.id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -436,7 +497,7 @@ const Product = () => {
 
                         <Button
                           onClick={() => {
-                            deleteProvince(user._id);
+                            deleteProvince(user.id);
                           }}
                         >
                           <DeleteIcon color="secondary" />
@@ -449,6 +510,23 @@ const Product = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginTop: "10px",
+        }}
+      >
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={handlePageChange}
+          disabled={load}
+          color="primary"
+        />
       </div>
 
       <div>

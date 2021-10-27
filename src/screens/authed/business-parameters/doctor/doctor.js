@@ -23,14 +23,13 @@ import InputLabel from "@material-ui/core/InputLabel";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import VisibilityIcon from "@material-ui/icons/Visibility";
-import SuccessIcon from "../../../components/Success&PendingIcon/SuccessIcon";
-import PendingIcon from "../../../components/Success&PendingIcon/PendingIcon";
+import Pagination from "@mui/material/Pagination";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { useSnackbar } from "notistack";
 import { makeStyles } from "@material-ui/core/styles";
 import moment from "moment";
-
+import "./doctor.css";
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
@@ -100,10 +99,10 @@ const Doctor = () => {
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [getModal, setGetModal] = useState(false);
-
+  const [totalPages, setTotalPages] = useState(0);
+  const [page, setPage] = useState(0);
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
-
   const [pmdcRegistration, setPmdcRegistration] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -137,6 +136,8 @@ const Doctor = () => {
   const [dropdownCity, setDropDownCity] = useState([]);
   const [dropDownBrick, setDropDownBrick] = useState([]);
   const [dropDownTier, setDropDownTier] = useState([]);
+  const [searchByHosp, setSearchByHosp] = useState("");
+  const [renderfilter, setRenderFilter] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
   const totalDays = [
@@ -177,6 +178,7 @@ const Doctor = () => {
     setCityId("");
     setBrickId("");
     setPreferredDay([]);
+    setTierId("");
   };
 
   const handleEditOpen = (id) => {
@@ -207,6 +209,7 @@ const Doctor = () => {
     setCityId("");
     setBrickId("");
     setPreferredDay([]);
+    setTierId("");
   };
 
   const handleGetOpen = (id) => {
@@ -215,6 +218,113 @@ const Doctor = () => {
 
   const handleGetClose = () => {
     setGetModal(false);
+    setName("");
+    setAbbreviation("");
+    setPmdcRegistration("");
+    setPhone("");
+    setEmail("");
+    setPreferredTime("");
+    setDistrict("");
+    setFee("");
+    setPotential("");
+    setQualificationId("");
+    setRepresentativeId("");
+    setRegionId("");
+    setZoneId("");
+    setTerritoryId("");
+    setDesignationId("");
+    setSpecialityId("");
+    setHospitalId("");
+    setProvinceId("");
+    setCityId("");
+    setBrickId("");
+    setPreferredDay([]);
+    setTierId("");
+  };
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    setLoad(true);
+  };
+
+  const searchFilterByName = async (e) => {
+    if (e.target.value == "") {
+      setRenderFilter(!renderfilter);
+    } else {
+      const filter = e.target.value;
+      await axios
+        .get(`${process.env.REACT_APP_URL}/doctors/getDoctors?name=${filter}`)
+        .then((response) => {
+          const allDoctor = response.data.results;
+          console.log(allDoctor);
+          setEmp(allDoctor);
+          setTotalPages(response.data.totalPages);
+          setPage(response.data.page);
+          setLoad(false);
+        })
+        .catch((error) => console.log(`Error: ${error}`));
+    }
+  };
+
+  const searchFilterByEmail = async (e) => {
+    if (e.target.value == "") {
+      setRenderFilter(!renderfilter);
+    } else {
+      const filter = e.target.value;
+      await axios
+        .get(`${process.env.REACT_APP_URL}/doctors/getDoctors?email=${filter}`)
+        .then((response) => {
+          const allDoctor = response.data.results;
+          console.log(allDoctor);
+          setEmp(allDoctor);
+          setTotalPages(response.data.totalPages);
+          setPage(response.data.page);
+          setLoad(false);
+        })
+        .catch((error) => console.log(`Error: ${error}`));
+    }
+  };
+
+  const searchFilterByPhone = async (e) => {
+    if (e.target.value == "") {
+      setRenderFilter(!renderfilter);
+    } else {
+      const filter = e.target.value;
+      await axios
+        .get(`${process.env.REACT_APP_URL}/doctors/getDoctors?phone=${filter}`)
+        .then((response) => {
+          const allDoctor = response.data.results;
+          console.log(allDoctor);
+          setEmp(allDoctor);
+          setTotalPages(response.data.totalPages);
+          setPage(response.data.page);
+          setLoad(false);
+        })
+        .catch((error) => console.log(`Error: ${error}`));
+    }
+  };
+
+  const searchFilterByHospital = async (e) => {
+    console.log(e.target.value, "=======================>");
+    setSearchByHosp(e.target.value);
+    if (e.target.value == "") {
+      setRenderFilter(!renderfilter);
+    } else {
+      const filter = e.target.value;
+      await axios
+        .get(
+          `${process.env.REACT_APP_URL}/doctors/getDoctors?hospitalId=${filter}`
+        )
+        .then((response) => {
+          const allDoctor = response.data.results;
+          console.log(allDoctor);
+          setEmp(allDoctor);
+          setTotalPages(response.data.totalPages);
+          setPage(response.data.page);
+          setLoad(false);
+        })
+        .catch((error) => console.log(`Error: ${error}`));
+    }
   };
 
   function tConvert(time) {
@@ -301,9 +411,7 @@ const Doctor = () => {
   const addDoctor = async () => {
     const form = {
       name,
-
       abbreviation,
-
       pmdcRegistration,
       phone,
       email,
@@ -343,7 +451,6 @@ const Doctor = () => {
 
     setName("");
     setAbbreviation("");
-
     setPmdcRegistration("");
     setPhone("");
     setEmail("");
@@ -372,7 +479,7 @@ const Doctor = () => {
       `${process.env.REACT_APP_URL}/doctors/getDoctor`,
       form
     );
-    console.log(response.data, "======================================>");
+
     setName(response.data.name);
     setAbbreviation(response.data.abbreviation);
     setPmdcRegistration(response.data.pmdcRegistration);
@@ -409,7 +516,6 @@ const Doctor = () => {
 
     setName(response.data.name);
     setAbbreviation(response.data.abbreviation);
-
     setPmdcRegistration(response.data.pmdcRegistration);
     setPhone(response.data.phone);
     setEmail(response.data.email);
@@ -418,7 +524,7 @@ const Doctor = () => {
     setFee(response.data.fee);
     setPotential(response.data.potential);
     setQualificationId(response.data.qualificationId?._id);
-    setDropDownRepresentative([response.data.assignedRepresentativeId]);
+    // setDropDownRepresentative([response.data.assignedRepresentativeId]);
     setRepresentativeId(response.data.assignedRepresentativeId?.id);
     setDesignationId(response.data.designationId?.id);
     setSpecialityId(response.data.specialityId?._id);
@@ -517,12 +623,19 @@ const Doctor = () => {
   //Get Region
 
   const fetchDoctor = async () => {
+    let filter = { page };
+    filter.status = false;
+    filter.limit = 10;
     await axios
-      .get(`${process.env.REACT_APP_URL}/doctors/getDoctors`)
+      .get(`${process.env.REACT_APP_URL}/doctors/getDoctors`, {
+        params: filter,
+      })
       .then((response) => {
         const allDoctor = response.data.results;
         console.log(allDoctor);
         setEmp(allDoctor);
+        setTotalPages(response.data.totalPages);
+        setPage(response.data.page);
         setLoad(false);
       })
       .catch((error) => console.log(`Error: ${error}`));
@@ -531,6 +644,10 @@ const Doctor = () => {
   useEffect(() => {
     fetchDoctor();
   }, [load]);
+
+  useEffect(() => {
+    fetchDoctor();
+  }, [renderfilter]);
 
   useEffect(() => {
     axios
@@ -604,20 +721,83 @@ const Doctor = () => {
         style={{
           display: "flex",
           width: "100%",
-          justifyContent: "flex-end",
+          justifyContent: "center",
           marginBottom: "10px",
         }}
       >
-        <Button
-          style={{ width: "150px" }}
-          variant="contained"
-          color="primary"
-          style={{ width: "200px", color: "white" }}
-          onClick={handleOpen}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
         >
-          Add Doctor
-        </Button>
+          <TextField
+            style={{ marginRight: "10px" }}
+            id="outlined-basic"
+            label="Name"
+            variant="outlined"
+            onChange={searchFilterByName}
+          />
+          <TextField
+            style={{ marginRight: "10px" }}
+            id="outlined-basic"
+            label="Email"
+            variant="outlined"
+            onChange={searchFilterByEmail}
+          />
+          <TextField
+            style={{ marginRight: "10px" }}
+            id="outlined-basic"
+            label="Phone"
+            variant="outlined"
+            onChange={searchFilterByPhone}
+          />
+          <FormControl
+            variant="outlined"
+            className={classes.textFieldSsid}
+            style={{ marginRight: "10px", width: "15%", marginBottom: "10px" }}
+          >
+            <InputLabel htmlFor="outlined-age-native-simple">
+              Hospital
+            </InputLabel>
+            <Select
+              // value={department}
+              onChange={searchFilterByHospital}
+              id="outlined-basic"
+              native
+              value={searchByHosp}
+              label="Hospital"
+            >
+              <option aria-label="None" />
+              {dropdownHospital.map((value, index) => (
+                <option key={value.id} value={value.id}>
+                  {value.name}
+                </option>
+              ))}
+            </Select>
+          </FormControl>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            width: "15%",
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ width: "200px", color: "white", height: "50px" }}
+            onClick={handleOpen}
+          >
+            Add Doctor
+          </Button>
+        </div>
       </div>
+
       <div>
         <TableContainer
           style={{
@@ -731,6 +911,23 @@ const Doctor = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginTop: "10px",
+        }}
+      >
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={handlePageChange}
+          disabled={load}
+          color="primary"
+        />
       </div>
 
       <div>

@@ -15,7 +15,7 @@ import ChamberMeeting from "../../screens/authed/meetings/ChamberMeeting/chamber
 import OnlineMeeting from "../../screens/authed/meetings/OnlineMeeting/onlineMeetings";
 
 // Authed/Event-Parameters
-import Events from "../../screens/authed/events-parameters/events/Calender";
+import Events from "../../screens/authed/events-parameters/events/BigCalender";
 import TourPlan from "../../screens/authed/events-parameters/tour-plan/TourPlan";
 
 // Authed/Vertical-Settings

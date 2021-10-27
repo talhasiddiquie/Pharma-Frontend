@@ -30,7 +30,7 @@ import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
 import { useSnackbar } from "notistack";
 import { makeStyles } from "@material-ui/core/styles";
 import moment from "moment";
-import { getModalUtilityClass } from "@mui/material";
+import Pagination from "@mui/material/Pagination";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -101,6 +101,8 @@ const Representative = () => {
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [getModal, setGetModal] = useState(false);
+  const [totalPages, setTotalPages] = useState(0);
+  const [page, setPage] = useState(0);
   const [role, setRole] = useState("");
   const [name, setName] = useState("");
   const [employeeCode, setEmployeeCode] = useState("");
@@ -114,7 +116,6 @@ const Representative = () => {
   const [gender, setGender] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-
   const [company, setCompany] = useState("");
   const [workType, setWorkType] = useState("");
   const [isActive, setIsActive] = useState("");
@@ -125,9 +126,10 @@ const Representative = () => {
   const [dropdownZone, setDropDownZone] = useState([]);
   const [dropdownTerritory, setDropDownTerritory] = useState([]);
   const [dropdownProvince, setDropDownProvince] = useState([]);
-
+  const [searchRole, setSearchRole] = useState("");
   const [dropDownDesignation, setDropDownDesignation] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
+  const [renderfilter, setRenderFilter] = useState(false);
 
   // const myArr = ["talhasiddquie10@gmail.com", "waji12@gmail.com"];
   // var result = [];
@@ -155,7 +157,6 @@ const Representative = () => {
     setGender("");
     setMaritalStatus("");
     setDateOfBirth("");
-
     setWorkType("");
     setCompany("");
     setPassword("");
@@ -175,7 +176,6 @@ const Representative = () => {
     setEditModal(false);
 
     setName("");
-
     setDesignationId("");
     setProvinceid([]);
     setPhone("");
@@ -183,7 +183,6 @@ const Representative = () => {
     setGender("");
     setMaritalStatus("");
     setDateOfBirth("");
-
     setWorkType("");
     setCompany("");
     setPassword("");
@@ -221,6 +220,96 @@ const Representative = () => {
     setRole("");
   };
 
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    setLoad(true);
+  };
+
+  const searchFilterByName = async (e) => {
+    if (e.target.value == "") {
+      setRenderFilter(!renderfilter);
+    } else {
+      const filter = e.target.value;
+      await axios
+        .get(
+          `${process.env.REACT_APP_URL}/representative/getRepresentatives?name=${filter}`
+        )
+        .then((response) => {
+          const allDoctor = response.data.results;
+          console.log(allDoctor);
+          setEmp(allDoctor);
+          setTotalPages(response.data.totalPages);
+          setPage(response.data.page);
+          setLoad(false);
+        })
+        .catch((error) => console.log(`Error: ${error}`));
+    }
+  };
+
+  const searchFilterByEmail = async (e) => {
+    if (e.target.value == "") {
+      setRenderFilter(!renderfilter);
+    } else {
+      const filter = e.target.value;
+      await axios
+        .get(
+          `${process.env.REACT_APP_URL}/representative/getRepresentatives?email=${filter}`
+        )
+        .then((response) => {
+          const allDoctor = response.data.results;
+          console.log(allDoctor);
+          setEmp(allDoctor);
+          setTotalPages(response.data.totalPages);
+          setPage(response.data.page);
+          setLoad(false);
+        })
+        .catch((error) => console.log(`Error: ${error}`));
+    }
+  };
+
+  const searchFilterByPhone = async (e) => {
+    if (e.target.value == "") {
+      setRenderFilter(!renderfilter);
+    } else {
+      const filter = e.target.value;
+      await axios
+        .get(
+          `${process.env.REACT_APP_URL}/representative/getRepresentatives?phone=${filter}`
+        )
+        .then((response) => {
+          const allDoctor = response.data.results;
+          console.log(allDoctor);
+          setEmp(allDoctor);
+          setTotalPages(response.data.totalPages);
+          setPage(response.data.page);
+          setLoad(false);
+        })
+        .catch((error) => console.log(`Error: ${error}`));
+    }
+  };
+
+  const searchFilterRole = async (e) => {
+    setSearchRole(e.target.value);
+    if (e.target.value == "") {
+      setRenderFilter(!renderfilter);
+    } else {
+      const filter = e.target.value;
+      await axios
+        .get(
+          `${process.env.REACT_APP_URL}/representative/getRepresentatives?role=${filter}`
+        )
+        .then((response) => {
+          const allDoctor = response.data.results;
+          console.log(allDoctor);
+          setEmp(allDoctor);
+          setTotalPages(response.data.totalPages);
+          setPage(response.data.page);
+          setLoad(false);
+        })
+        .catch((error) => console.log(`Error: ${error}`));
+    }
+  };
+
   const handleRegionChange = async (e, selectedObject) => {
     let List = [];
     if (selectedObject !== null) {
@@ -236,8 +325,6 @@ const Representative = () => {
       provinceList.push(value.provinceId);
     });
     setDropDownProvince(provinceList[0]);
-
-   
   };
 
   const handleProvinceChange = async (e, selectedObject) => {
@@ -528,15 +615,20 @@ const Representative = () => {
     });
   };
 
-  //Get Region
-
   const fetchRepresentative = async () => {
+    let filter = { page };
+    filter.status = false;
+    filter.limit = 10;
     await axios
-      .get(`${process.env.REACT_APP_URL}/representative/getRepresentatives`)
+      .get(`${process.env.REACT_APP_URL}/representative/getRepresentatives`, {
+        params: filter,
+      })
       .then((response) => {
         const allRepresentative = response.data.results;
         console.log(allRepresentative);
         setEmp(allRepresentative);
+        setTotalPages(response.data.totalPages);
+        setPage(response.data.page);
         setLoad(false);
       })
       .catch((error) => console.log(`Error: ${error}`));
@@ -571,6 +663,10 @@ const Representative = () => {
   useEffect(() => {
     fetchRepresentative();
   }, [load]);
+
+  useEffect(() => {
+    fetchRepresentative();
+  }, [renderfilter]);
 
   useEffect(() => {
     axios
@@ -622,19 +718,78 @@ const Representative = () => {
         style={{
           display: "flex",
           width: "100%",
-          justifyContent: "flex-end",
+          justifyContent: "center",
           marginBottom: "10px",
         }}
       >
-        <Button
-          style={{ width: "150px" }}
-          variant="contained"
-          color="primary"
-          style={{ width: "200px", color: "white" }}
-          onClick={handleOpen}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
         >
-          Add Representative
-        </Button>
+          <TextField
+            style={{ marginRight: "10px" }}
+            id="outlined-basic"
+            label="Name"
+            variant="outlined"
+            onChange={searchFilterByName}
+          />
+          <TextField
+            style={{ marginRight: "10px" }}
+            id="outlined-basic"
+            label="Email"
+            variant="outlined"
+            onChange={searchFilterByEmail}
+          />
+          <TextField
+            style={{ marginRight: "10px" }}
+            id="outlined-basic"
+            label="Phone"
+            variant="outlined"
+            onChange={searchFilterByPhone}
+          />
+          <FormControl
+            variant="outlined"
+            className={classes.textFieldSsid}
+            style={{ marginRight: "10px", marginBottom: "10px", width: "15%" }}
+          >
+            <InputLabel htmlFor="outlined-age-native-simple">Role</InputLabel>
+            <Select
+              onChange={searchFilterRole}
+              id="abc"
+              value={searchRole}
+              native
+              label="Role"
+            >
+              <option aria-label="None"> </option>
+              <option value="admin">Admin</option>
+              <option value="representative">Representative</option>
+              <option value="National Manager">National Manager</option>
+              <option value="Regional Manager">Regional Manager</option>
+              <option value="Zonal Manager">Zonal Manager</option>
+            </Select>
+          </FormControl>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            width: "15%",
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ width: "200px", color: "white", height: "50px" }}
+            onClick={handleOpen}
+          >
+            Add Representative
+          </Button>
+        </div>
       </div>
       <div>
         <TableContainer
@@ -772,6 +927,23 @@ const Representative = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "flex-end",
+          marginTop: "10px",
+        }}
+      >
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={handlePageChange}
+          disabled={load}
+          color="primary"
+        />
       </div>
 
       <div>

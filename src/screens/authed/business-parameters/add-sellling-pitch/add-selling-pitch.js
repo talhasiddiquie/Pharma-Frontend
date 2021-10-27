@@ -116,7 +116,7 @@ const AddSellingPitch = () => {
     );
     console.log(response.data);
     setId(response.data.id);
-    setProductId(response.data.productId?._id);
+    setProductId(response.data.productId?.id);
     setCallOpening(response.data.callOpening);
     setCallProbing(response.data.callProbing);
     setProblemSetup(response.data.problemSetup);
@@ -207,7 +207,7 @@ const AddSellingPitch = () => {
     axios
       .get(`${process.env.REACT_APP_URL}/products/getProducts`)
       .then((res) => {
-        setDropdownProduct(res.data);
+        setDropdownProduct(res?.data?.results);
       });
   }, []);
 
@@ -304,7 +304,7 @@ const AddSellingPitch = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {emp.map((user, key, index) => {
+              {emp?.map((user, key, index) => {
                 return (
                   <TableRow key={user._id}>
                     <TableCell component="th" scope="row">
@@ -390,8 +390,8 @@ const AddSellingPitch = () => {
                       label="Product"
                     >
                       <option aria-label="None" />
-                      {dropdownProduct.map((value, index) => (
-                        <option key={value.id} value={value._id}>
+                      {dropdownProduct?.map((value, index) => (
+                        <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
                       ))}
@@ -522,8 +522,8 @@ const AddSellingPitch = () => {
                       label="Product"
                     >
                       <option aria-label="None" />
-                      {dropdownProduct.map((value, index) => (
-                        <option key={value.id} value={value._id}>
+                      {dropdownProduct?.map((value, index) => (
+                        <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
                       ))}

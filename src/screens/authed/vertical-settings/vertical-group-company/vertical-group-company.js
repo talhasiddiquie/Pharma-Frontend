@@ -121,7 +121,7 @@ const VerticalGroupCompany = () => {
       form
     );
     console.log(response.data);
-    setId(response.data._id);
+    setId(response.data.id);
     setName(response.data.name);
     setAbbreviation(response.data.abbreviation);
     setAddress(response.data.address);
@@ -337,7 +337,7 @@ const VerticalGroupCompany = () => {
                       >
                         <Button
                           onClick={() => {
-                            getCompanyById(user._id);
+                            getCompanyById(user.id);
                           }}
                         >
                           <EditIcon color="primary" />
@@ -345,7 +345,7 @@ const VerticalGroupCompany = () => {
 
                         <Button
                           onClick={() => {
-                            deleteProvince(user._id);
+                            deleteProvince(user.id);
                           }}
                         >
                           <DeleteIcon color="secondary" />

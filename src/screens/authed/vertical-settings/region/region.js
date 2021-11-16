@@ -116,11 +116,11 @@ const Region = () => {
       form
     );
     console.log(response.data);
-    setId(response.data.id);
-    setName(response.data.name);
-    setProvince_Id(response.data.provinceId);
-    setAbbreviation(response.data.abbreviation);
-    setCompany(response.data.company?.id);
+    setId(response?.data?.id);
+    setName(response?.data?.name);
+    setProvince_Id(response?.data?.provinceId);
+    setAbbreviation(response?.data?.abbreviation);
+    setCompany(response?.data?.company?.id);
     setEditModal(true);
   };
 
@@ -180,7 +180,7 @@ const Region = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/regions/getRegions`)
       .then((response) => {
-        const allRegion = response.data.results;
+        const allRegion = response?.data?.results;
         console.log(allRegion);
         setEmp(allRegion);
         setLoad(false);
@@ -199,10 +199,14 @@ const Region = () => {
       provinceList.push(res.data.results);
     }
     let newList = [];
-    provinceList[0].map((item) => {
-      newList.push(item);
-    });
-    setDropDownProvince(newList);
+    console.log("province list", provinceList);
+    if (provinceList.length > 0) {
+      console.log("running if ");
+      provinceList[0].map((item) => {
+        newList.push(item);
+      });
+      setDropDownProvince(newList);
+    }
   };
 
   useEffect(() => {

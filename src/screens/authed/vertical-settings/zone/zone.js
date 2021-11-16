@@ -154,9 +154,19 @@ const Zone = () => {
     setAbbreviation(response.data.abbreviation);
     setCompany(response.data.company?.id);
     setRegionId(response.data.regionId?.id);
-    setDropDownProvince([response.data.provinceId]);
-    setprovince_Id(response.data.provinceId?.id);
-    
+    if (response.data?.provinceId == null) {
+      console.log("empty valuee ");
+    } else {
+      setDropDownProvince(response.data?.provinceId);
+      console.log(response.data?.provinceId);
+
+      const newArr = [];
+      response.data.provinceId.map((value) => {
+        newArr.push(value.id);
+      });
+
+      setprovince_Id(newArr);
+    }
 
     setEditModal(true);
   };
@@ -237,7 +247,7 @@ const Zone = () => {
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
-      setDropDownRegion(res.data.results);
+      setDropDownRegion(res.data?.results);
     });
   }, []);
 
@@ -338,13 +348,17 @@ const Zone = () => {
             </TableHead>
             <TableBody>
               {emp.map((user, key, index) => {
+                const provinceArr = [];
+                const regionData = user.provinceId?.forEach((value) =>
+                  provinceArr.push(value.name + ", ")
+                );
                 return (
                   <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
                       {user.name}
                     </TableCell>
                     <TableCell>{user.abbreviation}</TableCell>
-                    <TableCell>{user.provinceId?.name}</TableCell>
+                    <TableCell>{provinceArr}</TableCell>
                     <TableCell>{user.regionId?.name}</TableCell>
                     <TableCell>{user.company?.name}</TableCell>
                     <TableCell>

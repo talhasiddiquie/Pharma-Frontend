@@ -57,7 +57,6 @@ const ClinicHospital = () => {
   const [load, setLoad] = useState(false);
   const [open, setOpen] = useState(false);
   const [editModal, setEditModal] = useState(false);
-
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
   const [address, setAddress] = useState("");
@@ -125,7 +124,7 @@ const ClinicHospital = () => {
     await axios
       .post(`${process.env.REACT_APP_URL}/regions/getRegion`, { id })
       .then((res) => {
-        setDropDownProvince(res.data.provinceId);
+        setDropDownProvince(res.data?.provinceId);
       });
   };
 
@@ -138,7 +137,7 @@ const ClinicHospital = () => {
       .get(`${process.env.REACT_APP_URL}/zones/getZones?provinceId=${id}`)
       .then((res) => {
         console.log(res.data, "--------------------------------->");
-        setDropDownZone(res.data.results);
+        setDropDownZone(res.data?.results);
       });
   };
 
@@ -153,7 +152,7 @@ const ClinicHospital = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/cities/getCities?zoneId=${id}`)
       .then((res) => {
-        setDropDownCity(res.data.results);
+        setDropDownCity(res.data?.results);
       });
   };
 
@@ -169,7 +168,7 @@ const ClinicHospital = () => {
         `${process.env.REACT_APP_URL}/territory/getTerritories/?cityId=${id}`
       )
       .then((res) => {
-        setDropDownTerritory(res.data.results);
+        setDropDownTerritory(res.data?.results);
       });
   };
 
@@ -183,7 +182,7 @@ const ClinicHospital = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/bricks/getBricks/?territoryId=${id}`)
       .then((res) => {
-        setDropDownBrick(res.data.results);
+        setDropDownBrick(res.data?.results);
       });
   };
 
@@ -236,24 +235,54 @@ const ClinicHospital = () => {
       form
     );
     console.log(response.data);
-    setId(response.data.id);
-    setName(response.data.name);
-    setCompany(response.data?.company?.id);
-    setAddress(response.data.address);
-    setPhone(response.data.phone);
-    setAbbreviation(response.data.abbreviation);
-    setDropDownRegion([response.data.regionId]);
-    setRegionId(response.data.regionId?.id);
-    setDropDownProvince([response.data.provinceId]);
-    setProvinceId(response.data.provinceId?.id);
-    setDropDownZone([response.data.zoneId]);
-    setZoneId(response.data.zoneId?.id);
-    setDropDownCity([response.data.cityId]);
-    setCityId(response.data.cityId?.id);
-    setDropDownTerritory([response.data.territoryId]);
-    setTerritoryId(response.data.territoryId?.id);
-    setDropDownBrick([response.data.brickId]);
-    setBrickId(response.data.brickId?.id);
+    setId(response?.data?.id);
+    setName(response?.data?.name);
+    setCompany(response?.data?.company?.id);
+    setAddress(response?.data?.address);
+    setPhone(response?.data?.phone);
+    setAbbreviation(response?.data?.abbreviation);
+
+    if (response.data.provinceId == null) {
+      console.log("value of province is empty");
+    } else {
+      setProvinceId(response.data.provinceId.id);
+      setDropDownProvince([response.data?.provinceId]);
+    }
+
+    if (response.data.regionId == null) {
+      console.log("Region values are null");
+    } else {
+      setRegionId(response.data.regionId.id);
+      setDropDownRegion([response.data.regionId]);
+    }
+
+    if (response.data.cityId == null) {
+      console.log("value null");
+    } else {
+      setDropDownCity([response.data.cityId]);
+      setCityId(response.data.cityId.id);
+    }
+
+    if (response.data.zoneId == null) {
+      console.log("value null");
+    } else {
+      setDropDownZone([response.data.zoneId]);
+      setZoneId(response.data.zoneId.id);
+    }
+
+    if (response.data.territoryId == null) {
+      console.log("valuee of terrirtory is null");
+    } else {
+      setDropDownTerritory([response.data.territoryId]);
+      setTerritoryId(response.data.territoryId.id);
+    }
+
+    if (response?.data?.brickId == null) {
+      console.log("error brick is empty");
+    } else {
+      setDropDownBrick([response?.data?.brickId]);
+      setBrickId(response?.data?.brickId?.id);
+    }
 
     setEditModal(true);
   };
@@ -337,7 +366,7 @@ const ClinicHospital = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/hospitals/getHospitals`)
       .then((response) => {
-        const allHospitals = response.data.results;
+        const allHospitals = response?.data?.results;
         setEmp(allHospitals);
         setLoad(false);
       })
@@ -350,7 +379,7 @@ const ClinicHospital = () => {
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
-      setDropDownRegion(res.data.results);
+      setDropDownRegion(res?.data?.results);
     });
   }, []);
 
@@ -358,7 +387,7 @@ const ClinicHospital = () => {
     axios
       .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
       .then((res) => {
-        setDropDownCompany(res.data?.results);
+        setDropDownCompany(res?.data?.results);
       });
   }, []);
   return (
@@ -478,7 +507,7 @@ const ClinicHospital = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {emp.map((user, key, index) => {
+              {emp?.map((user, key, index) => {
                 return (
                   <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
@@ -609,7 +638,7 @@ const ClinicHospital = () => {
                       label="Company"
                     >
                       <option aria-label="None" />
-                      {dropdownCompany.map((value, index) => (
+                      {dropdownCompany?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -632,7 +661,7 @@ const ClinicHospital = () => {
                       label="Region"
                     >
                       <option aria-label="None" />
-                      {dropdownRegion.map((value, index) => (
+                      {dropdownRegion?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -655,7 +684,7 @@ const ClinicHospital = () => {
                       label="Province"
                     >
                       <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
+                      {dropdownProvince?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -678,7 +707,7 @@ const ClinicHospital = () => {
                       label="Zone"
                     >
                       <option aria-label="None" />
-                      {dropdownZone.map((value, index) => (
+                      {dropdownZone?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -701,7 +730,7 @@ const ClinicHospital = () => {
                       label="City"
                     >
                       <option aria-label="None" />
-                      {dropdownCity.map((value, index) => (
+                      {dropdownCity?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -724,7 +753,7 @@ const ClinicHospital = () => {
                       label="Territory"
                     >
                       <option aria-label="None" />
-                      {dropDownTerritory.map((value, index) => (
+                      {dropDownTerritory?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -747,7 +776,7 @@ const ClinicHospital = () => {
                       label="Brick"
                     >
                       <option aria-label="None" />
-                      {dropDownBrick.map((value, index) => (
+                      {dropDownBrick?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -872,7 +901,7 @@ const ClinicHospital = () => {
                       label="Company"
                     >
                       <option aria-label="None" />
-                      {dropdownCompany.map((value, index) => (
+                      {dropdownCompany?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -895,7 +924,7 @@ const ClinicHospital = () => {
                       label="Region"
                     >
                       <option aria-label="None" />
-                      {dropdownRegion.map((value, index) => (
+                      {dropdownRegion?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -918,7 +947,7 @@ const ClinicHospital = () => {
                       label="Province"
                     >
                       <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
+                      {dropdownProvince?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -941,7 +970,7 @@ const ClinicHospital = () => {
                       label="Zone"
                     >
                       <option aria-label="None" />
-                      {dropdownZone.map((value, index) => (
+                      {dropdownZone?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -964,7 +993,7 @@ const ClinicHospital = () => {
                       label="City"
                     >
                       <option aria-label="None" />
-                      {dropdownCity.map((value, index) => (
+                      {dropdownCity?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -987,7 +1016,7 @@ const ClinicHospital = () => {
                       label="Territory"
                     >
                       <option aria-label="None" />
-                      {dropDownTerritory.map((value, index) => (
+                      {dropDownTerritory?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -1010,7 +1039,7 @@ const ClinicHospital = () => {
                       label="Brick"
                     >
                       <option aria-label="None" />
-                      {dropDownBrick.map((value, index) => (
+                      {dropDownBrick?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>

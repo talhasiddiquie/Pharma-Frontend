@@ -461,6 +461,22 @@ function DrawerAndRoutes() {
                   <ListItemText primary="Tier" />
                 </ListItem>
               ) : null}
+
+              {(user && user.role === "admin") ||
+              user.role === "representative" ||
+              user.role === "National Manager" ||
+              user.role === "Regional Manager" ||
+              user.role === "Zonal Manager" ? (
+                <ListItem
+                  button
+                  className={classes.nested}
+                  onClick={() => {
+                    history.push("/business-parameters/doctorstatus");
+                  }}
+                >
+                  <ListItemText primary="Doctor Status" />
+                </ListItem>
+              ) : null}
               {(user && user.role === "admin") ||
               user.role === "representative" ||
               user.role === "National Manager" ||

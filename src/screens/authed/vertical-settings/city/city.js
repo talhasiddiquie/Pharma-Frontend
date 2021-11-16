@@ -106,7 +106,10 @@ const City = () => {
     await axios
       .post(`${process.env.REACT_APP_URL}/regions/getRegion`, { id })
       .then((res) => {
-        setDropDownProvince(res.data.provinceId);
+        setDropDownProvince(res.data?.provinceId);
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
@@ -118,7 +121,7 @@ const City = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/zones/getZones?provinceId=${id}`)
       .then((res) => {
-        setDropDownZone(res.data.results);
+        setDropDownZone(res.data?.results);
       });
   };
 
@@ -162,11 +165,20 @@ const City = () => {
     setName(response.data.name);
     setAbbreviation(response.data.abbreviation);
     setRegionId(response.data.regionId?.id);
-    setDropDownProvince([response.data.provinceId]);
     setProvinceId(response.data.provinceId?.id);
-    setDropDownZone([response.data.zoneId]);
     setZoneId(response.data.zoneId?.id);
     setCompany(response.data.company?.id);
+    if (response.data?.provinceId == null) {
+      console.log("empty valuee ");
+    } else {
+      setDropDownProvince([response.data?.provinceId]);
+    }
+
+    if (response.data.zoneId == null) {
+      console.log("errror empty value");
+    } else {
+      setDropDownZone([response.data.zoneId]);
+    }
 
     setEditModal(true);
   };
@@ -494,7 +506,7 @@ const City = () => {
                         label="Province"
                       >
                         <option aria-label="None" />
-                        {dropdownProvince.map((value, index) => (
+                        {dropdownProvince?.map((value, index) => (
                           <option key={value.id} value={value.id}>
                             {value.name}
                           </option>
@@ -664,7 +676,6 @@ const City = () => {
                       style={{
                         width: "100%",
                         marginTop: "10px",
-                        
                       }}
                     >
                       <InputLabel htmlFor="outlined-age-native-simple">

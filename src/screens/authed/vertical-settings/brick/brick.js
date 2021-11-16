@@ -115,7 +115,7 @@ const Brick = () => {
     await axios
       .post(`${process.env.REACT_APP_URL}/regions/getRegion`, { id })
       .then((res) => {
-        setDropDownProvince(res.data.provinceId);
+        setDropDownProvince(res?.data?.provinceId);
       });
   };
 
@@ -130,7 +130,7 @@ const Brick = () => {
       .get(`${process.env.REACT_APP_URL}/zones/getZones?provinceId=${id}`)
       .then((res) => {
         console.log(res.data, "--------------------------------->");
-        setDropDownZone(res.data.results);
+        setDropDownZone(res?.data?.results);
       });
   };
 
@@ -144,7 +144,7 @@ const Brick = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/cities/getCities?zoneId=${id}`)
       .then((res) => {
-        setDropDownCity(res.data.results);
+        setDropDownCity(res?.data?.results);
       });
   };
 
@@ -159,7 +159,7 @@ const Brick = () => {
         `${process.env.REACT_APP_URL}/territory/getTerritories/?cityId=${id}`
       )
       .then((res) => {
-        setDropDownTerritory(res.data.results);
+        setDropDownTerritory(res?.data?.results);
       });
   };
 
@@ -206,21 +206,40 @@ const Brick = () => {
       form
     );
     console.log(response.data);
-    setId(response.data.id);
-    setName(response.data.name);
-    setCompany(response.data.company?.id);
-    setAbbreviation(response.data.abbreviation);
-    setBrickType(response.data.brickType);
-    setRegionId(response.data.regionId?.id);
-    setDropDownProvince([response.data.provinceId]);
-    setProvinceId(response.data.provinceId?.id);
-    setDropDownZone([response.data.zoneId]);
-    setZoneId(response.data.zoneId?.id);
-    setDropDownCity([response.data.cityId]);
-    setCityId(response.data.cityId?.id);
-    setDropDownTerritory([response.data.territoryId]);
-    setTerritoryId(response.data.territoryId?.id);
+    setId(response?.data?.id);
+    setName(response?.data?.name);
+    setCompany(response?.data?.company?.id);
+    setAbbreviation(response?.data?.abbreviation);
+    setBrickType(response?.data?.brickType);
+    setRegionId(response?.data?.regionId?.id);
 
+    if (response.data.cityId == null) {
+      console.log("value null");
+    } else {
+      setDropDownCity([response.data.cityId]);
+      setCityId(response.data.cityId.id);
+    }
+
+    if (response.data.provinceId == null) {
+      console.log("value of province is empty");
+    } else {
+      setProvinceId(response?.data?.provinceId?.id);
+      setDropDownProvince([response?.data?.provinceId]);
+    }
+
+    if (response.data.zoneId == null) {
+      console.log("value null");
+    } else {
+      setDropDownZone([response.data.zoneId]);
+      setZoneId(response.data.zoneId.id);
+    }
+
+    if (response.data.territoryId == null) {
+      console.log("valuee of terrirtory is null");
+    } else {
+      setDropDownTerritory([response.data.territoryId]);
+      setTerritoryId(response.data.territoryId.id);
+    }
     setEditModal(true);
   };
 
@@ -298,7 +317,7 @@ const Brick = () => {
     await axios
       .get(`${process.env.REACT_APP_URL}/bricks/getBricks`)
       .then((response) => {
-        const allfetchBrick = response.data?.results;
+        const allfetchBrick = response?.data?.results;
         setEmp(allfetchBrick);
         setLoad(false);
       })
@@ -311,7 +330,7 @@ const Brick = () => {
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_URL}/regions/getRegions`).then((res) => {
-      setDropDownRegion(res.data?.results);
+      setDropDownRegion(res?.data?.results);
     });
   }, []);
 
@@ -319,7 +338,7 @@ const Brick = () => {
     axios
       .get(`${process.env.REACT_APP_URL}/companies/getCompanies`)
       .then((res) => {
-        setDropDownCompany(res.data?.results);
+        setDropDownCompany(res?.data?.results);
       });
   }, []);
 
@@ -370,46 +389,51 @@ const Brick = () => {
             <TableHead style={{ background: "#00AEEF" }}>
               <TableRow>
                 <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                  style={{ fontWeight: "600", width: "10%", color: "white" }}
                 >
                   Name
                 </TableCell>
                 <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                  style={{ fontWeight: "600", width: "10%", color: "white" }}
                 >
                   Abbreviation
                 </TableCell>
                 <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                  style={{ fontWeight: "600", width: "10%", color: "white" }}
                 >
                   Brick Type
                 </TableCell>
 
                 <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                  style={{ fontWeight: "600", width: "10%", color: "white" }}
                 >
                   Territory
                 </TableCell>
 
                 <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                  style={{ fontWeight: "600", width: "10%", color: "white" }}
                 >
                   Zone
                 </TableCell>
 
                 <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                  style={{ fontWeight: "600", width: "10%", color: "white" }}
                 >
                   Region
                 </TableCell>
 
                 <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                  style={{ fontWeight: "600", width: "10%", color: "white" }}
                 >
                   Province
                 </TableCell>
                 <TableCell
-                  style={{ fontWeight: "600", width: "15%", color: "white" }}
+                  style={{ fontWeight: "600", width: "10%", color: "white" }}
+                >
+                  City
+                </TableCell>
+                <TableCell
+                  style={{ fontWeight: "600", width: "10%", color: "white" }}
                 >
                   Company
                 </TableCell>
@@ -426,7 +450,7 @@ const Brick = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {emp.map((user, key, index) => {
+              {emp?.map((user, key, index) => {
                 return (
                   <TableRow key={user.id}>
                     <TableCell component="th" scope="row">
@@ -434,10 +458,11 @@ const Brick = () => {
                     </TableCell>
 
                     <TableCell>{user.abbreviation}</TableCell>
-                    <TableCell>{user.brickType}</TableCell>
+                    <TableCell>{user?.brickType}</TableCell>
                     <TableCell>{user.territoryId?.name}</TableCell>
                     <TableCell>{user.zoneId?.name}</TableCell>
                     <TableCell>{user.regionId?.name}</TableCell>
+                    <TableCell>{user.provinceId?.name}</TableCell>
                     <TableCell>{user.cityId?.name}</TableCell>
                     <TableCell>{user.company?.name}</TableCell>
                     <TableCell>
@@ -567,7 +592,7 @@ const Brick = () => {
                       label="Company"
                     >
                       <option aria-label="None" />
-                      {dropdownCompany.map((value, index) => (
+                      {dropdownCompany?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -590,7 +615,7 @@ const Brick = () => {
                       label="Region"
                     >
                       <option aria-label="None" />
-                      {dropdownRegion.map((value, index) => (
+                      {dropdownRegion?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -613,7 +638,7 @@ const Brick = () => {
                       label="Province"
                     >
                       <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
+                      {dropdownProvince?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -636,7 +661,7 @@ const Brick = () => {
                       label="Zone"
                     >
                       <option aria-label="None" />
-                      {dropdownZone.map((value, index) => (
+                      {dropdownZone?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -659,7 +684,7 @@ const Brick = () => {
                       label="City"
                     >
                       <option aria-label="None" />
-                      {dropdownCity.map((value, index) => (
+                      {dropdownCity?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -682,7 +707,7 @@ const Brick = () => {
                       label="Territory"
                     >
                       <option aria-label="None" />
-                      {dropDownTerritory.map((value, index) => (
+                      {dropDownTerritory?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -807,7 +832,7 @@ const Brick = () => {
                       label="Company"
                     >
                       <option aria-label="None" />
-                      {dropdownCompany.map((value, index) => (
+                      {dropdownCompany?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -830,7 +855,7 @@ const Brick = () => {
                       label="Region"
                     >
                       <option aria-label="None" />
-                      {dropdownRegion.map((value, index) => (
+                      {dropdownRegion?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -853,7 +878,7 @@ const Brick = () => {
                       label="Province"
                     >
                       <option aria-label="None" />
-                      {dropdownProvince.map((value, index) => (
+                      {dropdownProvince?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -876,7 +901,7 @@ const Brick = () => {
                       label="Zone"
                     >
                       <option aria-label="None" />
-                      {dropdownZone.map((value, index) => (
+                      {dropdownZone?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -899,7 +924,7 @@ const Brick = () => {
                       label="City"
                     >
                       <option aria-label="None" />
-                      {dropdownCity.map((value, index) => (
+                      {dropdownCity?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>
@@ -922,7 +947,7 @@ const Brick = () => {
                       label="Territory"
                     >
                       <option aria-label="None" />
-                      {dropDownTerritory.map((value, index) => (
+                      {dropDownTerritory?.map((value, index) => (
                         <option key={value.id} value={value.id}>
                           {value.name}
                         </option>

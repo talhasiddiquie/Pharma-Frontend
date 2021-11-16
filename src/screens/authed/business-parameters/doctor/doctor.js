@@ -110,7 +110,7 @@ const Doctor = () => {
   const [district, setDistrict] = useState("");
   const [fee, setFee] = useState("");
   const [potential, setPotential] = useState("");
-  const [qualificationId, setQualificationId] = useState("");
+  const [qualificationId, setQualificationId] = useState([]);
   const [representativeId, setRepresentativeId] = useState("");
   const [regionId, setRegionId] = useState("");
   const [zoneId, setZoneId] = useState("");
@@ -119,11 +119,13 @@ const Doctor = () => {
   const [specialityId, setSpecialityId] = useState("");
   const [hospitalId, setHospitalId] = useState("");
   const [provinceId, setProvinceId] = useState("");
+  const [status, setStatus] = useState("");
   const [cityId, setCityId] = useState("");
   const [brickId, setBrickId] = useState("");
   const [preferredDay, setPreferredDay] = useState([]);
   const [tierId, setTierId] = useState("");
   const [Id, setId] = useState("");
+  const [dorpdownDoctorStatus, setDropDownDoctorStatus] = useState([]);
   const [dropdownQualification, setDropDownQualification] = useState([]);
   const [dropdownRepresentative, setDropDownRepresentative] = useState([]);
   const [dropdownRegion, setDropDownRegion] = useState([]);
@@ -166,7 +168,7 @@ const Doctor = () => {
     setDistrict("");
     setFee("");
     setPotential("");
-    setQualificationId("");
+    setQualificationId([]);
     setRepresentativeId("");
     setRegionId("");
     setZoneId("");
@@ -197,7 +199,7 @@ const Doctor = () => {
     setDistrict("");
     setFee("");
     setPotential("");
-    setQualificationId("");
+    setQualificationId([]);
     setRepresentativeId("");
     setRegionId("");
     setZoneId("");
@@ -227,7 +229,7 @@ const Doctor = () => {
     setDistrict("");
     setFee("");
     setPotential("");
-    setQualificationId("");
+    setQualificationId([]);
     setRepresentativeId("");
     setRegionId("");
     setZoneId("");
@@ -432,6 +434,7 @@ const Doctor = () => {
       brickId,
       preferredDay,
       tierId,
+      status,
     };
     console.log(form);
     await axios
@@ -458,7 +461,7 @@ const Doctor = () => {
     setDistrict("");
     setFee("");
     setPotential("");
-    setQualificationId("");
+    setQualificationId([]);
     setRepresentativeId("");
     setRegionId("");
     setZoneId("");
@@ -471,6 +474,7 @@ const Doctor = () => {
     setBrickId("");
     setTierId("");
     setPreferredDay([]);
+    setStatus("");
   };
 
   const viewDoctorData = async (id) => {
@@ -479,6 +483,10 @@ const Doctor = () => {
       `${process.env.REACT_APP_URL}/doctors/getDoctor`,
       form
     );
+    const qualificationName = [];
+    const abc = response.data.qualificationId?.map((value) => {
+      qualificationName.push(value.name);
+    });
 
     setName(response.data.name);
     setAbbreviation(response.data.abbreviation);
@@ -490,7 +498,7 @@ const Doctor = () => {
     setTierId(response.data.tierId?.id);
     setFee(response.data.fee);
     setPotential(response.data.potential);
-    setQualificationId(response.data.qualificationId?.name);
+    setQualificationId(qualificationName + " ");
     setRepresentativeId(response.data.assignedRepresentativeId?.name);
     setRegionId(response.data.regionId?.name);
     setZoneId(response.data.zoneId?.name);
@@ -502,6 +510,7 @@ const Doctor = () => {
     setCityId(response.data.cityId?.name);
     setBrickId(response.data.brickId?.name);
     setPreferredDay(response.data.preferredDay + " ");
+    setStatus(response.data.status.name);
     handleGetOpen(true);
   };
 
@@ -523,27 +532,58 @@ const Doctor = () => {
     setDistrict(response.data.district);
     setFee(response.data.fee);
     setPotential(response.data.potential);
-    setQualificationId(response.data.qualificationId?._id);
+    setQualificationId(response.data.qualificationId);
     // setDropDownRepresentative([response.data.assignedRepresentativeId]);
     setRepresentativeId(response.data.assignedRepresentativeId?.id);
     setDesignationId(response.data.designationId?.id);
     setSpecialityId(response.data.specialityId?._id);
     setHospitalId(response.data.hospitalId?.id);
-    setDropDownRegion([response.data.regionId]);
-    setRegionId(response.data.regionId?.id);
-    setDropDownProvince([response.data.provinceId]);
-    setProvinceId(response.data.provinceId?.id);
-    setDropDownZone([response.data.zoneId]);
-    setZoneId(response.data.zoneId?.id);
-    setDropDownCity([response.data.cityId]);
-    setCityId(response.data.cityId?.id);
-    setDropDownTerritory([response.data.territoryId]);
-    setTerritoryId(response.data.territoryId?.id);
-    setDropDownBrick([response.data.brickId]);
-    setBrickId(response.data.brickId?.id);
+    setStatus(response.data.status.id);
     setPreferredDay(response.data.preferredDay);
 
     setTierId(response.data.tierId?._id);
+
+    if (response.data.regionId == null) {
+      console.log("null value of region");
+    } else {
+      setDropDownRegion([response.data.regionId]);
+      setRegionId(response.data.regionId?.id);
+    }
+
+    if (response.data.provinceId == null) {
+      console.log("null value of province");
+    } else {
+      setDropDownProvince([response.data.provinceId]);
+      setProvinceId(response.data.provinceId?.id);
+    }
+
+    if (response.data.zoneId == null) {
+      console.log("null value of zone");
+    } else {
+      setDropDownZone([response.data.zoneId]);
+      setZoneId(response.data.zoneId?.id);
+    }
+
+    if (response.data.cityId == null) {
+      console.log("value of city is null");
+    } else {
+      setDropDownCity([response.data.cityId]);
+      setCityId(response.data.cityId?.id);
+    }
+
+    if (response.data.territoryId == null) {
+      console.log("value of terrirtory is null");
+    } else {
+      setDropDownTerritory([response.data.territoryId]);
+      setTerritoryId(response.data.territoryId?.id);
+    }
+
+    if (response.data.brickId == null) {
+      console.log("value of brick is null");
+    } else {
+      setDropDownBrick([response.data.brickId]);
+      setBrickId(response.data.brickId?.id);
+    }
 
     setEditModal(true);
   };
@@ -573,6 +613,7 @@ const Doctor = () => {
       brickId,
       preferredDay,
       tierId,
+      status
     };
     await axios
       .post(`${process.env.REACT_APP_URL}/doctors/updateDoctor`, form)
@@ -649,12 +690,26 @@ const Doctor = () => {
     fetchDoctor();
   }, [renderfilter]);
 
+  const qualificationList = [];
+  const filterQualificationId = (res) => {
+    for (let i = 0; i < res.data.length; i++) {
+      qualificationList.push(res.data);
+    }
+    let newList = [];
+
+    if (qualificationList.length > 0) {
+      qualificationList[0].map((item) => {
+        newList.push(item);
+      });
+      setDropDownQualification(newList);
+    }
+  };
+
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_URL}/qualifications/getQualifications`)
       .then(async (res) => {
-        setDropDownQualification(res.data);
-        console.log(res, "===============>");
+        await filterQualificationId(res);
       });
   }, []);
 
@@ -671,6 +726,16 @@ const Doctor = () => {
       .get(`${process.env.REACT_APP_URL}/designations/getDesignations`)
       .then((res) => {
         setDropDownDesignation(res.data.results);
+      });
+  }, []);
+
+  useEffect(() => {
+    axios
+      .get(
+        `${process.env.REACT_APP_URL}/doctors/doctorStatus/getDoctorStatuses`
+      )
+      .then((res) => {
+        setDropDownDoctorStatus(res.data.results);
       });
   }, []);
 
@@ -1125,27 +1190,44 @@ const Doctor = () => {
                       onChange={(e) => setPotential(e.target.value)}
                     />
                     <FormControl
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
                       variant="outlined"
-                      className={classes.textFieldSsid}
                     >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Qualification
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setQualificationId(e.target.value)}
+                      <Autocomplete
                         id="abc"
-                        native
+                        multiple
+                        id="tags-outlined"
+                        options={dropdownQualification}
+                        getOptionLabel={(option) => option.name}
                         value={qualificationId}
-                        label="Qualification"
-                      >
-                        <option aria-label="None" />
-                        {dropdownQualification.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
+                        filterSelectedOptions
+                        getOptionSelected={(option, value) => {
+                          if (value === "") {
+                            return true;
+                          } else if (value === option) {
+                            return true;
+                          }
+                        }}
+                        onChange={(e, selectedObject) => {
+                          if (selectedObject !== null) {
+                            let List = [];
+                            for (let i = 0; i < selectedObject.length; i++) {
+                              List.push(selectedObject[i]);
+                            }
+                            setQualificationId(List);
+                          }
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            label="Qualification"
+                          />
+                        )}
+                      />
                     </FormControl>
                   </div>
 
@@ -1408,6 +1490,29 @@ const Doctor = () => {
                     </FormControl>
                   </div>
 
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      DoctorStatus
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={(e) => setStatus(e.target.value)}
+                      id="abc"
+                      native
+                      value={status}
+                      label="DoctorStatus"
+                    >
+                      <option aria-label="None" />
+                      {dorpdownDoctorStatus.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
                   <Button
                     onClick={addDoctor}
                     className={classes.btn}
@@ -1621,27 +1726,44 @@ const Doctor = () => {
                       onChange={(e) => setPotential(e.target.value)}
                     />
                     <FormControl
+                      style={{
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
                       variant="outlined"
-                      className={classes.textFieldSsid}
                     >
-                      <InputLabel htmlFor="outlined-age-native-simple">
-                        Qualification
-                      </InputLabel>
-                      <Select
-                        // value={department}
-                        onChange={(e) => setQualificationId(e.target.value)}
+                      <Autocomplete
                         id="abc"
-                        native
+                        multiple
+                        id="tags-outlined"
+                        options={dropdownQualification}
+                        getOptionLabel={(option) => option.name}
                         value={qualificationId}
-                        label="Qualification"
-                      >
-                        <option aria-label="None" />
-                        {dropdownQualification.map((value, index) => (
-                          <option key={value.id} value={value._id}>
-                            {value.name}
-                          </option>
-                        ))}
-                      </Select>
+                        filterSelectedOptions
+                        getOptionSelected={(option, value) => {
+                          if (value === "") {
+                            return true;
+                          } else if (value === option) {
+                            return true;
+                          }
+                        }}
+                        onChange={(e, selectedObject) => {
+                          if (selectedObject !== null) {
+                            let List = [];
+                            for (let i = 0; i < selectedObject.length; i++) {
+                              List.push(selectedObject[i]);
+                            }
+                            setQualificationId(List);
+                          }
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="outlined"
+                            label="Qualification"
+                          />
+                        )}
+                      />
                     </FormControl>
                   </div>
 
@@ -1905,6 +2027,29 @@ const Doctor = () => {
                     </FormControl>
                   </div>
 
+                  <FormControl
+                    variant="outlined"
+                    className={classes.textFieldSsid}
+                  >
+                    <InputLabel htmlFor="outlined-age-native-simple">
+                      DoctorStatus
+                    </InputLabel>
+                    <Select
+                      // value={department}
+                      onChange={(e) => setStatus(e.target.value)}
+                      id="abc"
+                      native
+                      value={status}
+                      label="DoctorStatus"
+                    >
+                      <option aria-label="None" />
+                      {dorpdownDoctorStatus.map((value, index) => (
+                        <option key={value.id} value={value.id}>
+                          {value.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
                   <Button
                     onClick={() => editDoctor(Id)}
                     className={classes.btn}
@@ -2084,6 +2229,17 @@ const Doctor = () => {
                       style={{ textAlign: "left", borderLeft: "2px solid" }}
                     >
                       {zoneId}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow style={{ border: "2px solid" }}>
+                    <TableCell className={classes.styleTableHead}>
+                      DoctorStatus
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: "left", borderLeft: "2px solid" }}
+                    >
+                      {status}
                     </TableCell>
                   </TableRow>
 

@@ -199,19 +199,29 @@ const Territory = () => {
       form
     );
 
-    setId(response.data.id);
-    setName(response.data.name);
-    setAbberivation(response.data.abbreviation);
-    setCompany(response.data.company?.id);
-    setRegionId(response.data.regionId.id);
-    setProvince_Id([response.data.provinceId]);
-    setDropDownZone([response.data.zoneId]);
-    setZoneId(response.data.zoneId?.id);
-    setDropDownCity([response.data.cityId]);
+    setId(response?.data?.id);
+    setName(response?.data?.name);
+    setAbberivation(response?.data?.abbreviation);
+    setCompany(response?.data?.company?.id);
+    setRegionId(response?.data?.regionId?.id);
+
+    setDropDownCity([response?.data?.cityId]);
     response.data.cityId.map((value) => {
       setCity_Id([value]);
     });
-   
+
+    if (response.data.provinceId == null) {
+      console.log("error empty province value");
+    } else {
+      setProvince_Id([response.data.provinceId]);
+    }
+
+    if (response.data.zoneId == null) {
+      console.log("error empty zone value");
+    } else {
+      setZoneId(response?.data?.zoneId?.id);
+      setDropDownZone([response?.data?.zoneId]);
+    }
 
     setEditModal(true);
   };
@@ -306,10 +316,14 @@ const Territory = () => {
       provinceList.push(res.data.results);
     }
     let newList = [];
-    provinceList[0].map((item) => {
-      newList.push(item);
-    });
-    setDropDownProvince(newList);
+    console.log("province list", provinceList);
+    if (provinceList.length > 0) {
+      console.log("running if ");
+      provinceList[0].map((item) => {
+        newList.push(item);
+      });
+      setDropDownProvince(newList);
+    }
   };
 
   useEffect(() => {
